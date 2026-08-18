@@ -11,6 +11,9 @@
   .wrap { max-width:1080px; margin:0 auto; padding:24px 20px 60px; }
   h1 { font-size:22px; margin:0 0 4px; }
   .sub { color:var(--dim); font-size:13px; margin-bottom:20px; word-break:break-all; }
+  .lang-toggle { position:fixed; top:16px; right:16px; z-index:100; display:flex; gap:6px; }
+  .lang-btn { padding:6px 12px; border:1px solid var(--border); background:var(--card); color:var(--dim); border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; }
+  .lang-btn.active { color:var(--txt); border-color:var(--blue); background:#1a2436; }
   .tabs { display:flex; gap:8px; margin-bottom:20px; }
   .tab { padding:10px 18px; border:1px solid var(--border); background:var(--card); border-radius:8px; cursor:pointer; font-size:14px; color:var(--dim); }
   .tab.active { color:var(--txt); border-color:var(--blue); background:#1a2436; }
@@ -39,50 +42,55 @@
   .tag.valuable { background:rgba(74,163,255,.15); color:var(--blue); }
   .muted { color:var(--dim); }
   .err { color:var(--red); margin-top:10px; font-size:13px; }
-  .log { font-family:ui-monospace,monospace; font-size:12px; white-space:pre-wrap; }
   .logbox { display:none; background:#0f1420; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:12px; max-height:340px; overflow-y:auto; font-family:ui-monospace,monospace; font-size:12px; color:var(--dim); line-height:1.6; }
   .logbox div { white-space:pre-wrap; word-break:break-all; }
   .warn { color:var(--amber); font-size:12px; margin-top:8px; }
-  .rpc-line { color:var(--dim); font-size:12px; line-height:1.8; }
-  .rpc-line .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
-  .dot.ok { background:var(--green); }
-  .dot.bad { background:var(--red); }
   .hero { background:linear-gradient(135deg,#152238,#101826); border:1px solid rgba(74,163,255,.35); border-radius:12px; padding:18px 20px; margin-bottom:20px; }
   .hero-tagline { font-size:17px; font-weight:700; color:var(--green); margin-bottom:8px; }
   .hero p { margin:6px 0; font-size:14px; line-height:1.75; color:var(--txt); }
   .hero b { color:var(--green); }
   .hero-cta { margin-top:12px; font-size:14px; font-weight:600; color:var(--amber); }
   .hero-note { margin-top:10px; font-size:12px; color:var(--dim); }
+  .footer { margin-top:24px; padding:20px; border-top:1px solid var(--border); text-align:center; }
+  .footer-title { font-size:14px; color:var(--dim); margin-bottom:12px; }
+  .footer-links { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .footer-links a { display:inline-block; padding:9px 16px; border:1px solid var(--border); border-radius:8px; color:var(--txt); font-size:13px; text-decoration:none; background:var(--card); }
+  .footer-links a:hover { border-color:var(--blue); }
 </style>
 </head>
 <body>
+<div class="lang-toggle">
+  <button id="langZh" class="lang-btn">中文</button>
+  <button id="langEn" class="lang-btn">EN</button>
+</div>
+
 <div class="wrap">
-  <h1>🖊️ SOLANA ATA 租金退回系统</h1>
+  <h1 data-i18n="title">🖊️ SOLANA ATA 租金退回系统</h1>
 
   <div class="hero">
-    <div class="hero-tagline">你钱包里的归零币、垃圾币、貔貅币、空投币，锁着你自己的 SOL 💰</div>
-    <p>每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。</p>
-    <p>本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，<b>0 SOL 也能退</b>。</p>
-    <div class="hero-cta">👇 连接钱包，看看你锁住了多少 SOL</div>
-    <div class="hero-note">本系统代码已经在 GitHub 开源，没有隐瞒，请放心使用。</div>
+    <div class="hero-tagline" data-i18n="hero_tagline">你钱包里的归零币、垃圾币、貔貅币、空投币，锁着你自己的 SOL 💰</div>
+    <p data-i18n-html="hero_p1">每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。</p>
+    <p data-i18n-html="hero_p2">本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，<b>0 SOL 也能退</b>。</p>
+    <div class="hero-cta" data-i18n="hero_cta">👇 连接钱包，看看你锁住了多少 SOL</div>
+    <div class="hero-note" data-i18n="hero_note">本系统代码已经在 GitHub 开源，没有隐瞒，请放心使用。</div>
   </div>
 
   <div class="tabs">
-    <div class="tab active" data-t="wallet">🔗 连接钱包退回</div>
-    <div class="tab" data-t="scan">🔍 地址查询</div>
+    <div class="tab active" data-t="wallet" data-i18n="tab_wallet">🔗 连接钱包退回</div>
+    <div class="tab" data-t="scan" data-i18n="tab_scan">🔍 地址查询</div>
   </div>
 
   <!-- 连接钱包退回（签名模式） -->
   <div class="panel active" id="panel-wallet">
     <div class="card">
-      <label>连接你的 Solana 钱包（Phantom / Solflare / OKX / TokenPocket / Backpack 等）</label>
+      <label data-i18n="wallet_label">连接你的 Solana 钱包（Phantom / Solflare / OKX / TokenPocket / Backpack 等）</label>
       <div class="row">
-        <button id="connectBtn" style="flex:1">连接钱包</button>
-        <button id="disconnectBtn" style="flex:1; background:#2a3242; color:var(--txt)">断开</button>
+        <button id="connectBtn" style="flex:1" data-i18n="connect_btn">连接钱包</button>
+        <button id="disconnectBtn" style="flex:1; background:#2a3242; color:var(--txt)" data-i18n="disconnect_btn">断开</button>
       </div>
-      <div style="margin-top:10px; font-size:13px; color:var(--dim)">已连接：<b id="walletAddr" style="color:var(--green)">未连接</b></div>
-      <button id="redeemWalletBtn" style="margin-top:14px; width:100%">扫描并一键退回</button>
-      <div class="warn">🔐 私钥永不离开你的钱包。平台代付交易费，每个账户收 0.0002 SOL（约租金 10%），0 SOL 也能退回。</div>
+      <div style="margin-top:10px; font-size:13px; color:var(--dim)"><span data-i18n="connected_prefix">已连接：</span><b id="walletAddr" style="color:var(--green)" data-i18n="not_connected">未连接</b></div>
+      <button id="redeemWalletBtn" style="margin-top:14px; width:100%" data-i18n="redeem_btn">扫描并一键退回</button>
+      <div class="warn" data-i18n="wallet_warn">🔐 私钥永不离开你的钱包。平台代付交易费，每个账户收 0.0002 SOL（约租金 10%），0 SOL 也能退回。</div>
       <div class="err" id="walletErr"></div>
     </div>
     <div class="logbox" id="walletLog"></div>
@@ -92,10 +100,10 @@
   <!-- 查询 -->
   <div class="panel" id="panel-scan">
     <div class="card">
-      <label>钱包地址（公钥）</label>
+      <label data-i18n="scan_label">钱包地址（公钥）</label>
       <div class="row">
-        <input id="scanAddr" placeholder="输入任意 Solana 地址，查询可赎回押金的归零币">
-        <button id="scanBtn" style="flex:0 0 auto">查询</button>
+        <input id="scanAddr" data-i18n-ph="scan_placeholder" placeholder="输入任意 Solana 地址，查询可赎回押金的归零币">
+        <button id="scanBtn" style="flex:0 0 auto" data-i18n="scan_btn">查询</button>
       </div>
       <div class="err" id="scanErr"></div>
     </div>
@@ -104,12 +112,12 @@
   </div>
 
   <div class="footer">
-    <div class="footer-title">联系我们 / 社区</div>
+    <div class="footer-title" data-i18n="footer_title">联系我们 / 社区</div>
     <div class="footer-links">
-      <a href="https://t.me/SOLANA_ATA_ADM" target="_blank" rel="noopener">💬 TG 群组</a>
-      <a href="https://m.debox.pro/card?id=bemdnbps&amp;invite_code=bemdnbps" target="_blank" rel="noopener">📱 DEBOX 群组</a>
-      <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
-      <a href="#" target="_blank" rel="noopener">🌐 官方网站</a>
+      <a href="https://t.me/SOLANA_ATA_ADM" target="_blank" rel="noopener" data-i18n="footer_tg">💬 TG 群组</a>
+      <a href="https://m.debox.pro/card?id=bemdnbps&amp;invite_code=bemdnbps" target="_blank" rel="noopener" data-i18n="footer_debox">📱 DEBOX 群组</a>
+      <a href="https://x.com/mingzhu038" target="_blank" rel="noopener" data-i18n="footer_x">𝕏 X.com</a>
+      <a href="#" target="_blank" rel="noopener" data-i18n="footer_web">🌐 官方网站</a>
     </div>
   </div>
 </div>
@@ -117,6 +125,167 @@
 <script src="/vendor/web3.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
+
+// ===== i18n =====
+const I18N = {
+  zh: {
+    title: "🖊️ SOLANA ATA 租金退回系统",
+    hero_tagline: "你钱包里的归零币、垃圾币、貔貅币、空投币，锁着你自己的 SOL 💰",
+    hero_p1: "每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。",
+    hero_p2: "本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，<b>0 SOL 也能退</b>。",
+    hero_cta: "👇 连接钱包，看看你锁住了多少 SOL",
+    hero_note: "本系统代码已经在 GitHub 开源，没有隐瞒，请放心使用。",
+    tab_wallet: "🔗 连接钱包退回",
+    tab_scan: "🔍 地址查询",
+    wallet_label: "连接你的 Solana 钱包（Phantom / Solflare / OKX / TokenPocket / Backpack 等）",
+    connect_btn: "连接钱包",
+    disconnect_btn: "断开",
+    connected_prefix: "已连接：",
+    not_connected: "未连接",
+    redeem_btn: "扫描并一键退回",
+    wallet_warn: "🔐 私钥永不离开你的钱包。平台代付交易费，每个账户收 0.0002 SOL（约租金 10%），0 SOL 也能退回。",
+    scan_label: "钱包地址（公钥）",
+    scan_placeholder: "输入任意 Solana 地址，查询可赎回押金的归零币",
+    scan_btn: "查询",
+    footer_title: "联系我们 / 社区",
+    footer_tg: "💬 TG 群组",
+    footer_debox: "📱 DEBOX 群组",
+    footer_x: "𝕏 X.com",
+    footer_web: "🌐 官方网站",
+    stat_total: "代币账户总数",
+    stat_empty: "可直接关",
+    stat_burnable: "系统会自动销毁再退回",
+    stat_protected: "受保护",
+    stat_valuable: "有价值(跳过)",
+    stat_nonredeemable: "不可赎回",
+    stat_recoverable: "可回收账户",
+    stat_recoverable_sol: "可回收 SOL",
+    cat_empty: "可直接关",
+    cat_burnable: "系统会自动销毁代币再执行租金赎回操作",
+    cat_protected: "受保护",
+    cat_valuable: "有价值",
+    cat_nonredeemable: "不可赎回",
+    th_mint: "代币 Mint",
+    th_program: "程序",
+    th_balance: "余额",
+    th_category: "分类",
+    th_recoverable: "可回收(SOL)",
+    wr_accounts: "退回账户",
+    wr_rent: "退回租金 SOL",
+    wr_fee: "平台手续费 SOL",
+    wr_broadcast: "已广播交易",
+    wr_signatures: "交易签名：",
+    no_accounts: "未发现代币账户",
+    no_reclaimable: "没有可退回租金的账户（0 个可关账户）",
+    wallet_balance: "钱包 SOL 余额",
+    querying: "查询中…",
+    processing: "处理中…",
+    connected: "已连接",
+    err_no_wallet: "未检测到 Solana 钱包。请安装 Phantom / Solflare / OKX / TokenPocket / Backpack 等。注意：MetaMask 是 ETH 钱包，不支持 Solana。",
+    err_connect_fail: "连接失败",
+    err_please_connect: "请先连接钱包",
+    err_please_addr: "请输入地址",
+    err_broadcast_fail: "广播失败: ",
+    err_reclaim_fail: "退回失败",
+    err_start_fail: "启动失败",
+    err_task_fail: "任务失败"
+  },
+  en: {
+    title: "🖊️ SOLANA ATA Rent Reclaim System",
+    hero_tagline: "Zeroed coins, junk coins, honeypot coins, airdrop coins in your wallet — they're locking up YOUR SOL 💰",
+    hero_p1: "Every time you trade a different token, your Solana wallet auto-opens a token account — that's how the Solana blockchain works. Each account locks ~<b>0.002 SOL</b> in rent. When zeroed meme coins, junk coins, honeypot coins, and airdrop coins can't be sold and the account can't be closed, that SOL is stuck on-chain.",
+    hero_p2: "This system helps you: <b>scan → burn junk coins → close zombie accounts → reclaim rent back to your wallet</b>. Each account costs only <b>0.0002 SOL</b> (~<b>10%</b> of rent), and works even with <b>0 SOL</b>.",
+    hero_cta: "👇 Connect your wallet and see how much SOL you've locked up",
+    hero_note: "The code is open sourced on GitHub — no hidden tricks, use with confidence.",
+    tab_wallet: "🔗 Connect & Reclaim",
+    tab_scan: "🔍 Address Lookup",
+    wallet_label: "Connect your Solana wallet (Phantom / Solflare / OKX / TokenPocket / Backpack, etc.)",
+    connect_btn: "Connect Wallet",
+    disconnect_btn: "Disconnect",
+    connected_prefix: "Connected: ",
+    not_connected: "Not connected",
+    redeem_btn: "Scan & Reclaim",
+    wallet_warn: "🔐 Your private key never leaves your wallet. The platform covers the tx fee; each account costs 0.0002 SOL (~10% of rent). Works even with 0 SOL.",
+    scan_label: "Wallet Address (Public Key)",
+    scan_placeholder: "Enter any Solana address to find reclaimable rent from zeroed coins",
+    scan_btn: "Lookup",
+    footer_title: "Contact Us / Community",
+    footer_tg: "💬 TG Group",
+    footer_debox: "📱 DEBOX Group",
+    footer_x: "𝕏 X.com",
+    footer_web: "🌐 Official Site",
+    stat_total: "Total Token Accounts",
+    stat_empty: "Can Close Directly",
+    stat_burnable: "Auto-burn & Reclaim",
+    stat_protected: "Protected",
+    stat_valuable: "Valuable (Skip)",
+    stat_nonredeemable: "Non-redeemable",
+    stat_recoverable: "Reclaimable Accounts",
+    stat_recoverable_sol: "Reclaimable SOL",
+    cat_empty: "Can close directly",
+    cat_burnable: "System will auto-burn tokens then reclaim rent",
+    cat_protected: "Protected",
+    cat_valuable: "Valuable",
+    cat_nonredeemable: "Non-redeemable",
+    th_mint: "Token Mint",
+    th_program: "Program",
+    th_balance: "Balance",
+    th_category: "Category",
+    th_recoverable: "Reclaimable (SOL)",
+    wr_accounts: "Accounts Reclaimed",
+    wr_rent: "Rent Reclaimed (SOL)",
+    wr_fee: "Platform Fee (SOL)",
+    wr_broadcast: "Tx Broadcast",
+    wr_signatures: "Tx Signatures: ",
+    no_accounts: "No token accounts found",
+    no_reclaimable: "No reclaimable accounts (0 closable accounts)",
+    wallet_balance: "Wallet SOL Balance",
+    querying: "Looking up…",
+    processing: "Processing…",
+    connected: "Connected",
+    err_no_wallet: "No Solana wallet detected. Please install Phantom / Solflare / OKX / TokenPocket / Backpack, etc. Note: MetaMask is an ETH wallet and does not support Solana.",
+    err_connect_fail: "Connection failed",
+    err_please_connect: "Please connect your wallet first",
+    err_please_addr: "Please enter an address",
+    err_broadcast_fail: "Broadcast failed: ",
+    err_reclaim_fail: "Reclaim failed",
+    err_start_fail: "Failed to start",
+    err_task_fail: "Task failed"
+  }
+};
+
+let LANG = localStorage.getItem("lang") || "zh";
+const t = (key) => (I18N[LANG] && I18N[LANG][key]) || key;
+
+function catLabel(cat) {
+  const map = { empty: "cat_empty", burnable: "cat_burnable", protected: "cat_protected", valuable: "cat_valuable", "non-redeemable": "cat_nonredeemable" };
+  return map[cat] ? t(map[cat]) : cat;
+}
+
+let lastScanData = null;
+let lastWalletBuild = null;
+
+function applyLang() {
+  document.documentElement.lang = LANG === "zh" ? "zh-CN" : "en";
+  document.title = t("title");
+  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b.id === (LANG === "zh" ? "langZh" : "langEn")));
+  // 已连接地址显示
+  const addrEl = $("walletAddr");
+  if (currentWallet) {
+    addrEl.textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
+  } else {
+    addrEl.textContent = t("not_connected");
+  }
+  // 重渲染动态结果
+  if (lastScanData) renderScanResult(lastScanData);
+  if (lastWalletBuild) renderWalletResult(lastWalletBuild);
+}
+
+$("langZh").onclick = () => { LANG = "zh"; localStorage.setItem("lang", "zh"); applyLang(); };
+$("langEn").onclick = () => { LANG = "en"; localStorage.setItem("lang", "en"); applyLang(); };
 
 // tabs
 document.querySelectorAll(".tab").forEach((t) => {
@@ -128,25 +297,23 @@ document.querySelectorAll(".tab").forEach((t) => {
   };
 });
 
-const CAT_LABEL = { empty:"可直接关", burnable:"系统会自动销毁代币再执行租金赎回操作", protected:"受保护", valuable:"有价值", "non-redeemable":"不可赎回" };
-
 function renderSummary(s) {
   return `<div class="summary">
-    <div class="stat"><b>${s.total}</b><span>代币账户总数</span></div>
-    <div class="stat"><b style="color:var(--green)">${s.empty}</b><span>可直接关</span></div>
-    <div class="stat"><b style="color:var(--amber)">${s.burnable}</b><span>系统会自动销毁再退回</span></div>
-    <div class="stat"><b style="color:var(--blue)">${s.protected}</b><span>受保护</span></div>
-    <div class="stat"><b style="color:var(--blue)">${s.valuable}</b><span>有价值(跳过)</span></div>
-    <div class="stat"><b style="color:var(--red)">${s.nonRedeemable}</b><span>不可赎回</span></div>
-    <div class="stat"><b>${s.recoverableCount}</b><span>可回收账户</span></div>
-    <div class="stat"><b style="color:var(--green)">${s.recoverableSol.toFixed(6)}</b><span>可回收 SOL</span></div>
+    <div class="stat"><b>${s.total}</b><span>${t("stat_total")}</span></div>
+    <div class="stat"><b style="color:var(--green)">${s.empty}</b><span>${t("stat_empty")}</span></div>
+    <div class="stat"><b style="color:var(--amber)">${s.burnable}</b><span>${t("stat_burnable")}</span></div>
+    <div class="stat"><b style="color:var(--blue)">${s.protected}</b><span>${t("stat_protected")}</span></div>
+    <div class="stat"><b style="color:var(--blue)">${s.valuable}</b><span>${t("stat_valuable")}</span></div>
+    <div class="stat"><b style="color:var(--red)">${s.nonRedeemable}</b><span>${t("stat_nonredeemable")}</span></div>
+    <div class="stat"><b>${s.recoverableCount}</b><span>${t("stat_recoverable")}</span></div>
+    <div class="stat"><b style="color:var(--green)">${s.recoverableSol.toFixed(6)}</b><span>${t("stat_recoverable_sol")}</span></div>
   </div>`;
 }
 
 function renderTable(items) {
-  if (!items || !items.length) return `<div class="card muted">未发现代币账户</div>`;
+  if (!items || !items.length) return `<div class="card muted">${t("no_accounts")}</div>`;
   let rows = items.map((it) => {
-    const tag = `<span class="tag ${it.category}">${CAT_LABEL[it.category] || it.category}</span>`;
+    const tag = `<span class="tag ${it.category}">${catLabel(it.category)}</span>`;
     return `<tr>
       <td>${it.mint.slice(0,8)}…${it.mint.slice(-6)}</td>
       <td>${it.tag === "token2022" ? "Token-2022" : "SPL"}</td>
@@ -156,8 +323,30 @@ function renderTable(items) {
     </tr>`;
   }).join("");
   return `<div class="card"><table>
-    <thead><tr><th>代币 Mint</th><th>程序</th><th>余额</th><th>分类</th><th>可回收(SOL)</th></tr></thead>
+    <thead><tr><th>${t("th_mint")}</th><th>${t("th_program")}</th><th>${t("th_balance")}</th><th>${t("th_category")}</th><th>${t("th_recoverable")}</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
+}
+
+function renderScanResult(data) {
+  lastScanData = data;
+  const balCard = `<div class="card">
+    <div style="font-size:13px;color:var(--dim);margin-bottom:8px">${t("wallet_balance")}</div>
+    <div style="font-size:28px;color:var(--blue);font-weight:700">${data.balanceSol.toFixed(6)} SOL</div>
+  </div>`;
+  $("scanResult").innerHTML = balCard + renderSummary(data.summary) + renderTable(data.items);
+}
+
+function renderWalletResult(build) {
+  lastWalletBuild = build;
+  $("walletResult").innerHTML = `<div class="card">
+    <div class="summary">
+      <div class="stat"><b>${build.targetCount}</b><span>${t("wr_accounts")}</span></div>
+      <div class="stat"><b style="color:var(--green)">${build.rentSol.toFixed(6)}</b><span>${t("wr_rent")}</span></div>
+      <div class="stat"><b style="color:var(--amber)">${build.feeSol.toFixed(6)}</b><span>${t("wr_fee")}</span></div>
+      <div class="stat"><b>${build.sigCount}</b><span>${t("wr_broadcast")}</span></div>
+    </div>
+    <div class="muted">${t("wr_signatures")}${build.sigs.map((s) => s.slice(0, 10) + "…").join("、")}</div>
+  </div>`;
 }
 
 function appendLog(container, lines) {
@@ -176,7 +365,7 @@ async function runJob(url, body, logbox, onDone) {
     body: JSON.stringify(body),
   });
   const startData = await res.json();
-  if (!res.ok) throw new Error(startData.error || "启动失败");
+  if (!res.ok) throw new Error(startData.error || t("err_start_fail"));
   const jobId = startData.jobId;
   let after = 0;
   await new Promise((resolve, reject) => {
@@ -189,7 +378,7 @@ async function runJob(url, body, logbox, onDone) {
           after = pd.total;
         }
         if (pd.status === "done") { onDone(pd.result); resolve(); return; }
-        if (pd.status === "error") { reject(new Error(pd.error || "任务失败")); return; }
+        if (pd.status === "error") { reject(new Error(pd.error || t("err_task_fail"))); return; }
         setTimeout(tick, 700);
       } catch (e) { reject(e); }
     };
@@ -204,22 +393,18 @@ $("scanBtn").onclick = async () => {
   const logbox = $("scanLog");
   logbox.innerHTML = "";
   logbox.style.display = "block";
-  if (!addr) { $("scanErr").textContent = "请输入地址"; return; }
+  if (!addr) { $("scanErr").textContent = t("err_please_addr"); return; }
   $("scanBtn").disabled = true;
-  $("scanBtn").textContent = "查询中…";
+  $("scanBtn").textContent = t("querying");
   try {
     await runJob("/api/scan", { address: addr }, logbox, (data) => {
-      const balCard = `<div class="card">
-        <div style="font-size:13px;color:var(--dim);margin-bottom:8px">钱包 SOL 余额</div>
-        <div style="font-size:28px;color:var(--blue);font-weight:700">${data.balanceSol.toFixed(6)} SOL</div>
-      </div>`;
-      $("scanResult").innerHTML = balCard + renderSummary(data.summary) + renderTable(data.items);
+      renderScanResult(data);
     });
   } catch (e) {
     $("scanErr").textContent = e.message;
   } finally {
     $("scanBtn").disabled = false;
-    $("scanBtn").textContent = "查询";
+    $("scanBtn").textContent = t("scan_btn");
   }
 };
 
@@ -227,47 +412,46 @@ $("scanBtn").onclick = async () => {
 // ===== 连接钱包退回（签名模式）=====
 const getProvider = () => {
   const w = window;
-  if (w.phantom?.solana?.isPhantom) return w.phantom.solana;   // Phantom
-  if (w.solflare?.isSolflare) return w.solflare;                // Solflare
+  if (w.phantom?.solana?.isPhantom) return w.phantom.solana;
+  if (w.solflare?.isSolflare) return w.solflare;
   if (w.solflare?.solana) return w.solflare.solana;
-  if (w.backpack?.isBackpack) return w.backpack;                // Backpack
+  if (w.backpack?.isBackpack) return w.backpack;
   if (w.xnft?.solana) return w.xnft.solana;
-  if (w.okxwallet?.solana) return w.okxwallet.solana;          // OKX Wallet
-  if (w.tokenpocket?.solana) return w.tokenpocket.solana;      // TokenPocket
+  if (w.okxwallet?.solana) return w.okxwallet.solana;
+  if (w.tokenpocket?.solana) return w.tokenpocket.solana;
   if (w.solana?.isTokenPocket) return w.solana;
-  if (w.bitgetWallet?.solana) return w.bitgetWallet.solana;    // Bitget
+  if (w.bitgetWallet?.solana) return w.bitgetWallet.solana;
   if (w.bitkeep?.solana) return w.bitkeep.solana;
-  if (w.trustwallet?.solana) return w.trustwallet.solana;      // Trust Wallet
-  if (w.coinbaseSolana) return w.coinbaseSolana;               // Coinbase Wallet
-  if (w.solana) return w.solana;                               // 通用 fallback（放最后避免误判）
+  if (w.trustwallet?.solana) return w.trustwallet.solana;
+  if (w.coinbaseSolana) return w.coinbaseSolana;
+  if (w.solana) return w.solana;
   return null;
 };
 let currentWallet = null;
 
-// base64 → Uint8Array（Transaction.from 需要解码后的字节，不是 base64 字符串）
 const b64ToBytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 
 $("connectBtn").onclick = async () => {
   $("walletErr").textContent = "";
   try {
     const p = getProvider();
-    if (!p) throw new Error("未检测到 Solana 钱包。请安装 Phantom / Solflare / OKX / TokenPocket / Backpack 等。注意：MetaMask 是 ETH 钱包，不支持 Solana。");
+    if (!p) throw new Error(t("err_no_wallet"));
     const resp = await p.connect();
     currentWallet = resp.publicKey.toString();
     $("walletAddr").textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
     $("connectBtn").disabled = true;
-    $("connectBtn").textContent = "已连接";
+    $("connectBtn").textContent = t("connected");
   } catch (e) {
-    $("walletErr").textContent = e.message || "连接失败";
+    $("walletErr").textContent = e.message || t("err_connect_fail");
   }
 };
 
 $("disconnectBtn").onclick = async () => {
   try { const p = getProvider(); if (p && p.disconnect) await p.disconnect(); } catch {}
   currentWallet = null;
-  $("walletAddr").textContent = "未连接";
+  $("walletAddr").textContent = t("not_connected");
   $("connectBtn").disabled = false;
-  $("connectBtn").textContent = "连接钱包";
+  $("connectBtn").textContent = t("connect_btn");
   $("walletResult").innerHTML = "";
   $("walletLog").style.display = "none";
 };
@@ -279,21 +463,19 @@ $("redeemWalletBtn").onclick = async () => {
   logbox.innerHTML = "";
   logbox.style.display = "block";
   const p = getProvider();
-  if (!p || !currentWallet) { $("walletErr").textContent = "请先连接钱包"; return; }
+  if (!p || !currentWallet) { $("walletErr").textContent = t("err_please_connect"); return; }
   $("redeemWalletBtn").disabled = true;
-  $("redeemWalletBtn").textContent = "处理中…";
+  $("redeemWalletBtn").textContent = t("processing");
   try {
-    // 构造交易（后端内部先扫描再构造）
     const build = await fetch("/api/build-redeem-tx", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address: currentWallet }),
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
     if (!build.targetCount) {
-      $("walletResult").innerHTML = `<div class="card muted">没有可退回租金的账户（0 个可关账户）</div>`;
+      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>`;
       return;
     }
-    // 逐笔签名 + 广播
     const sigs = [];
     for (let i = 0; i < build.txs.length; i++) {
       const tx = build.txs[i];
@@ -304,27 +486,20 @@ $("redeemWalletBtn").onclick = async () => {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tx: b64 }),
       }).then((r) => r.json());
-      if (sub.error) throw new Error("广播失败: " + sub.error);
+      if (sub.error) throw new Error(t("err_broadcast_fail") + sub.error);
       sigs.push(sub.signature);
     }
-    $("walletResult").innerHTML = `<div class="card">
-      <div class="summary">
-        <div class="stat"><b>${build.targetCount}</b><span>退回账户</span></div>
-        <div class="stat"><b style="color:var(--green)">${build.rentSol.toFixed(6)}</b><span>退回租金 SOL</span></div>
-        <div class="stat"><b style="color:var(--amber)">${build.feeSol.toFixed(6)}</b><span>平台手续费 SOL</span></div>
-        <div class="stat"><b>${sigs.length}</b><span>已广播交易</span></div>
-      </div>
-      <div class="muted">交易签名：${sigs.map((s) => s.slice(0, 10) + "…").join("、")}</div>
-    </div>`;
+    renderWalletResult({ ...build, sigs, sigCount: sigs.length });
   } catch (e) {
-    $("walletErr").textContent = e.message || "退回失败";
+    $("walletErr").textContent = e.message || t("err_reclaim_fail");
   } finally {
     $("redeemWalletBtn").disabled = false;
-    $("redeemWalletBtn").textContent = "扫描并一键退回";
+    $("redeemWalletBtn").textContent = t("redeem_btn");
   }
 };
 
-
+// 初始应用语言
+applyLang();
 </script>
 </body>
 </html>
