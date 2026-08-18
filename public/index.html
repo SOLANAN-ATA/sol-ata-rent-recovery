@@ -175,6 +175,8 @@ const I18N = {
     wr_fee: "平台手续费 SOL",
     wr_broadcast: "已广播交易",
     wr_signatures: "交易签名：",
+    wr_net: "净额转回 SOL",
+    wr_forward: "✅ 平台已把净额转回你的钱包",
     no_accounts: "未发现代币账户",
     no_reclaimable: "没有可退回租金的账户（0 个可关账户）",
     wallet_balance: "钱包 SOL 余额",
@@ -237,6 +239,8 @@ const I18N = {
     wr_fee: "Platform Fee (SOL)",
     wr_broadcast: "Tx Broadcast",
     wr_signatures: "Tx Signatures: ",
+    wr_net: "Net Returned (SOL)",
+    wr_forward: "✅ Net amount returned to your wallet",
     no_accounts: "No token accounts found",
     no_reclaimable: "No reclaimable accounts (0 closable accounts)",
     wallet_balance: "Wallet SOL Balance",
@@ -341,11 +345,11 @@ function renderWalletResult(build) {
   $("walletResult").innerHTML = `<div class="card">
     <div class="summary">
       <div class="stat"><b>${build.targetCount}</b><span>${t("wr_accounts")}</span></div>
-      <div class="stat"><b style="color:var(--green)">${build.rentSol.toFixed(6)}</b><span>${t("wr_rent")}</span></div>
+      <div class="stat"><b style="color:var(--blue)">${build.rentSol.toFixed(6)}</b><span>${t("wr_rent")}</span></div>
       <div class="stat"><b style="color:var(--amber)">${build.feeSol.toFixed(6)}</b><span>${t("wr_fee")}</span></div>
-      <div class="stat"><b>${build.sigCount}</b><span>${t("wr_broadcast")}</span></div>
+      <div class="stat"><b style="color:var(--green)">${build.netSol.toFixed(6)}</b><span>${t("wr_net")}</span></div>
     </div>
-    <div class="muted">${t("wr_signatures")}${build.sigs.map((s) => s.slice(0, 10) + "…").join("、")}</div>
+    <div class="muted">${t("wr_forward")}${build.forwardSig ? " · " + build.forwardSig.slice(0, 10) + "…" : ""}</div>
   </div>`;
 }
 
@@ -489,7 +493,17 @@ $("redeemWalletBtn").onclick = async () => {
       if (sub.error) throw new Error(t("err_broadcast_fail") + sub.error);
       sigs.push(sub.signature);
     }
-    renderWalletResult({ ...build, sigs, sigCount: sigs.length });
+    // 方案A：广播后请求平台转净额
+    let forwardSig = null;
+    if (build.requestId) {
+      const fw = await fetch("/api/forward", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId: build.requestId }),
+      }).then((r) => r.json());
+      if (fw.error) throw new Error(fw.error);
+      forwardSig = fw.signature;
+    }
+    renderWalletResult({ ...build, sigs, forwardSig });
   } catch (e) {
     $("walletErr").textContent = e.message || t("err_reclaim_fail");
   } finally {

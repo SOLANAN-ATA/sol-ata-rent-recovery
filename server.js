@@ -1,7 +1,7 @@
 /**
  * SOLANA ATA 租金退回系统
  * 入口：Express 服务 + 静态网页
- * 签名模式：用户连钱包签名，平台代付交易费（/api/build-redeem-tx + /api/submit-tx）
+ * 签名模式：方案A——用户连钱包签名关户，租金进平台，平台转净额给用户（/api/build-redeem-tx + /api/submit-tx + /api/forward）
  */
 const express = require("express");
 const path = require("path");
@@ -11,7 +11,7 @@ const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY } = require("./config
 const { scanWallet } = require("./lib/scan");
 const { buildRedeemTransactions } = require("./lib/txbuild");
 const { log, subscribe } = require("./lib/log");
-const { checkRpcHealth, broadcastTransaction } = require("./lib/solana");
+const { checkRpcHealth, broadcastTransaction, transferSol } = require("./lib/solana");
 
 // 平台手续费支付钱包（签名模式代付交易费）
 const FEE_PAYER_KP = (() => {
@@ -35,6 +35,9 @@ app.get("/vendor/web3.js", (req, res) => {
 
 // ===== 后台任务 + 实时日志 =====
 const jobs = new Map(); // jobId -> { status, logs, result, error }
+
+// 方案A：转发请求追踪（requestId -> { address, netLamports, used, createdAt }）
+const redeemRequests = new Map();
 
 function startJob(fn) {
   const jobId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -94,18 +97,42 @@ app.get("/api/rpc", async (req, res) => {
   res.json({ donation: DONATION_ADDRESS, rpcs });
 });
 
-// ===== 签名模式：用户连钱包签名，平台代付交易费 =====
+// ===== 签名模式（方案A）：用户签名关户 → 租金进平台 → 平台转净额 =====
 
-// 构造可签名赎回交易（返回部分签名 base64，用户钱包签名后广播）
+// 构造关户交易（方案A：租金进平台，用户自己签名+付手续费）
 app.post("/api/build-redeem-tx", async (req, res) => {
   try {
     const addr = (req.body && req.body.address || "").trim();
     if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
-    if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台手续费支付钱包（FEE_PAYER_SECRET_KEY）" });
+    if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const userPk = new PublicKey(addr);
-    const feeAddress = new PublicKey(DONATION_ADDRESS);
-    const result = await buildRedeemTransactions(userPk, FEE_PAYER_KP, feeAddress);
-    res.json(result);
+    const result = await buildRedeemTransactions(userPk, FEE_PAYER_KP.publicKey);
+    if (!result.targetCount) return res.json(result);
+    const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    redeemRequests.set(requestId, { address: userPk.toBase58(), netLamports: result.netLamports, used: false, createdAt: Date.now() });
+    // 清理过期请求（>1 小时）
+    for (const [k, v] of redeemRequests) {
+      if (Date.now() - v.createdAt > 3600000) redeemRequests.delete(k);
+    }
+    res.json({ ...result, requestId });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 方案A：平台转净额给用户（用户广播关户交易后调用）
+app.post("/api/forward", async (req, res) => {
+  try {
+    const requestId = (req.body && req.body.requestId || "").trim();
+    const reqInfo = redeemRequests.get(requestId);
+    if (!reqInfo) return res.status(404).json({ error: "requestId 不存在或已过期" });
+    if (reqInfo.used) return res.status(400).json({ error: "该请求已转发过" });
+    if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
+    if (reqInfo.netLamports <= 0) { reqInfo.used = true; return res.json({ signature: null, netSol: 0 }); }
+    log(`💸 方案A 转发净额 ${(reqInfo.netLamports / 1e9).toFixed(6)} SOL → ${reqInfo.address.slice(0, 8)}…`);
+    const sig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.address), reqInfo.netLamports);
+    reqInfo.used = true;
+    res.json({ signature: sig, netSol: reqInfo.netLamports / 1e9 });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
