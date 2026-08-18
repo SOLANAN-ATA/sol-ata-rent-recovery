@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLANA ATA 租金退回系统</title>
+<style>
+  :root { --bg:#0b0e14; --card:#151a24; --border:#232b3b; --txt:#e6e9f0; --dim:#8b94a7; --green:#3ddc84; --amber:#f5b942; --red:#ff5d5d; --blue:#4aa3ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--txt); }
+  .wrap { max-width:1080px; margin:0 auto; padding:24px 20px 60px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--dim); font-size:13px; margin-bottom:20px; word-break:break-all; }
+  .tabs { display:flex; gap:8px; margin-bottom:20px; }
+  .tab { padding:10px 18px; border:1px solid var(--border); background:var(--card); border-radius:8px; cursor:pointer; font-size:14px; color:var(--dim); }
+  .tab.active { color:var(--txt); border-color:var(--blue); background:#1a2436; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:16px; }
+  label { display:block; font-size:13px; color:var(--dim); margin-bottom:6px; }
+  input, textarea { width:100%; padding:11px 12px; border:1px solid var(--border); background:#0f1420; color:var(--txt); border-radius:8px; font-size:14px; font-family:inherit; }
+  textarea { min-height:90px; resize:vertical; }
+  .row { display:flex; gap:10px; }
+  .row > * { flex:1; }
+  button { padding:11px 22px; border:0; border-radius:8px; background:var(--blue); color:#04121f; font-size:14px; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .summary { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; }
+  .stat { background:#0f1420; border:1px solid var(--border); border-radius:8px; padding:12px 16px; min-width:120px; }
+  .stat b { display:block; font-size:20px; }
+  .stat span { font-size:12px; color:var(--dim); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); word-break:break-all; }
+  th { color:var(--dim); font-weight:500; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:6px; font-size:12px; font-weight:600; }
+  .tag.empty { background:rgba(61,220,132,.15); color:var(--green); }
+  .tag.burnable { background:rgba(245,185,66,.15); color:var(--amber); }
+  .tag.non-redeemable { background:rgba(255,93,93,.15); color:var(--red); }
+  .tag.protected { background:rgba(74,163,255,.15); color:var(--blue); }
+  .tag.valuable { background:rgba(74,163,255,.15); color:var(--blue); }
+  .muted { color:var(--dim); }
+  .err { color:var(--red); margin-top:10px; font-size:13px; }
+  .log { font-family:ui-monospace,monospace; font-size:12px; white-space:pre-wrap; }
+  .logbox { display:none; background:#0f1420; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:12px; max-height:340px; overflow-y:auto; font-family:ui-monospace,monospace; font-size:12px; color:var(--dim); line-height:1.6; }
+  .logbox div { white-space:pre-wrap; word-break:break-all; }
+  .warn { color:var(--amber); font-size:12px; margin-top:8px; }
+  .rpc-line { color:var(--dim); font-size:12px; line-height:1.8; }
+  .rpc-line .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+  .dot.ok { background:var(--green); }
+  .dot.bad { background:var(--red); }
+  .hero { background:linear-gradient(135deg,#152238,#101826); border:1px solid rgba(74,163,255,.35); border-radius:12px; padding:18px 20px; margin-bottom:20px; }
+  .hero-tagline { font-size:17px; font-weight:700; color:var(--green); margin-bottom:8px; }
+  .hero p { margin:6px 0; font-size:14px; line-height:1.75; color:var(--txt); }
+  .hero b { color:var(--green); }
+  .hero-cta { margin-top:12px; font-size:14px; font-weight:600; color:var(--amber); }
+  .hero-note { margin-top:10px; font-size:12px; color:var(--dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🖊️ SOLANA ATA 租金退回系统</h1>
+
+  <div class="hero">
+    <div class="hero-tagline">你钱包里的归零币、垃圾币、貔貅币、空投币，锁着你自己的 SOL 💰</div>
+    <p>每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。</p>
+    <p>本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，<b>0 SOL 也能退</b>。</p>
+    <div class="hero-cta">👇 连接钱包，看看你锁住了多少 SOL</div>
+    <div class="hero-note">本系统代码已经在 GitHub 开源，没有隐瞒，请放心使用。</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="wallet">🔗 连接钱包退回</div>
+    <div class="tab" data-t="scan">🔍 地址查询</div>
+  </div>
+
+  <!-- 连接钱包退回（签名模式） -->
+  <div class="panel active" id="panel-wallet">
+    <div class="card">
+      <label>连接你的 Solana 钱包（Phantom / Solflare / OKX / TokenPocket / Backpack 等）</label>
+      <div class="row">
+        <button id="connectBtn" style="flex:1">连接钱包</button>
+        <button id="disconnectBtn" style="flex:1; background:#2a3242; color:var(--txt)">断开</button>
+      </div>
+      <div style="margin-top:10px; font-size:13px; color:var(--dim)">已连接：<b id="walletAddr" style="color:var(--green)">未连接</b></div>
+      <button id="redeemWalletBtn" style="margin-top:14px; width:100%">扫描并一键退回</button>
+      <div class="warn">🔐 私钥永不离开你的钱包。平台代付交易费，每个账户收 0.0002 SOL（约租金 10%），0 SOL 也能退回。</div>
+      <div class="err" id="walletErr"></div>
+    </div>
+    <div class="logbox" id="walletLog"></div>
+    <div id="walletResult"></div>
+  </div>
+
+  <!-- 查询 -->
+  <div class="panel" id="panel-scan">
+    <div class="card">
+      <label>钱包地址（公钥）</label>
+      <div class="row">
+        <input id="scanAddr" placeholder="输入任意 Solana 地址，查询可赎回押金的归零币">
+        <button id="scanBtn" style="flex:0 0 auto">查询</button>
+      </div>
+      <div class="err" id="scanErr"></div>
+    </div>
+    <div class="logbox" id="scanLog"></div>
+    <div id="scanResult"></div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-title">联系我们 / 社区</div>
+    <div class="footer-links">
+      <a href="https://t.me/SOLANA_ATA_ADM" target="_blank" rel="noopener">💬 TG 群组</a>
+      <a href="https://m.debox.pro/card?id=bemdnbps&amp;invite_code=bemdnbps" target="_blank" rel="noopener">📱 DEBOX 群组</a>
+      <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+      <a href="#" target="_blank" rel="noopener">🌐 官方网站</a>
+    </div>
+  </div>
+</div>
+
+<script src="/vendor/web3.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+
+// tabs
+document.querySelectorAll(".tab").forEach((t) => {
+  t.onclick = () => {
+    document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach((x) => x.classList.remove("active"));
+    t.classList.add("active");
+    $("panel-" + t.dataset.t).classList.add("active");
+  };
+});
+
+const CAT_LABEL = { empty:"可直接关", burnable:"系统会自动销毁代币再执行租金赎回操作", protected:"受保护", valuable:"有价值", "non-redeemable":"不可赎回" };
+
+function renderSummary(s) {
+  return `<div class="summary">
+    <div class="stat"><b>${s.total}</b><span>代币账户总数</span></div>
+    <div class="stat"><b style="color:var(--green)">${s.empty}</b><span>可直接关</span></div>
+    <div class="stat"><b style="color:var(--amber)">${s.burnable}</b><span>系统会自动销毁再退回</span></div>
+    <div class="stat"><b style="color:var(--blue)">${s.protected}</b><span>受保护</span></div>
+    <div class="stat"><b style="color:var(--blue)">${s.valuable}</b><span>有价值(跳过)</span></div>
+    <div class="stat"><b style="color:var(--red)">${s.nonRedeemable}</b><span>不可赎回</span></div>
+    <div class="stat"><b>${s.recoverableCount}</b><span>可回收账户</span></div>
+    <div class="stat"><b style="color:var(--green)">${s.recoverableSol.toFixed(6)}</b><span>可回收 SOL</span></div>
+  </div>`;
+}
+
+function renderTable(items) {
+  if (!items || !items.length) return `<div class="card muted">未发现代币账户</div>`;
+  let rows = items.map((it) => {
+    const tag = `<span class="tag ${it.category}">${CAT_LABEL[it.category] || it.category}</span>`;
+    return `<tr>
+      <td>${it.mint.slice(0,8)}…${it.mint.slice(-6)}</td>
+      <td>${it.tag === "token2022" ? "Token-2022" : "SPL"}</td>
+      <td>${it.amountUi}</td>
+      <td>${tag}${it.reason ? `<div class="muted">${it.reason}</div>` : ""}</td>
+      <td>${it.category === "empty" || it.category === "burnable" ? (it.recoverableLamports/1e9).toFixed(6) : "—"}</td>
+    </tr>`;
+  }).join("");
+  return `<div class="card"><table>
+    <thead><tr><th>代币 Mint</th><th>程序</th><th>余额</th><th>分类</th><th>可回收(SOL)</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function appendLog(container, lines) {
+  for (const l of lines) {
+    const div = document.createElement("div");
+    div.textContent = l;
+    container.appendChild(div);
+  }
+  container.scrollTop = container.scrollHeight;
+}
+
+async function runJob(url, body, logbox, onDone) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const startData = await res.json();
+  if (!res.ok) throw new Error(startData.error || "启动失败");
+  const jobId = startData.jobId;
+  let after = 0;
+  await new Promise((resolve, reject) => {
+    const tick = async () => {
+      try {
+        const pr = await fetch(`/api/progress/${jobId}?after=${after}`);
+        const pd = await pr.json();
+        if (pd.logs && pd.logs.length) {
+          appendLog(logbox, pd.logs);
+          after = pd.total;
+        }
+        if (pd.status === "done") { onDone(pd.result); resolve(); return; }
+        if (pd.status === "error") { reject(new Error(pd.error || "任务失败")); return; }
+        setTimeout(tick, 700);
+      } catch (e) { reject(e); }
+    };
+    tick();
+  });
+}
+
+$("scanBtn").onclick = async () => {
+  const addr = $("scanAddr").value.trim();
+  $("scanErr").textContent = "";
+  $("scanResult").innerHTML = "";
+  const logbox = $("scanLog");
+  logbox.innerHTML = "";
+  logbox.style.display = "block";
+  if (!addr) { $("scanErr").textContent = "请输入地址"; return; }
+  $("scanBtn").disabled = true;
+  $("scanBtn").textContent = "查询中…";
+  try {
+    await runJob("/api/scan", { address: addr }, logbox, (data) => {
+      const balCard = `<div class="card">
+        <div style="font-size:13px;color:var(--dim);margin-bottom:8px">钱包 SOL 余额</div>
+        <div style="font-size:28px;color:var(--blue);font-weight:700">${data.balanceSol.toFixed(6)} SOL</div>
+      </div>`;
+      $("scanResult").innerHTML = balCard + renderSummary(data.summary) + renderTable(data.items);
+    });
+  } catch (e) {
+    $("scanErr").textContent = e.message;
+  } finally {
+    $("scanBtn").disabled = false;
+    $("scanBtn").textContent = "查询";
+  }
+};
+
+
+// ===== 连接钱包退回（签名模式）=====
+const getProvider = () => {
+  const w = window;
+  if (w.phantom?.solana?.isPhantom) return w.phantom.solana;   // Phantom
+  if (w.solflare?.isSolflare) return w.solflare;                // Solflare
+  if (w.solflare?.solana) return w.solflare.solana;
+  if (w.backpack?.isBackpack) return w.backpack;                // Backpack
+  if (w.xnft?.solana) return w.xnft.solana;
+  if (w.okxwallet?.solana) return w.okxwallet.solana;          // OKX Wallet
+  if (w.tokenpocket?.solana) return w.tokenpocket.solana;      // TokenPocket
+  if (w.solana?.isTokenPocket) return w.solana;
+  if (w.bitgetWallet?.solana) return w.bitgetWallet.solana;    // Bitget
+  if (w.bitkeep?.solana) return w.bitkeep.solana;
+  if (w.trustwallet?.solana) return w.trustwallet.solana;      // Trust Wallet
+  if (w.coinbaseSolana) return w.coinbaseSolana;               // Coinbase Wallet
+  if (w.solana) return w.solana;                               // 通用 fallback（放最后避免误判）
+  return null;
+};
+let currentWallet = null;
+
+// base64 → Uint8Array（Transaction.from 需要解码后的字节，不是 base64 字符串）
+const b64ToBytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
+$("connectBtn").onclick = async () => {
+  $("walletErr").textContent = "";
+  try {
+    const p = getProvider();
+    if (!p) throw new Error("未检测到 Solana 钱包。请安装 Phantom / Solflare / OKX / TokenPocket / Backpack 等。注意：MetaMask 是 ETH 钱包，不支持 Solana。");
+    const resp = await p.connect();
+    currentWallet = resp.publicKey.toString();
+    $("walletAddr").textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
+    $("connectBtn").disabled = true;
+    $("connectBtn").textContent = "已连接";
+  } catch (e) {
+    $("walletErr").textContent = e.message || "连接失败";
+  }
+};
+
+$("disconnectBtn").onclick = async () => {
+  try { const p = getProvider(); if (p && p.disconnect) await p.disconnect(); } catch {}
+  currentWallet = null;
+  $("walletAddr").textContent = "未连接";
+  $("connectBtn").disabled = false;
+  $("connectBtn").textContent = "连接钱包";
+  $("walletResult").innerHTML = "";
+  $("walletLog").style.display = "none";
+};
+
+$("redeemWalletBtn").onclick = async () => {
+  $("walletErr").textContent = "";
+  $("walletResult").innerHTML = "";
+  const logbox = $("walletLog");
+  logbox.innerHTML = "";
+  logbox.style.display = "block";
+  const p = getProvider();
+  if (!p || !currentWallet) { $("walletErr").textContent = "请先连接钱包"; return; }
+  $("redeemWalletBtn").disabled = true;
+  $("redeemWalletBtn").textContent = "处理中…";
+  try {
+    // 构造交易（后端内部先扫描再构造）
+    const build = await fetch("/api/build-redeem-tx", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address: currentWallet }),
+    }).then((r) => r.json());
+    if (build.error) throw new Error(build.error);
+    if (!build.targetCount) {
+      $("walletResult").innerHTML = `<div class="card muted">没有可退回租金的账户（0 个可关账户）</div>`;
+      return;
+    }
+    // 逐笔签名 + 广播
+    const sigs = [];
+    for (let i = 0; i < build.txs.length; i++) {
+      const tx = build.txs[i];
+      const txObj = solanaWeb3.Transaction.from(b64ToBytes(tx.serialized));
+      const signed = await p.signTransaction(txObj);
+      const b64 = signed.serialize().toString("base64");
+      const sub = await fetch("/api/submit-tx", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tx: b64 }),
+      }).then((r) => r.json());
+      if (sub.error) throw new Error("广播失败: " + sub.error);
+      sigs.push(sub.signature);
+    }
+    $("walletResult").innerHTML = `<div class="card">
+      <div class="summary">
+        <div class="stat"><b>${build.targetCount}</b><span>退回账户</span></div>
+        <div class="stat"><b style="color:var(--green)">${build.rentSol.toFixed(6)}</b><span>退回租金 SOL</span></div>
+        <div class="stat"><b style="color:var(--amber)">${build.feeSol.toFixed(6)}</b><span>平台手续费 SOL</span></div>
+        <div class="stat"><b>${sigs.length}</b><span>已广播交易</span></div>
+      </div>
+      <div class="muted">交易签名：${sigs.map((s) => s.slice(0, 10) + "…").join("、")}</div>
+    </div>`;
+  } catch (e) {
+    $("walletErr").textContent = e.message || "退回失败";
+  } finally {
+    $("redeemWalletBtn").disabled = false;
+    $("redeemWalletBtn").textContent = "扫描并一键退回";
+  }
+};
+
+
+</script>
+</body>
+</html>

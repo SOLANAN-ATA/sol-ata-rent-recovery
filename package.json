@@ -1,0 +1,15 @@
+{
+  "name": "sol-ata-rent-recovery",
+  "version": "2.0.0",
+  "description": "SOLANA ATA 租金退回系统 —— 扫描/退回代币账户的 ATA 押金（签名模式 + 私钥模式）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "bs58": "^5.0.0",
+    "express": "^5.2.1"
+  }
+}
