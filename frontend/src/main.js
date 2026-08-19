@@ -367,18 +367,14 @@ $("connectBtn").onclick = async () => {
   }
 };
 
-$("disconnectBtn").onclick = async () => {
-  try {
-    // 不带 namespace，断开所有连接（对 WalletConnect 远程钱包更彻底）
-    await modal.disconnect();
-  } catch (e) {
-    console.error("[disconnect] 断开失败:", e);
-  }
-  // 兑底：手动清 UI 状态，不依赖 subscribeAccount 回调时序
+$("disconnectBtn").onclick = () => {
+  // 先本地立即断开（UI + 本地状态，不依赖网络/VPN）
   currentWallet = null;
   updateWalletUI(false);
   $("walletResult").innerHTML = "";
   $("walletLog").style.display = "none";
+  // 后台异步断开 WalletConnect session（需走 relay，国内没 VPN 会失败，但不影响本地已断开）
+  modal.disconnect().catch((e) => console.error("[disconnect] 后台断开失败:", e));
 };
 
 $("redeemWalletBtn").onclick = async () => {
