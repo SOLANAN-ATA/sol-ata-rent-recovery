@@ -1,7 +1,14 @@
+import { Buffer } from "buffer";
 import { createAppKit } from "@reown/appkit";
 import { SolanaAdapter } from "@reown/appkit-adapter-solana";
 import { solana, solanaDevnet } from "@reown/appkit/networks";
 import { Transaction } from "@solana/web3.js";
+
+// 浏览器没有 Node 的全局 Buffer，但 @reown/appkit-adapter-solana 内部用了裸 Buffer.from，
+// 这里注入 polyfill（在其 signTransaction 被调用前设置即可）。
+if (typeof globalThis.Buffer === "undefined") {
+  globalThis.Buffer = Buffer;
+}
 
 const PROJECT_ID = "90e8acbd6ef561c010388421e704871d";
 
