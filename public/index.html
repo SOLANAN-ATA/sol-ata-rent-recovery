@@ -72,7 +72,7 @@
     <p data-i18n-html="hero_p1">每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。</p>
     <p data-i18n-html="hero_p2">本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，<b>0 SOL 也能退</b>。</p>
     <div class="hero-cta" data-i18n="hero_cta">👇 连接钱包，看看你锁住了多少 SOL</div>
-    <div class="hero-note" data-i18n="hero_note">本系统代码已经在 GitHub 开源，没有隐瞒，请放心使用。</div>
+    <div class="hero-note" data-i18n-html="hero_note">本系统代码已在 <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub 开源</a>，欢迎审阅，没有隐瞒，请放心使用。</div>
   </div>
 
   <div class="tabs">
@@ -90,7 +90,7 @@
       </div>
       <div style="margin-top:10px; font-size:13px; color:var(--dim)"><span data-i18n="connected_prefix">已连接：</span><b id="walletAddr" style="color:var(--green)" data-i18n="not_connected">未连接</b></div>
       <button id="redeemWalletBtn" style="margin-top:14px; width:100%" data-i18n="redeem_btn">扫描并一键退回</button>
-      <div class="warn" data-i18n="wallet_warn">🔐 私钥永不离开你的钱包。平台代付交易费，每个账户收 0.0002 SOL（约租金 10%），0 SOL 也能退回。</div>
+      <div class="warn" data-i18n="wallet_warn">🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。</div>
       <div class="err" id="walletErr"></div>
     </div>
     <div class="logbox" id="walletLog"></div>
@@ -134,7 +134,7 @@ const I18N = {
     hero_p1: "每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。",
     hero_p2: "本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金自动退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，仅需极少量 SOL 作链上手续费。",
     hero_cta: "👇 连接钱包，看看你锁住了多少 SOL",
-    hero_note: "本系统代码已经在 GitHub 开源，没有隐瞒，请放心使用。",
+    hero_note: "本系统代码已在 <a href=\"https://github.com/SOLANAN-ATA/sol-ata-rent-recovery\" target=\"_blank\" rel=\"noopener\">GitHub 开源</a>，欢迎审阅，没有隐瞒，请放心使用。",
     tab_wallet: "🔗 连接钱包退回",
     tab_scan: "🔍 地址查询",
     wallet_label: "连接你的 Solana 钱包（Phantom / Solflare / OKX / TokenPocket / Backpack 等）",
@@ -143,7 +143,7 @@ const I18N = {
     connected_prefix: "已连接：",
     not_connected: "未连接",
     redeem_btn: "扫描并一键退回",
-    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），仅需极少量 SOL 作链上手续费。",
+    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。",
     scan_label: "钱包地址（公钥）",
     scan_placeholder: "输入任意 Solana 地址，查询可赎回押金的归零币",
     scan_btn: "查询",
@@ -198,7 +198,7 @@ const I18N = {
     hero_p1: "Every time you trade a different token, your Solana wallet auto-opens a token account — that's how the Solana blockchain works. Each account locks ~<b>0.002 SOL</b> in rent. When zeroed meme coins, junk coins, honeypot coins, and airdrop coins can't be sold and the account can't be closed, that SOL is stuck on-chain.",
     hero_p2: "This system helps you: <b>scan → burn junk coins → close zombie accounts → rent auto-returned to your wallet</b>. Each account costs only <b>0.0002 SOL</b> (~<b>10%</b> of rent); you only need a tiny amount of SOL for the on-chain fee.",
     hero_cta: "👇 Connect your wallet and see how much SOL you've locked up",
-    hero_note: "The code is open sourced on GitHub — no hidden tricks, use with confidence.",
+    hero_note: "The code is <a href=\"https://github.com/SOLANAN-ATA/sol-ata-rent-recovery\" target=\"_blank\" rel=\"noopener\">open sourced on GitHub</a> — feel free to review. No hidden tricks.",
     tab_wallet: "🔗 Connect & Reclaim",
     tab_scan: "🔍 Address Lookup",
     wallet_label: "Connect your Solana wallet (Phantom / Solflare / OKX / TokenPocket / Backpack, etc.)",
@@ -207,7 +207,7 @@ const I18N = {
     connected_prefix: "Connected: ",
     not_connected: "Not connected",
     redeem_btn: "Scan & Reclaim",
-    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). You only need a tiny amount of SOL for the on-chain fee.",
+    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee.",
     scan_label: "Wallet Address (Public Key)",
     scan_placeholder: "Enter any Solana address to find reclaimable rent from zeroed coins",
     scan_btn: "Lookup",
