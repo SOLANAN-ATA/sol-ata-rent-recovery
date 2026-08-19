@@ -55,6 +55,7 @@ const I18N = {
     connected_prefix: "已连接：",
     not_connected: "未连接",
     redeem_btn: "扫描并一键退回",
+    force_burn_label: "同时烧掉有价值的币（确定不值钱再勾选）",
     wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。⚠️ 若钱包里有比较值钱的币，请先自行卖掉再来赎回——系统只处理归零币，值钱的币会跳过，避免烧掉可惜。",
     scan_label: "钱包地址（公钥）",
     scan_placeholder: "输入任意 Solana 地址，查询可赎回押金的归零币",
@@ -121,6 +122,7 @@ const I18N = {
     connected_prefix: "Connected: ",
     not_connected: "Not connected",
     redeem_btn: "Scan & Reclaim",
+    force_burn_label: "Also burn valuable tokens (tick only if you're sure they're worthless)",
     wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee. ⚠️ If you hold any valuable tokens, sell them manually first — this tool only processes zeroed tokens and will skip valuable ones to avoid burning them.",
     scan_label: "Wallet Address (Public Key)",
     scan_placeholder: "Enter any Solana address to find reclaimable rent from zeroed coins",
@@ -400,7 +402,7 @@ $("redeemWalletBtn").onclick = async () => {
   try {
     const build = await fetch("/api/build-redeem-tx", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: currentWallet }),
+      body: JSON.stringify({ address: currentWallet, forceBurnValuable: $("forceBurnValuable").checked }),
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
     if (!build.targetCount) {

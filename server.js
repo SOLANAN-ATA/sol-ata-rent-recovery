@@ -106,7 +106,9 @@ app.post("/api/build-redeem-tx", async (req, res) => {
     if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const userPk = new PublicKey(addr);
-    const result = await buildRedeemTransactions(userPk, FEE_PAYER_KP.publicKey);
+    const result = await buildRedeemTransactions(userPk, FEE_PAYER_KP.publicKey, {
+      forceBurnValuable: !!(req.body && req.body.forceBurnValuable),
+    });
     if (!result.targetCount) return res.json(result);
     const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     redeemRequests.set(requestId, { address: userPk.toBase58(), netLamports: result.netLamports, used: false, createdAt: Date.now() });

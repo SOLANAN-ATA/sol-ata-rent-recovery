@@ -90,6 +90,10 @@
       </div>
       <div style="margin-top:10px; font-size:13px; color:var(--dim)"><span data-i18n="connected_prefix">已连接：</span><b id="walletAddr" style="color:var(--green)" data-i18n="not_connected">未连接</b></div>
       <button id="redeemWalletBtn" style="margin-top:14px; width:100%" data-i18n="redeem_btn">扫描并一键退回</button>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; color:var(--dim); cursor:pointer">
+        <input type="checkbox" id="forceBurnValuable" style="width:auto; margin:0">
+        <span data-i18n="force_burn_label">同时烧掉有价值的币（确定不值钱再勾选）</span>
+      </label>
       <div class="warn" data-i18n="wallet_warn">🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。</div>
       <div class="err" id="walletErr"></div>
     </div>
