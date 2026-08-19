@@ -11,7 +11,7 @@ const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY } = require("./config
 const { scanWallet } = require("./lib/scan");
 const { buildRedeemTransactions } = require("./lib/txbuild");
 const { log, subscribe } = require("./lib/log");
-const { checkRpcHealth, broadcastTransaction, transferSol } = require("./lib/solana");
+const { checkRpcHealth, broadcastTransaction, transferSol, getBalance } = require("./lib/solana");
 
 // 平台手续费支付钱包（签名模式代付交易费）
 const FEE_PAYER_KP = (() => {
@@ -131,6 +131,16 @@ app.post("/api/forward", async (req, res) => {
     if (reqInfo.used) return res.status(400).json({ error: "该请求已转发过" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     if (reqInfo.netLamports <= 0) { reqInfo.used = true; return res.json({ signature: null, netSol: 0 }); }
+    // 等待关户交易的租金到账（广播后链上确认需数秒，避免平台钱包余额不足导致转账失败）
+    let balance = await getBalance(FEE_PAYER_KP.publicKey);
+    const deadline = Date.now() + 30000; // 最多等 30 秒
+    while (balance < reqInfo.netLamports && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 2000));
+      balance = await getBalance(FEE_PAYER_KP.publicKey);
+    }
+    if (balance < reqInfo.netLamports) {
+      return res.status(500).json({ error: "平台钱包余额不足，关户租金尚未到账，请稍后重试" });
+    }
     log(`💸 方案A 转发净额 ${(reqInfo.netLamports / 1e9).toFixed(6)} SOL → ${reqInfo.address.slice(0, 8)}…`);
     const sig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.address), reqInfo.netLamports);
     reqInfo.used = true;
