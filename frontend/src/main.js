@@ -55,7 +55,7 @@ const I18N = {
     connected_prefix: "已连接：",
     not_connected: "未连接",
     redeem_btn: "扫描并一键退回",
-    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。",
+    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。⚠️ 若钱包里有比较值钱的币，请先自行卖掉再来赎回——系统只处理归零币，值钱的币会跳过，避免烧掉可惜。",
     scan_label: "钱包地址（公钥）",
     scan_placeholder: "输入任意 Solana 地址，查询可赎回押金的归零币",
     scan_btn: "查询",
@@ -90,6 +90,7 @@ const I18N = {
     wr_net: "净额转回 SOL",
     wr_forward: "✅ 平台已把净额转回你的钱包",
     wr_view_tx: "查看转账交易",
+    skipped_valuable_hint: "⚠️ 检测到 {n} 个有价值的币已跳过（未烧）。建议先手动卖掉这些币，再来赎回，避免烧掉可惜。",
     no_accounts: "未发现代币账户",
     no_reclaimable: "没有可退回租金的账户（0 个可关账户）",
     wallet_balance: "钱包 SOL 余额",
@@ -120,7 +121,7 @@ const I18N = {
     connected_prefix: "Connected: ",
     not_connected: "Not connected",
     redeem_btn: "Scan & Reclaim",
-    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee.",
+    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee. ⚠️ If you hold any valuable tokens, sell them manually first — this tool only processes zeroed tokens and will skip valuable ones to avoid burning them.",
     scan_label: "Wallet Address (Public Key)",
     scan_placeholder: "Enter any Solana address to find reclaimable rent from zeroed coins",
     scan_btn: "Lookup",
@@ -155,6 +156,7 @@ const I18N = {
     wr_net: "Net Returned (SOL)",
     wr_forward: "✅ Net amount returned to your wallet",
     wr_view_tx: "View transfer tx",
+    skipped_valuable_hint: "⚠️ Detected {n} valuable token(s) skipped (not burned). Consider selling them manually first, then come back to reclaim — so they aren't wasted.",
     no_accounts: "No token accounts found",
     no_reclaimable: "No reclaimable accounts (0 closable accounts)",
     wallet_balance: "Wallet SOL Balance",
@@ -228,6 +230,9 @@ function renderScanResult(data) {
 
 function renderWalletResult(build) {
   lastWalletBuild = build;
+  const skippedHint = build.skippedValuable > 0
+    ? `<div class="warn" style="margin-top:10px">${t("skipped_valuable_hint").replace("{n}", build.skippedValuable)}</div>`
+    : "";
   $("walletResult").innerHTML = `<div class="card">
     <div class="summary">
       <div class="stat"><b>${build.targetCount}</b><span>${t("wr_accounts")}</span></div>
@@ -236,6 +241,7 @@ function renderWalletResult(build) {
       <div class="stat"><b style="color:var(--green)">${build.netSol.toFixed(6)}</b><span>${t("wr_net")}</span></div>
     </div>
     <div class="muted">${t("wr_forward")}${build.forwardSig ? ` · <a href="https://solscan.io/tx/${build.forwardSig}" target="_blank" rel="noopener" style="color:var(--blue)">${t("wr_view_tx")}</a>` : ""}</div>
+    ${skippedHint}
   </div>`;
 }
 
@@ -398,7 +404,10 @@ $("redeemWalletBtn").onclick = async () => {
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
     if (!build.targetCount) {
-      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>`;
+      const hint = build.skippedValuable > 0
+        ? `<div class="warn" style="margin-top:10px">${t("skipped_valuable_hint").replace("{n}", build.skippedValuable)}</div>`
+        : "";
+      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>${hint}`;
       return;
     }
     const sigs = [];
