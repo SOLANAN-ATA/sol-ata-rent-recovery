@@ -368,7 +368,17 @@ $("connectBtn").onclick = async () => {
 };
 
 $("disconnectBtn").onclick = async () => {
-  try { await modal.disconnect("solana"); } catch {}
+  try {
+    // 不带 namespace，断开所有连接（对 WalletConnect 远程钱包更彻底）
+    await modal.disconnect();
+  } catch (e) {
+    console.error("[disconnect] 断开失败:", e);
+  }
+  // 兑底：手动清 UI 状态，不依赖 subscribeAccount 回调时序
+  currentWallet = null;
+  updateWalletUI(false);
+  $("walletResult").innerHTML = "";
+  $("walletLog").style.display = "none";
 };
 
 $("redeemWalletBtn").onclick = async () => {
