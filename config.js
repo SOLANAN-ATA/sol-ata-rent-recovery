@@ -2,7 +2,7 @@
  * SOLANA ATA 租金退回系统 — 配置
  */
 
-// 收款/归集/发奖地址：赎回的 SOL 全部归这里，也是公开捐赠地址
+// 归集冷钱包地址：热钱包（FEE_PAYER）余额超 0.1 SOL 时，多余 SOL 归集到这里（无私钥，冷存储，也是公开捐赠地址）
 const DONATION_ADDRESS = "5aqXs2FFumQkyN8SBYf3EGV7PwLKAHgPwKPdtQQN5MAK";
 
 // RPC 端点（轮换 + fallback）

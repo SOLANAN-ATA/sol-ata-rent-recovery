@@ -227,7 +227,7 @@ app.listen(PORT, HOST, () => {
   console.log("  SOLANA ATA 租金退回系统 已启动");
   console.log(`  访问: http://localhost:${PORT}`);
   console.log(`  监听: ${HOST}:${PORT}（仅本机，私钥不外露）`);
-  console.log(`  平台手续费地址: ${DONATION_ADDRESS}`);
+  console.log(`  归集冷钱包地址: ${DONATION_ADDRESS}`);
   console.log("==============================================");
 
   // 热钱包归集定时任务：每 10 分钟检查一次，余额 > 0.1 SOL 自动扫到冷钱包
