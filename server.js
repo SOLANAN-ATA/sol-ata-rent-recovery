@@ -5,6 +5,7 @@
  */
 const express = require("express");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 const { Keypair, PublicKey } = require("@solana/web3.js");
 const bs58 = require("bs58");
 const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY } = require("./config");
@@ -25,6 +26,38 @@ const FEE_PAYER_KP = (() => {
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
+
+// 信任 Nginx 反代，识别真实客户端 IP（限流按真实 IP 计）
+app.set("trust proxy", 1);
+
+// 全局限流：每 IP 每分钟 120 次
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 120,
+  standardHeaders: true,
+  headers: false,
+  message: { error: "请求过于频繁，请稍后再试" },
+});
+app.use(globalLimiter);
+
+// 扫描/构造交易（耗 RPC）更严格限流
+const scanLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  headers: false,
+  message: { error: "扫描过于频繁，请稍后再试" },
+});
+
+// 转发净额（敏感，动平台钱包资金）严格限流
+const forwardLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  headers: false,
+  message: { error: "操作过于频繁，请稍后再试" },
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // 浏览器端 web3.js（本地 vendor，避免 CDN 依赖）
@@ -60,7 +93,7 @@ function startJob(fn) {
 }
 
 // 地址查询（只读，无需私钥）
-app.post("/api/scan", async (req, res) => {
+app.post("/api/scan", scanLimiter, async (req, res) => {
   try {
     const addr = (req.body && req.body.address || "").trim();
     if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
@@ -100,7 +133,7 @@ app.get("/api/rpc", async (req, res) => {
 // ===== 签名模式（方案A）：用户签名关户 → 租金进平台 → 平台转净额 =====
 
 // 构造关户交易（方案A：租金进平台，用户自己签名+付手续费）
-app.post("/api/build-redeem-tx", async (req, res) => {
+app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
   try {
     const addr = (req.body && req.body.address || "").trim();
     if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
@@ -123,7 +156,7 @@ app.post("/api/build-redeem-tx", async (req, res) => {
 });
 
 // 方案A：平台转净额给用户（用户广播关户交易后调用）
-app.post("/api/forward", async (req, res) => {
+app.post("/api/forward", forwardLimiter, async (req, res) => {
   try {
     const requestId = (req.body && req.body.requestId || "").trim();
     const reqInfo = redeemRequests.get(requestId);
