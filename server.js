@@ -72,6 +72,29 @@ const jobs = new Map(); // jobId -> { status, logs, result, error }
 // 方案A：转发请求追踪（requestId -> { address, netLamports, used, createdAt }）
 const redeemRequests = new Map();
 
+// ===== 热钱包归集：余额 > 0.1 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
+// 设计：91nSV…（FEE_PAYER，私钥在 .env）只留少量运转资金，超过阈值扫到冷钱包少放钱
+const SWEEP_THRESHOLD_LAMPORTS = 100000000; // 0.1 SOL
+const SWEEP_RESERVE_LAMPORTS = 5000; // 预留转账手续费（~0.000005 SOL）
+let sweeping = false; // 并发保护：避免归集重入
+async function sweepIfNeeded() {
+  if (sweeping || !FEE_PAYER_KP) return;
+  sweeping = true;
+  try {
+    const balance = await getBalance(FEE_PAYER_KP.publicKey);
+    if (balance <= SWEEP_THRESHOLD_LAMPORTS) return;
+    const toSend = balance - SWEEP_THRESHOLD_LAMPORTS - SWEEP_RESERVE_LAMPORTS;
+    if (toSend <= 0) return;
+    log(`🏦 归集热钱包多余 ${(toSend / 1e9).toFixed(6)} SOL → 冷钱包 ${DONATION_ADDRESS.slice(0, 8)}…`);
+    const sig = await transferSol(FEE_PAYER_KP, new PublicKey(DONATION_ADDRESS), toSend);
+    log(`✅ 归集完成 ${sig}`);
+  } catch (e) {
+    console.error("⚠️ 热钱包归集失败:", e.message);
+  } finally {
+    sweeping = false;
+  }
+}
+
 function startJob(fn) {
   const jobId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const job = { status: "running", logs: [], result: null, error: null };
@@ -206,4 +229,10 @@ app.listen(PORT, HOST, () => {
   console.log(`  监听: ${HOST}:${PORT}（仅本机，私钥不外露）`);
   console.log(`  平台手续费地址: ${DONATION_ADDRESS}`);
   console.log("==============================================");
+
+  // 热钱包归集定时任务：每 10 分钟检查一次，余额 > 0.1 SOL 自动扫到冷钱包
+  const SWEEP_INTERVAL_MS = 10 * 60 * 1000;
+  setInterval(() => {
+    sweepIfNeeded().catch((e) => console.error("⚠️ 归集定时任务异常:", e.message));
+  }, SWEEP_INTERVAL_MS);
 });
