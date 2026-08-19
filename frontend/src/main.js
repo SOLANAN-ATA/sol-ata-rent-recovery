@@ -1,129 +1,34 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOLANA ATA 租金退回系统</title>
-<style>
-  :root { --bg:#0b0e14; --card:#151a24; --border:#232b3b; --txt:#e6e9f0; --dim:#8b94a7; --green:#3ddc84; --amber:#f5b942; --red:#ff5d5d; --blue:#4aa3ff; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--txt); }
-  .wrap { max-width:1080px; margin:0 auto; padding:24px 20px 60px; }
-  h1 { font-size:22px; margin:0 0 4px; }
-  .sub { color:var(--dim); font-size:13px; margin-bottom:20px; word-break:break-all; }
-  .lang-toggle { position:fixed; top:16px; right:16px; z-index:100; display:flex; gap:6px; }
-  .lang-btn { padding:6px 12px; border:1px solid var(--border); background:var(--card); color:var(--dim); border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; }
-  .lang-btn.active { color:var(--txt); border-color:var(--blue); background:#1a2436; }
-  .tabs { display:flex; gap:8px; margin-bottom:20px; }
-  .tab { padding:10px 18px; border:1px solid var(--border); background:var(--card); border-radius:8px; cursor:pointer; font-size:14px; color:var(--dim); }
-  .tab.active { color:var(--txt); border-color:var(--blue); background:#1a2436; }
-  .panel { display:none; }
-  .panel.active { display:block; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:16px; }
-  label { display:block; font-size:13px; color:var(--dim); margin-bottom:6px; }
-  input, textarea { width:100%; padding:11px 12px; border:1px solid var(--border); background:#0f1420; color:var(--txt); border-radius:8px; font-size:14px; font-family:inherit; }
-  textarea { min-height:90px; resize:vertical; }
-  .row { display:flex; gap:10px; }
-  .row > * { flex:1; }
-  button { padding:11px 22px; border:0; border-radius:8px; background:var(--blue); color:#04121f; font-size:14px; font-weight:600; cursor:pointer; }
-  button:disabled { opacity:.5; cursor:not-allowed; }
-  .summary { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; }
-  .stat { background:#0f1420; border:1px solid var(--border); border-radius:8px; padding:12px 16px; min-width:120px; }
-  .stat b { display:block; font-size:20px; }
-  .stat span { font-size:12px; color:var(--dim); }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); word-break:break-all; }
-  th { color:var(--dim); font-weight:500; }
-  .tag { display:inline-block; padding:2px 8px; border-radius:6px; font-size:12px; font-weight:600; }
-  .tag.empty { background:rgba(61,220,132,.15); color:var(--green); }
-  .tag.burnable { background:rgba(245,185,66,.15); color:var(--amber); }
-  .tag.non-redeemable { background:rgba(255,93,93,.15); color:var(--red); }
-  .tag.protected { background:rgba(74,163,255,.15); color:var(--blue); }
-  .tag.valuable { background:rgba(74,163,255,.15); color:var(--blue); }
-  .muted { color:var(--dim); }
-  .err { color:var(--red); margin-top:10px; font-size:13px; }
-  .logbox { display:none; background:#0f1420; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:12px; max-height:340px; overflow-y:auto; font-family:ui-monospace,monospace; font-size:12px; color:var(--dim); line-height:1.6; }
-  .logbox div { white-space:pre-wrap; word-break:break-all; }
-  .warn { color:var(--amber); font-size:12px; margin-top:8px; }
-  .hero { background:linear-gradient(135deg,#152238,#101826); border:1px solid rgba(74,163,255,.35); border-radius:12px; padding:18px 20px; margin-bottom:20px; }
-  .hero-tagline { font-size:17px; font-weight:700; color:var(--green); margin-bottom:8px; }
-  .hero p { margin:6px 0; font-size:14px; line-height:1.75; color:var(--txt); }
-  .hero b { color:var(--green); }
-  .hero-cta { margin-top:12px; font-size:14px; font-weight:600; color:var(--amber); }
-  .hero-note { margin-top:10px; font-size:12px; color:var(--dim); }
-  .footer { margin-top:24px; padding:20px; border-top:1px solid var(--border); text-align:center; }
-  .footer-title { font-size:14px; color:var(--dim); margin-bottom:12px; }
-  .footer-links { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
-  .footer-links a { display:inline-block; padding:9px 16px; border:1px solid var(--border); border-radius:8px; color:var(--txt); font-size:13px; text-decoration:none; background:var(--card); }
-  .footer-links a:hover { border-color:var(--blue); }
-</style>
-</head>
-<body>
-<div class="lang-toggle">
-  <button id="langZh" class="lang-btn">中文</button>
-  <button id="langEn" class="lang-btn">EN</button>
-</div>
+import { createAppKit } from "@reown/appkit";
+import { SolanaAdapter } from "@reown/appkit-adapter-solana";
+import { solana, solanaDevnet } from "@reown/appkit/networks";
+import { Transaction } from "@solana/web3.js";
 
-<div class="wrap">
-  <h1 data-i18n="title">🖊️ SOLANA ATA 租金退回系统</h1>
+const PROJECT_ID = "90e8acbd6ef561c010388421e704871d";
 
-  <div class="hero">
-    <div class="hero-tagline" data-i18n="hero_tagline">你钱包里的归零币、垃圾币、貔貅币、空投币，锁着你自己的 SOL 💰</div>
-    <p data-i18n-html="hero_p1">每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。</p>
-    <p data-i18n-html="hero_p2">本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，<b>0 SOL 也能退</b>。</p>
-    <div class="hero-cta" data-i18n="hero_cta">👇 连接钱包，看看你锁住了多少 SOL</div>
-    <div class="hero-note" data-i18n-html="hero_note">本系统代码已在 <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub 开源</a>，欢迎审阅，没有隐瞒，请放心使用。</div>
-  </div>
+// ===== AppKit 初始化（WalletConnect + 本地钱包统一入口）=====
+const modal = createAppKit({
+  adapters: [new SolanaAdapter()],
+  networks: [solana, solanaDevnet],
+  projectId: PROJECT_ID,
+  metadata: {
+    name: "SOLANA ATA Rent Reclaim",
+    description: "Reclaim SOL rent locked in your dead token accounts",
+    url: window.location.origin,
+    icons: [],
+  },
+  features: {
+    swaps: false,
+    onramp: false,
+    send: false,
+    receive: false,
+    email: false,
+    socials: false,
+    emailShowWallets: false,
+    history: false,
+    analytics: false,
+  },
+});
 
-  <div class="tabs">
-    <div class="tab active" data-t="wallet" data-i18n="tab_wallet">🔗 连接钱包退回</div>
-    <div class="tab" data-t="scan" data-i18n="tab_scan">🔍 地址查询</div>
-  </div>
-
-  <!-- 连接钱包退回（签名模式） -->
-  <div class="panel active" id="panel-wallet">
-    <div class="card">
-      <label data-i18n="wallet_label">连接你的 Solana 钱包（Phantom / Solflare / OKX / TokenPocket / Backpack 等）</label>
-      <div class="row">
-        <button id="connectBtn" style="flex:1" data-i18n="connect_btn">连接钱包</button>
-        <button id="disconnectBtn" style="flex:1; background:#2a3242; color:var(--txt)" data-i18n="disconnect_btn">断开</button>
-      </div>
-      <div style="margin-top:10px; font-size:13px; color:var(--dim)"><span data-i18n="connected_prefix">已连接：</span><b id="walletAddr" style="color:var(--green)" data-i18n="not_connected">未连接</b></div>
-      <button id="redeemWalletBtn" style="margin-top:14px; width:100%" data-i18n="redeem_btn">扫描并一键退回</button>
-      <div class="warn" data-i18n="wallet_warn">🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。</div>
-      <div class="err" id="walletErr"></div>
-    </div>
-    <div class="logbox" id="walletLog"></div>
-    <div id="walletResult"></div>
-  </div>
-
-  <!-- 查询 -->
-  <div class="panel" id="panel-scan">
-    <div class="card">
-      <label data-i18n="scan_label">钱包地址（公钥）</label>
-      <div class="row">
-        <input id="scanAddr" data-i18n-ph="scan_placeholder" placeholder="输入任意 Solana 地址，查询可赎回押金的归零币">
-        <button id="scanBtn" style="flex:0 0 auto" data-i18n="scan_btn">查询</button>
-      </div>
-      <div class="err" id="scanErr"></div>
-    </div>
-    <div class="logbox" id="scanLog"></div>
-    <div id="scanResult"></div>
-  </div>
-
-  <div class="footer">
-    <div class="footer-title" data-i18n="footer_title">联系我们 / 社区</div>
-    <div class="footer-links">
-      <a href="https://t.me/SOLANA_ATA_ADM" target="_blank" rel="noopener" data-i18n="footer_tg">💬 TG 群组</a>
-      <a href="https://m.debox.pro/card?id=bemdnbps&amp;invite_code=bemdnbps" target="_blank" rel="noopener" data-i18n="footer_debox">📱 DEBOX 群组</a>
-      <a href="https://x.com/mingzhu038" target="_blank" rel="noopener" data-i18n="footer_x">𝕏 X.com</a>
-      <a href="#" target="_blank" rel="noopener" data-i18n="footer_web">🌐 官方网站</a>
-    </div>
-  </div>
-</div>
-
-<script src="/vendor/web3.js"></script>
-<script>
 const $ = (id) => document.getElementById(id);
 
 // ===== i18n =====
@@ -190,7 +95,7 @@ const I18N = {
     err_broadcast_fail: "广播失败: ",
     err_reclaim_fail: "退回失败",
     err_start_fail: "启动失败",
-    err_task_fail: "任务失败"
+    err_task_fail: "任务失败",
   },
   en: {
     title: "🖊️ SOLANA ATA Rent Reclaim System",
@@ -254,8 +159,8 @@ const I18N = {
     err_broadcast_fail: "Broadcast failed: ",
     err_reclaim_fail: "Reclaim failed",
     err_start_fail: "Failed to start",
-    err_task_fail: "Task failed"
-  }
+    err_task_fail: "Task failed",
+  },
 };
 
 let LANG = localStorage.getItem("lang") || "zh";
@@ -266,41 +171,11 @@ function catLabel(cat) {
   return map[cat] ? t(map[cat]) : cat;
 }
 
+let currentWallet = null;
 let lastScanData = null;
 let lastWalletBuild = null;
 
-function applyLang() {
-  document.documentElement.lang = LANG === "zh" ? "zh-CN" : "en";
-  document.title = t("title");
-  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
-  document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
-  document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
-  document.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b.id === (LANG === "zh" ? "langZh" : "langEn")));
-  // 已连接地址显示
-  const addrEl = $("walletAddr");
-  if (currentWallet) {
-    addrEl.textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
-  } else {
-    addrEl.textContent = t("not_connected");
-  }
-  // 重渲染动态结果
-  if (lastScanData) renderScanResult(lastScanData);
-  if (lastWalletBuild) renderWalletResult(lastWalletBuild);
-}
-
-$("langZh").onclick = () => { LANG = "zh"; localStorage.setItem("lang", "zh"); applyLang(); };
-$("langEn").onclick = () => { LANG = "en"; localStorage.setItem("lang", "en"); applyLang(); };
-
-// tabs
-document.querySelectorAll(".tab").forEach((t) => {
-  t.onclick = () => {
-    document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach((x) => x.classList.remove("active"));
-    t.classList.add("active");
-    $("panel-" + t.dataset.t).classList.add("active");
-  };
-});
-
+// ===== 渲染函数 =====
 function renderSummary(s) {
   return `<div class="summary">
     <div class="stat"><b>${s.total}</b><span>${t("stat_total")}</span></div>
@@ -316,16 +191,18 @@ function renderSummary(s) {
 
 function renderTable(items) {
   if (!items || !items.length) return `<div class="card muted">${t("no_accounts")}</div>`;
-  let rows = items.map((it) => {
-    const tag = `<span class="tag ${it.category}">${catLabel(it.category)}</span>`;
-    return `<tr>
-      <td>${it.mint.slice(0,8)}…${it.mint.slice(-6)}</td>
+  let rows = items
+    .map((it) => {
+      const tag = `<span class="tag ${it.category}">${catLabel(it.category)}</span>`;
+      return `<tr>
+      <td>${it.mint.slice(0, 8)}…${it.mint.slice(-6)}</td>
       <td>${it.tag === "token2022" ? "Token-2022" : "SPL"}</td>
       <td>${it.amountUi}</td>
       <td>${tag}${it.reason ? `<div class="muted">${it.reason}</div>` : ""}</td>
-      <td>${it.category === "empty" || it.category === "burnable" ? (it.recoverableLamports/1e9).toFixed(6) : "—"}</td>
+      <td>${it.category === "empty" || it.category === "burnable" ? (it.recoverableLamports / 1e9).toFixed(6) : "—"}</td>
     </tr>`;
-  }).join("");
+    })
+    .join("");
   return `<div class="card"><table>
     <thead><tr><th>${t("th_mint")}</th><th>${t("th_program")}</th><th>${t("th_balance")}</th><th>${t("th_category")}</th><th>${t("th_recoverable")}</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
@@ -390,6 +267,38 @@ async function runJob(url, body, logbox, onDone) {
   });
 }
 
+// ===== i18n 应用 =====
+function applyLang() {
+  document.documentElement.lang = LANG === "zh" ? "zh-CN" : "en";
+  document.title = t("title");
+  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b.id === (LANG === "zh" ? "langZh" : "langEn")));
+  const addrEl = $("walletAddr");
+  if (currentWallet) {
+    addrEl.textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
+  } else {
+    addrEl.textContent = t("not_connected");
+  }
+  if (lastScanData) renderScanResult(lastScanData);
+  if (lastWalletBuild) renderWalletResult(lastWalletBuild);
+}
+
+$("langZh").onclick = () => { LANG = "zh"; localStorage.setItem("lang", "zh"); applyLang(); };
+$("langEn").onclick = () => { LANG = "en"; localStorage.setItem("lang", "en"); applyLang(); };
+
+// tabs
+document.querySelectorAll(".tab").forEach((tab) => {
+  tab.onclick = () => {
+    document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach((x) => x.classList.remove("active"));
+    tab.classList.add("active");
+    $("panel-" + tab.dataset.t).classList.add("active");
+  };
+});
+
+// ===== 地址查询 =====
 $("scanBtn").onclick = async () => {
   const addr = $("scanAddr").value.trim();
   $("scanErr").textContent = "";
@@ -412,52 +321,45 @@ $("scanBtn").onclick = async () => {
   }
 };
 
-
-// ===== 连接钱包退回（签名模式）=====
-const getProvider = () => {
-  const w = window;
-  if (w.phantom?.solana?.isPhantom) return w.phantom.solana;
-  if (w.solflare?.isSolflare) return w.solflare;
-  if (w.solflare?.solana) return w.solflare.solana;
-  if (w.backpack?.isBackpack) return w.backpack;
-  if (w.xnft?.solana) return w.xnft.solana;
-  if (w.okxwallet?.solana) return w.okxwallet.solana;
-  if (w.tokenpocket?.solana) return w.tokenpocket.solana;
-  if (w.solana?.isTokenPocket) return w.solana;
-  if (w.bitgetWallet?.solana) return w.bitgetWallet.solana;
-  if (w.bitkeep?.solana) return w.bitkeep.solana;
-  if (w.trustwallet?.solana) return w.trustwallet.solana;
-  if (w.coinbaseSolana) return w.coinbaseSolana;
-  if (w.solana) return w.solana;
-  return null;
-};
-let currentWallet = null;
-
+// ===== 连接钱包（AppKit / WalletConnect）=====
 const b64ToBytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
+function updateWalletUI(connected) {
+  const addrEl = $("walletAddr");
+  if (connected && currentWallet) {
+    addrEl.textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
+    $("connectBtn").disabled = true;
+    $("connectBtn").textContent = t("connected");
+  } else {
+    addrEl.textContent = t("not_connected");
+    $("connectBtn").disabled = false;
+    $("connectBtn").textContent = t("connect_btn");
+  }
+}
+
+// 订阅账户状态（连接/断开/换钱包都触发）
+modal.subscribeAccount((state) => {
+  if (state.isConnected && state.address) {
+    currentWallet = state.address;
+    updateWalletUI(true);
+  } else {
+    currentWallet = null;
+    updateWalletUI(false);
+    $("walletResult").innerHTML = "";
+  }
+}, "solana");
 
 $("connectBtn").onclick = async () => {
   $("walletErr").textContent = "";
   try {
-    const p = getProvider();
-    if (!p) throw new Error(t("err_no_wallet"));
-    const resp = await p.connect();
-    currentWallet = resp.publicKey.toString();
-    $("walletAddr").textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
-    $("connectBtn").disabled = true;
-    $("connectBtn").textContent = t("connected");
+    await modal.open({ view: "Connect" });
   } catch (e) {
     $("walletErr").textContent = e.message || t("err_connect_fail");
   }
 };
 
 $("disconnectBtn").onclick = async () => {
-  try { const p = getProvider(); if (p && p.disconnect) await p.disconnect(); } catch {}
-  currentWallet = null;
-  $("walletAddr").textContent = t("not_connected");
-  $("connectBtn").disabled = false;
-  $("connectBtn").textContent = t("connect_btn");
-  $("walletResult").innerHTML = "";
-  $("walletLog").style.display = "none";
+  try { await modal.disconnect("solana"); } catch {}
 };
 
 $("redeemWalletBtn").onclick = async () => {
@@ -466,8 +368,12 @@ $("redeemWalletBtn").onclick = async () => {
   const logbox = $("walletLog");
   logbox.innerHTML = "";
   logbox.style.display = "block";
-  const p = getProvider();
-  if (!p || !currentWallet) { $("walletErr").textContent = t("err_please_connect"); return; }
+  if (!currentWallet) { $("walletErr").textContent = t("err_please_connect"); return; }
+  const provider = modal.getProvider("solana");
+  if (!provider || typeof provider.signTransaction !== "function") {
+    $("walletErr").textContent = t("err_no_wallet");
+    return;
+  }
   $("redeemWalletBtn").disabled = true;
   $("redeemWalletBtn").textContent = t("processing");
   try {
@@ -483,8 +389,8 @@ $("redeemWalletBtn").onclick = async () => {
     const sigs = [];
     for (let i = 0; i < build.txs.length; i++) {
       const tx = build.txs[i];
-      const txObj = solanaWeb3.Transaction.from(b64ToBytes(tx.serialized));
-      const signed = await p.signTransaction(txObj);
+      const txObj = Transaction.from(b64ToBytes(tx.serialized));
+      const signed = await provider.signTransaction(txObj);
       const b64 = signed.serialize().toString("base64");
       const sub = await fetch("/api/submit-tx", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -514,6 +420,3 @@ $("redeemWalletBtn").onclick = async () => {
 
 // 初始应用语言
 applyLang();
-</script>
-</body>
-</html>
