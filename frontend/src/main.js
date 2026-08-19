@@ -56,7 +56,8 @@ const I18N = {
     not_connected: "未连接",
     redeem_btn: "扫描并一键退回",
     force_burn_label: "同时烧掉有价值的币（确定不值钱再勾选）",
-    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。⚠️ 若钱包里有比较值钱的币，请先自行卖掉再来赎回——系统只处理归零币，值钱的币会跳过，避免烧掉可惜。",
+    multi_sign_hint: "⚠️ 共 {total} 个账户，将分成 {tx} 笔交易，请在钱包中连续确认 {tx} 次签名。",
+    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。⚠️ 若钱包里有比较值钱的币，请先自行卖掉再来赎回——系统只处理归零币，值钱的币会跳过，避免烧掉可惜。⚠️ 账户较多时会分成多笔交易，需在钱包多次确认签名（约每 6 个账户一次）。",
     scan_label: "钱包地址（公钥）",
     scan_placeholder: "输入任意 Solana 地址，查询可赎回押金的归零币",
     scan_btn: "查询",
@@ -123,7 +124,8 @@ const I18N = {
     not_connected: "Not connected",
     redeem_btn: "Scan & Reclaim",
     force_burn_label: "Also burn valuable tokens (tick only if you're sure they're worthless)",
-    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee. ⚠️ If you hold any valuable tokens, sell them manually first — this tool only processes zeroed tokens and will skip valuable ones to avoid burning them.",
+    multi_sign_hint: "⚠️ {total} accounts will be split into {tx} transactions — please approve {tx} signatures in your wallet.",
+    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee. ⚠️ If you hold any valuable tokens, sell them manually first — this tool only processes zeroed tokens and will skip valuable ones to avoid burning them. ⚠️ With many accounts, the reclaim is split into multiple transactions and needs multiple wallet signatures (~every 6 accounts).",
     scan_label: "Wallet Address (Public Key)",
     scan_placeholder: "Enter any Solana address to find reclaimable rent from zeroed coins",
     scan_btn: "Lookup",
@@ -411,6 +413,9 @@ $("redeemWalletBtn").onclick = async () => {
         : "";
       $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>${hint}`;
       return;
+    }
+    if (build.txs.length > 1) {
+      $("walletResult").innerHTML = `<div class="card" style="border-color:var(--amber)"><div class="warn" style="margin:0; font-size:14px">${t("multi_sign_hint").replace("{total}", build.targetCount).replace("{tx}", build.txs.length)}</div></div>`;
     }
     const sigs = [];
     for (let i = 0; i < build.txs.length; i++) {
