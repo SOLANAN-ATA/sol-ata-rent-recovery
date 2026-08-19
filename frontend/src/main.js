@@ -89,6 +89,7 @@ const I18N = {
     wr_signatures: "交易签名：",
     wr_net: "净额转回 SOL",
     wr_forward: "✅ 平台已把净额转回你的钱包",
+    wr_view_tx: "查看转账交易",
     no_accounts: "未发现代币账户",
     no_reclaimable: "没有可退回租金的账户（0 个可关账户）",
     wallet_balance: "钱包 SOL 余额",
@@ -153,6 +154,7 @@ const I18N = {
     wr_signatures: "Tx Signatures: ",
     wr_net: "Net Returned (SOL)",
     wr_forward: "✅ Net amount returned to your wallet",
+    wr_view_tx: "View transfer tx",
     no_accounts: "No token accounts found",
     no_reclaimable: "No reclaimable accounts (0 closable accounts)",
     wallet_balance: "Wallet SOL Balance",
@@ -233,7 +235,7 @@ function renderWalletResult(build) {
       <div class="stat"><b style="color:var(--amber)">${build.feeSol.toFixed(6)}</b><span>${t("wr_fee")}</span></div>
       <div class="stat"><b style="color:var(--green)">${build.netSol.toFixed(6)}</b><span>${t("wr_net")}</span></div>
     </div>
-    <div class="muted">${t("wr_forward")}${build.forwardSig ? " · " + build.forwardSig.slice(0, 10) + "…" : ""}</div>
+    <div class="muted">${t("wr_forward")}${build.forwardSig ? ` · <a href="https://solscan.io/tx/${build.forwardSig}" target="_blank" rel="noopener" style="color:var(--blue)">${t("wr_view_tx")}</a>` : ""}</div>
   </div>`;
 }
 
