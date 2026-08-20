@@ -433,7 +433,7 @@ $("redeemWalletBtn").onclick = async () => {
       const b64 = signed.serialize().toString("base64");
       const sub = await fetch("/api/submit-tx", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tx: b64 }),
+        body: JSON.stringify({ tx: b64, requestId: build.requestId, index: i }),
       }).then((r) => r.json());
       if (sub.error) throw new Error(t("err_broadcast_fail") + sub.error);
       sigs.push(sub.signature);

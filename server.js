@@ -78,8 +78,8 @@ app.get("/vendor/web3.js", (req, res) => {
 // ===== 后台任务 + 实时日志 =====
 const jobs = new Map(); // jobId -> { status, logs, result, error }
 
-// 方案A：转发请求追踪（requestId -> { address, chunks, perChunkNet, forwarded, createdAt }）
-// chunks: 每批账户数组；perChunkNet: 每批净额（lamports）；forwarded: 每批是否已转出
+// 方案A：转发请求追踪（requestId -> { address, chunks, perChunkNet, submitted, forwarded, createdAt }）
+// chunks: 每批账户数组；perChunkNet: 每批净额（lamports）；submitted: 每批是否已广播；forwarded: 每批是否已转出
 const redeemRequests = new Map();
 
 // ===== 热钱包归集：余额 > 0.1 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
@@ -88,14 +88,15 @@ const SWEEP_THRESHOLD_LAMPORTS = 100000000; // 0.1 SOL
 const SWEEP_RESERVE_LAMPORTS = 5000; // 预留转账手续费（~0.000005 SOL）
 let sweeping = false; // 并发保护：避免归集重入
 
-/** 计算当前「待转给用户」的净额总和（未完成 forward 的批次），归集时不能把这些钱扫走 */
+/** 计算当前「已广播但还没转出」的净额总和（租金已进热钱包，归集时不能把这些钱扫走） */
 function pendingReserveLamports() {
   let pending = 0;
   const now = Date.now();
   for (const v of redeemRequests.values()) {
     if (now - v.createdAt > 3600000) continue; // 过期请求不再预留
     for (let i = 0; i < v.perChunkNet.length; i++) {
-      if (!v.forwarded[i]) pending += v.perChunkNet[i];
+      // 只预留「已广播但未转出」的批次（租金确实进了热钱包）；未广播的批次租金还没进来，不用预留
+      if (v.submitted[i] && !v.forwarded[i]) pending += v.perChunkNet[i];
     }
   }
   return pending;
@@ -199,6 +200,7 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
       address: userPk.toBase58(),
       chunks: result.chunks,
       perChunkNet: result.perChunkNet,
+      submitted: result.chunks.map(() => false),
       forwarded: result.chunks.map(() => false),
       createdAt: Date.now(),
     });
@@ -283,6 +285,9 @@ app.post("/api/submit-tx", async (req, res) => {
   try {
     const b64 = (req.body && req.body.tx || "").trim();
     if (!b64) return res.status(400).json({ error: "缺少 tx 参数" });
+    const requestId = (req.body && req.body.requestId || "").trim();
+    const index = parseInt(req.body && req.body.index, 10);
+    const reqInfo = requestId ? redeemRequests.get(requestId) : null;
     const sig = await broadcastTransaction(b64);
     if (!sig) return res.status(500).json({ error: "所有 RPC 发送失败" });
     // 等待链上确认（通常 2-5 秒）
@@ -293,6 +298,10 @@ app.post("/api/submit-tx", async (req, res) => {
       if (status) {
         if (status.err) return res.status(500).json({ error: "交易链上失败: " + JSON.stringify(status.err) });
         if (status.confirmationStatus === "confirmed" || status.confirmationStatus === "finalized") {
+          // 标记该批已广播（租金已到账），供归集预留判断用
+          if (reqInfo && Number.isInteger(index) && index >= 0 && index < reqInfo.chunks.length) {
+            reqInfo.submitted[index] = true;
+          }
           return res.json({ signature: sig });
         }
       }
