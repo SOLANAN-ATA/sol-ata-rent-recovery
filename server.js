@@ -121,6 +121,20 @@ async function sweepIfNeeded() {
   }
 }
 
+/** 等待交易链上确认（confirmed/finalized），失败或超时抛错 */
+async function waitForConfirmation(sig, timeoutMs = 30000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const st = await getSignatureStatusAll(sig);
+    if (st) {
+      if (st.err) throw new Error("交易链上失败: " + JSON.stringify(st.err));
+      if (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized") return st;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  throw new Error("交易确认超时");
+}
+
 function startJob(fn) {
   const jobId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const job = { status: "running", logs: [], result: null, error: null };
@@ -271,8 +285,10 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     }
     log(`💸 方案A 转发净额 ${(net / 1e9).toFixed(6)} SOL → ${reqInfo.address.slice(0, 8)}…`);
     const sig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.address), net);
+    // 等这笔转出链上确认后再标记并归集：否则归集会读到「转出还没落地」的旧余额，把刚转给客户的钱又扫走
+    await waitForConfirmation(sig);
     reqInfo.forwarded[index] = true;
-    // 转发成功后立即触发归集，把累积的 10% 手续费及时扫到冷钱包（不用等 10 分钟定时）
+    // 转发确认后立即触发归集，把累积的 10% 手续费及时扫到冷钱包（不用等 10 分钟定时）
     sweepIfNeeded().catch(() => {});
     res.json({ signature: sig, netSol: net / 1e9 });
   } catch (e) {
