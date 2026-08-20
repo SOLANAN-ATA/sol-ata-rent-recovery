@@ -12,7 +12,7 @@ const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY } = require("./config
 const { scanWallet } = require("./lib/scan");
 const { classifyAndChunk, buildChunkTx } = require("./lib/txbuild");
 const { log, subscribe } = require("./lib/log");
-const { checkRpcHealth, broadcastTransaction, transferSol, getBalance } = require("./lib/solana");
+const { checkRpcHealth, broadcastTransaction, transferSol, getBalance, getSignatureStatusAll } = require("./lib/solana");
 
 // 平台手续费支付钱包（签名模式代付交易费）
 const FEE_PAYER_KP = (() => {
@@ -278,14 +278,27 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
   }
 });
 
-// 广播用户已签名的交易
+// 广播用户已签名的交易（广播后等待链上确认，避免「过期/失败交易仍返回成功」导致后续 forward 白转钱）
 app.post("/api/submit-tx", async (req, res) => {
   try {
     const b64 = (req.body && req.body.tx || "").trim();
     if (!b64) return res.status(400).json({ error: "缺少 tx 参数" });
     const sig = await broadcastTransaction(b64);
     if (!sig) return res.status(500).json({ error: "所有 RPC 发送失败" });
-    res.json({ signature: sig });
+    // 等待链上确认（通常 2-5 秒）
+    const deadline = Date.now() + 45000;
+    let status = null;
+    while (Date.now() < deadline) {
+      status = await getSignatureStatusAll(sig);
+      if (status) {
+        if (status.err) return res.status(500).json({ error: "交易链上失败: " + JSON.stringify(status.err) });
+        if (status.confirmationStatus === "confirmed" || status.confirmationStatus === "finalized") {
+          return res.json({ signature: sig });
+        }
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    return res.status(500).json({ error: "交易确认超时，请稍后重试" });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
