@@ -10,7 +10,7 @@ const { Keypair, PublicKey } = require("@solana/web3.js");
 const bs58 = require("bs58");
 const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY } = require("./config");
 const { scanWallet } = require("./lib/scan");
-const { buildRedeemTransactions } = require("./lib/txbuild");
+const { classifyAndChunk, buildChunkTx } = require("./lib/txbuild");
 const { log, subscribe } = require("./lib/log");
 const { checkRpcHealth, broadcastTransaction, transferSol, getBalance } = require("./lib/solana");
 
@@ -49,10 +49,19 @@ const scanLimiter = rateLimit({
   message: { error: "扫描过于频繁，请稍后再试" },
 });
 
-// 转发净额（敏感，动平台钱包资金）严格限流
+// 逐笔构造交易（每笔仅取 blockhash + 序列化，轻量；一次多账户赎回会连发多笔）
+const buildTxLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 60,
+  standardHeaders: true,
+  headers: false,
+  message: { error: "操作过于频繁，请稍后再试" },
+});
+
+// 逐笔转发净额（敏感，动平台钱包资金；一次赎回多笔账户会连发多笔）
 const forwardLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 10,
+  limit: 60,
   standardHeaders: true,
   headers: false,
   message: { error: "操作过于频繁，请稍后再试" },
@@ -69,7 +78,8 @@ app.get("/vendor/web3.js", (req, res) => {
 // ===== 后台任务 + 实时日志 =====
 const jobs = new Map(); // jobId -> { status, logs, result, error }
 
-// 方案A：转发请求追踪（requestId -> { address, netLamports, used, createdAt }）
+// 方案A：转发请求追踪（requestId -> { address, chunks, perChunkNet, forwarded, createdAt }）
+// chunks: 每批账户数组；perChunkNet: 每批净额（lamports）；forwarded: 每批是否已转出
 const redeemRequests = new Map();
 
 // ===== 热钱包归集：余额 > 0.1 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
@@ -77,13 +87,28 @@ const redeemRequests = new Map();
 const SWEEP_THRESHOLD_LAMPORTS = 100000000; // 0.1 SOL
 const SWEEP_RESERVE_LAMPORTS = 5000; // 预留转账手续费（~0.000005 SOL）
 let sweeping = false; // 并发保护：避免归集重入
+
+/** 计算当前「待转给用户」的净额总和（未完成 forward 的批次），归集时不能把这些钱扫走 */
+function pendingReserveLamports() {
+  let pending = 0;
+  const now = Date.now();
+  for (const v of redeemRequests.values()) {
+    if (now - v.createdAt > 3600000) continue; // 过期请求不再预留
+    for (let i = 0; i < v.perChunkNet.length; i++) {
+      if (!v.forwarded[i]) pending += v.perChunkNet[i];
+    }
+  }
+  return pending;
+}
+
 async function sweepIfNeeded() {
   if (sweeping || !FEE_PAYER_KP) return;
   sweeping = true;
   try {
     const balance = await getBalance(FEE_PAYER_KP.publicKey);
     if (balance <= SWEEP_THRESHOLD_LAMPORTS) return;
-    const toSend = balance - SWEEP_THRESHOLD_LAMPORTS - SWEEP_RESERVE_LAMPORTS;
+    const pending = pendingReserveLamports();
+    const toSend = balance - SWEEP_THRESHOLD_LAMPORTS - SWEEP_RESERVE_LAMPORTS - pending;
     if (toSend <= 0) return;
     log(`🏦 归集热钱包多余 ${(toSend / 1e9).toFixed(6)} SOL → 冷钱包 ${DONATION_ADDRESS.slice(0, 8)}…`);
     const sig = await transferSol(FEE_PAYER_KP, new PublicKey(DONATION_ADDRESS), toSend);
@@ -156,51 +181,98 @@ app.get("/api/rpc", async (req, res) => {
 // ===== 签名模式（方案A）：用户签名关户 → 租金进平台 → 平台转净额 =====
 
 // 构造关户交易（方案A：租金进平台，用户自己签名+付手续费）
+// 只做「扫描 + 分类 + 分批」，返回 requestId + 分批次元数据（不返回序列化交易，改为逐笔 build-next-tx）
 app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
   try {
     const addr = (req.body && req.body.address || "").trim();
     if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const userPk = new PublicKey(addr);
-    const result = await buildRedeemTransactions(userPk, FEE_PAYER_KP.publicKey, {
+    const result = await classifyAndChunk(userPk, FEE_PAYER_KP.publicKey, {
       forceBurnValuable: !!(req.body && req.body.forceBurnValuable),
     });
-    if (!result.targetCount) return res.json(result);
+    if (!result.targetCount) {
+      return res.json({ targetCount: 0, chunkCount: 0, skippedValuable: result.skippedValuable });
+    }
     const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    redeemRequests.set(requestId, { address: userPk.toBase58(), netLamports: result.netLamports, used: false, createdAt: Date.now() });
+    redeemRequests.set(requestId, {
+      address: userPk.toBase58(),
+      chunks: result.chunks,
+      perChunkNet: result.perChunkNet,
+      forwarded: result.chunks.map(() => false),
+      createdAt: Date.now(),
+    });
     // 清理过期请求（>1 小时）
     for (const [k, v] of redeemRequests) {
       if (Date.now() - v.createdAt > 3600000) redeemRequests.delete(k);
     }
-    res.json({ ...result, requestId });
+    res.json({
+      requestId,
+      targetCount: result.targetCount,
+      chunkCount: result.chunks.length,
+      rentLamports: result.totalRent,
+      feeLamports: result.totalFee,
+      netLamports: result.totalNet,
+      rentSol: result.totalRent / 1e9,
+      feeSol: result.totalFee / 1e9,
+      netSol: result.totalNet / 1e9,
+      skippedValuable: result.skippedValuable,
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-// 方案A：平台转净额给用户（用户广播关户交易后调用）
+// 逐笔构造单笔关户交易（每次取 FRESH blockhash，避免多笔共用一个 blockhash 过期）
+app.post("/api/build-next-tx", buildTxLimiter, async (req, res) => {
+  try {
+    const requestId = (req.body && req.body.requestId || "").trim();
+    const index = parseInt(req.body && req.body.index, 10);
+    const reqInfo = redeemRequests.get(requestId);
+    if (!reqInfo) return res.status(404).json({ error: "requestId 不存在或已过期" });
+    if (!Number.isInteger(index) || index < 0 || index >= reqInfo.chunks.length) {
+      return res.status(400).json({ error: "index 越界" });
+    }
+    if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
+    const userPk = new PublicKey(reqInfo.address);
+    const tx = await buildChunkTx(reqInfo.chunks[index], userPk, FEE_PAYER_KP.publicKey);
+    res.json({ serialized: tx.serialized, index, accountCount: tx.accountCount, netLamports: tx.netLamports, netSol: tx.netSol });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// 方案A：平台逐笔转净额给用户（用户广播该批关户交易后调用，index 指定第几批）
 app.post("/api/forward", forwardLimiter, async (req, res) => {
   try {
     const requestId = (req.body && req.body.requestId || "").trim();
+    const index = parseInt(req.body && req.body.index, 10);
     const reqInfo = redeemRequests.get(requestId);
     if (!reqInfo) return res.status(404).json({ error: "requestId 不存在或已过期" });
-    if (reqInfo.used) return res.status(400).json({ error: "该请求已转发过" });
+    if (!Number.isInteger(index) || index < 0 || index >= reqInfo.chunks.length) {
+      return res.status(400).json({ error: "index 越界" });
+    }
+    if (reqInfo.forwarded[index]) return res.status(400).json({ error: "该笔已转发过" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
-    if (reqInfo.netLamports <= 0) { reqInfo.used = true; return res.json({ signature: null, netSol: 0 }); }
-    // 等待关户交易的租金到账（广播后链上确认需数秒，避免平台钱包余额不足导致转账失败）
+    const net = reqInfo.perChunkNet[index];
+    if (net <= 0) { reqInfo.forwarded[index] = true; return res.json({ signature: null, netSol: 0 }); }
+    // 等待该批关户交易的租金到账（广播后链上确认需数秒，避免平台钱包余额不足导致转账失败）
+    const need = net + 5000; // 净额 + 平台转账手续费
     let balance = await getBalance(FEE_PAYER_KP.publicKey);
     const deadline = Date.now() + 30000; // 最多等 30 秒
-    while (balance < reqInfo.netLamports && Date.now() < deadline) {
+    while (balance < need && Date.now() < deadline) {
       await new Promise((r) => setTimeout(r, 2000));
       balance = await getBalance(FEE_PAYER_KP.publicKey);
     }
-    if (balance < reqInfo.netLamports) {
+    if (balance < need) {
       return res.status(500).json({ error: "平台钱包余额不足，关户租金尚未到账，请稍后重试" });
     }
-    log(`💸 方案A 转发净额 ${(reqInfo.netLamports / 1e9).toFixed(6)} SOL → ${reqInfo.address.slice(0, 8)}…`);
-    const sig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.address), reqInfo.netLamports);
-    reqInfo.used = true;
-    res.json({ signature: sig, netSol: reqInfo.netLamports / 1e9 });
+    log(`💸 方案A 转发净额 ${(net / 1e9).toFixed(6)} SOL → ${reqInfo.address.slice(0, 8)}…`);
+    const sig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.address), net);
+    reqInfo.forwarded[index] = true;
+    // 转发成功后立即触发归集，把累积的 10% 手续费及时扫到冷钱包（不用等 10 分钟定时）
+    sweepIfNeeded().catch(() => {});
+    res.json({ signature: sig, netSol: net / 1e9 });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
