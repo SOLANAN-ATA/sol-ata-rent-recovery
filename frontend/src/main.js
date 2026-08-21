@@ -101,6 +101,8 @@ const I18N = {
     querying: "查询中…",
     processing: "处理中…",
     connected: "已连接",
+    copy: "📋 复制",
+    copy_done: "✅ 已复制",
     err_no_wallet: "未检测到 Solana 钱包。请安装 Phantom / Solflare / OKX / TokenPocket / Backpack 等。注意：MetaMask 是 ETH 钱包，不支持 Solana。",
     err_connect_fail: "连接失败",
     err_please_connect: "请先连接钱包",
@@ -172,6 +174,8 @@ const I18N = {
     querying: "Looking up…",
     processing: "Processing…",
     connected: "Connected",
+    copy: "📋 Copy",
+    copy_done: "✅ Copied",
     err_no_wallet: "No Solana wallet detected. Please install Phantom / Solflare / OKX / TokenPocket / Backpack, etc. Note: MetaMask is an ETH wallet and does not support Solana.",
     err_connect_fail: "Connection failed",
     err_please_connect: "Please connect your wallet first",
@@ -300,12 +304,7 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
   document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
   document.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b.id === (LANG === "zh" ? "langZh" : "langEn")));
-  const addrEl = $("walletAddr");
-  if (currentWallet) {
-    addrEl.textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
-  } else {
-    addrEl.textContent = t("not_connected");
-  }
+  renderAddr();
   if (lastScanData) renderScanResult(lastScanData);
   if (lastWalletBuild) renderWalletResult(lastWalletBuild);
 }
@@ -349,14 +348,25 @@ $("scanBtn").onclick = async () => {
 // ===== 连接钱包（AppKit / WalletConnect）=====
 const b64ToBytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 
-function updateWalletUI(connected) {
+function renderAddr() {
   const addrEl = $("walletAddr");
+  const copyBtn = $("copyAddrBtn");
+  if (currentWallet) {
+    addrEl.textContent = currentWallet;
+    if (copyBtn) copyBtn.style.display = "inline-block";
+  } else {
+    addrEl.textContent = t("not_connected");
+    if (copyBtn) copyBtn.style.display = "none";
+  }
+}
+
+function updateWalletUI(connected) {
   if (connected && currentWallet) {
-    addrEl.textContent = currentWallet.slice(0, 8) + "…" + currentWallet.slice(-6);
+    renderAddr();
     $("connectBtn").disabled = true;
     $("connectBtn").textContent = t("connected");
   } else {
-    addrEl.textContent = t("not_connected");
+    renderAddr();
     $("connectBtn").disabled = false;
     $("connectBtn").textContent = t("connect_btn");
   }
@@ -380,6 +390,33 @@ $("connectBtn").onclick = async () => {
     await modal.open({ view: "Connect" });
   } catch (e) {
     $("walletErr").textContent = e.message || t("err_connect_fail");
+  }
+};
+
+$("copyAddrBtn").onclick = async () => {
+  if (!currentWallet) return;
+  const btn = $("copyAddrBtn");
+  const done = () => {
+    btn.textContent = t("copy_done");
+    setTimeout(() => { btn.textContent = t("copy"); }, 1500);
+  };
+  try {
+    await navigator.clipboard.writeText(currentWallet);
+    done();
+  } catch (e) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = currentWallet;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      done();
+    } catch (e2) {
+      console.error("[copy] 复制失败:", e2);
+    }
   }
 };
 
