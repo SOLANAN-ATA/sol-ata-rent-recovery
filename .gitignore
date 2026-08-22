@@ -5,3 +5,4 @@ HANDOFF.md
 public/
 bot-stats.jsonl
 .sweepable-fee.json
+.pending-forwards.json

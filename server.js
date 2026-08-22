@@ -83,6 +83,69 @@ const jobs = new Map(); // jobId -> { status, logs, result, error }
 // chunks: 每批账户数组；perChunkNet: 每批净额（lamports）；submitted: 每批是否已广播；forwarded: 每批是否已转出
 const redeemRequests = new Map();
 
+// ===== 孤儿净额补发：关户成功但 forward 未转出的 90%，持久化并定时自动补发 =====
+const PENDING_FORWARDS_FILE = path.join(__dirname, ".pending-forwards.json");
+function loadPendingForwards() {
+  try { return JSON.parse(fs.readFileSync(PENDING_FORWARDS_FILE, "utf8")); }
+  catch { return []; }
+}
+function savePendingForwards() {
+  try { fs.writeFileSync(PENDING_FORWARDS_FILE, JSON.stringify(pendingForwards)); }
+  catch (e) { console.error("⚠️ 保存待补发状态失败:", e.message); }
+}
+let pendingForwards = loadPendingForwards();
+
+function addPendingForward({ address, accounts, net, ref }) {
+  const key = address + "|" + accounts.join(",");
+  if (pendingForwards.some(p => (p.address + "|" + p.accounts.join(",")) === key)) return; // 幂等
+  pendingForwards.push({ address, accounts, net, ref: ref || null, createdAt: Date.now() });
+  savePendingForwards();
+}
+
+function markForwarded(address, accounts) {
+  const key = address + "|" + accounts.join(",");
+  const before = pendingForwards.length;
+  pendingForwards = pendingForwards.filter(p => (p.address + "|" + p.accounts.join(",")) !== key);
+  if (pendingForwards.length !== before) savePendingForwards();
+}
+
+/** 定时补发：把「关户成功但 forward 未转出」的 90% 净额自动转回客户，不让客户损失也不让平台重复转 */
+async function retryPendingForwards() {
+  if (!FEE_PAYER_KP || pendingForwards.length === 0) return;
+  const remain = [];
+  for (const p of pendingForwards) {
+    try {
+      // 验证该批账户确已关闭（未关户则跳过，等关户完成 + RPC 同步）
+      let allClosed = true;
+      for (const a of p.accounts) {
+        const info = await getAccountInfo(new PublicKey(a));
+        if (info) { allClosed = false; break; }
+      }
+      if (!allClosed) { remain.push(p); continue; }
+      // 余额足够才转（租金已进热钱包）
+      const need = p.net + 5000;
+      const balance = await getBalance(FEE_PAYER_KP.publicKey);
+      if (balance < need) { remain.push(p); continue; }
+      const sig = await transferSol(FEE_PAYER_KP, new PublicKey(p.address), p.net);
+      await waitForConfirmation(sig);
+      // 邀请返佣（失败不影响补发）
+      if (p.ref) {
+        try {
+          const refSig = await transferSol(FEE_PAYER_KP, new PublicKey(p.ref), REFERRAL_LAMPORTS * p.accounts.length);
+          await waitForConfirmation(refSig);
+        } catch (e2) { console.error("⚠️ 补发返佣失败:", e2.message); }
+      }
+      log(`🔁 补发孤儿净额 ${(p.net / 1e9).toFixed(6)} SOL → ${p.address.slice(0, 8)}…`);
+      // 成功，不加入 remain（移除）
+    } catch (e) {
+      console.error("⚠️ 补发孤儿失败:", e.message);
+      remain.push(p);
+    }
+  }
+  pendingForwards = remain;
+  savePendingForwards();
+}
+
 // ===== 热钱包归集：余额 > 0.01 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
 // 设计：91nSV…（FEE_PAYER，私钥在 .env）只留极少量运转资金（够 GAS 即可，中转账户非储值账户）
 // 2026-08-22 下调 0.1 → 0.001：热钱包只需够付转账 GAS，手续费及时扫冷钱包
@@ -321,6 +384,8 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     // 等这笔转出链上确认后再标记并归集：否则归集会读到「转出还没落地」的旧余额，把刚转给客户的钱又扫走
     await waitForConfirmation(sig);
     reqInfo.forwarded[index] = true;
+    // 转出成功：从待补发中移除（避免定时任务重复转）
+    markForwarded(reqInfo.address, reqInfo.chunks[index].map(item => item.account.toBase58()));
     // 累加本次 10% 手续费到待归集（90% 已转客户，只有手续费可扫走）
     sweepableFee += reqInfo.chunks[index].length * FEE_LAMPORTS;
     saveSweepableFee();
@@ -366,6 +431,13 @@ app.post("/api/submit-tx", async (req, res) => {
           // 标记该批已广播（租金已到账），供归集预留判断用
           if (reqInfo && Number.isInteger(index) && index >= 0 && index < reqInfo.chunks.length) {
             reqInfo.submitted[index] = true;
+            // 关户确认：记录待补发（若 forward 未转出，定时任务会自动补发 90%）
+            addPendingForward({
+              address: reqInfo.address,
+              accounts: reqInfo.chunks[index].map(item => item.account.toBase58()),
+              net: reqInfo.perChunkNet[index],
+              ref: reqInfo.ref || null,
+            });
           }
           return res.json({ signature: sig });
         }
@@ -393,5 +465,6 @@ app.listen(PORT, HOST, () => {
   const SWEEP_INTERVAL_MS = 60 * 1000;
   setInterval(() => {
     sweepIfNeeded().catch((e) => console.error("⚠️ 归集定时任务异常:", e.message));
+    retryPendingForwards().catch((e) => console.error("⚠️ 补发定时任务异常:", e.message));
   }, SWEEP_INTERVAL_MS);
 });
