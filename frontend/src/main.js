@@ -112,6 +112,11 @@ const I18N = {
     err_start_fail: "启动失败",
     err_task_fail: "任务失败",
     progress_step: "✅ 第 {i}/{n} 笔：关闭 {c} 个账户，净额 {net} SOL 已转回",
+    share_title: "🚀 分享你的战果",
+    share_text: "我在 solata.top 一键拿回了 {sol} SOL 死账户租金 💰 你钱包里估计也锁着不少，快查查 👉 {url}",
+    share_copy: "📋 复制文案",
+    share_tg: "💬 分享到 TG",
+    share_x: "𝕏 分享到 X",
   },
   en: {
     title: "🖊️ SOLANA ATA Rent Reclaim System",
@@ -185,6 +190,11 @@ const I18N = {
     err_start_fail: "Failed to start",
     err_task_fail: "Task failed",
     progress_step: "✅ Step {i}/{n}: closed {c} accounts, {net} SOL returned",
+    share_title: "🚀 Share your win",
+    share_text: "I just reclaimed {sol} SOL in dead-account rent on solata.top 💰 You probably have some locked too — check yours 👉 {url}",
+    share_copy: "📋 Copy text",
+    share_tg: "💬 Share to TG",
+    share_x: "𝕏 Share to X",
   },
 };
 
@@ -199,6 +209,7 @@ function catLabel(cat) {
 let currentWallet = null;
 let lastScanData = null;
 let lastWalletBuild = null;
+let lastShareText = "";
 
 // ===== 渲染函数 =====
 function renderSummary(s) {
@@ -244,6 +255,7 @@ function renderScanResult(data) {
 
 function renderWalletResult(build) {
   lastWalletBuild = build;
+  lastShareText = buildShareText(build);
   const skippedHint = build.skippedValuable > 0
     ? `<div class="warn" style="margin-top:10px">${t("skipped_valuable_hint").replace("{n}", build.skippedValuable)}</div>`
     : "";
@@ -256,7 +268,20 @@ function renderWalletResult(build) {
     </div>
     <div class="muted">${t("wr_forward")}${build.forwardSig ? ` · <a href="https://solscan.io/tx/${build.forwardSig}" target="_blank" rel="noopener" style="color:var(--blue)">${t("wr_view_tx")}</a>` : ""}</div>
     ${skippedHint}
+    <div class="share-box" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+      <div style="font-size:13px;color:var(--dim);margin-bottom:8px">${t("share_title")}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" data-share-action="copy" style="flex:1;min-width:100px">${t("share_copy")}</button>
+        <button type="button" data-share-action="tg" style="flex:1;min-width:100px;background:#2aabee;color:#fff">${t("share_tg")}</button>
+        <button type="button" data-share-action="x" style="flex:1;min-width:100px;background:#1d9bf0;color:#fff">${t("share_x")}</button>
+      </div>
+    </div>
   </div>`;
+}
+
+function buildShareText(build) {
+  const url = window.location.origin;
+  return t("share_text").replace("{sol}", build.netSol.toFixed(6)).replace("{url}", url);
 }
 
 function appendLog(container, lines) {
@@ -498,3 +523,31 @@ $("redeemWalletBtn").onclick = async () => {
 
 // 初始应用语言
 applyLang();
+
+// ===== 战报卡片分享（事件委托，语言切换重渲染后仍生效）=====
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-share-action]");
+  if (!btn) return;
+  const text = lastShareText || "";
+  const action = btn.dataset.shareAction;
+  if (action === "copy") {
+    const done = () => {
+      btn.textContent = t("copy_done");
+      setTimeout(() => { btn.textContent = t("share_copy"); }, 1500);
+    };
+    navigator.clipboard.writeText(text).then(done).catch(() => {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (_) {}
+      document.body.removeChild(ta);
+    });
+  } else if (action === "tg") {
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.origin)}&text=${encodeURIComponent(text)}`, "_blank", "noopener");
+  } else if (action === "x") {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+  }
+});
