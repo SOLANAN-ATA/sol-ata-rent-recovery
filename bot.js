@@ -76,6 +76,29 @@ function logQuery(rec) {
   fs.appendFile(STATS_FILE, JSON.stringify({ date, ts: Date.now(), ...rec }) + "\n", () => {});
 }
 
+// ===== 每日汇总推送（给管理员）=====
+const ADMIN_FILE = path.join(__dirname, "admin-chat-id.txt");
+let adminChatId = null;
+try { adminChatId = fs.readFileSync(ADMIN_FILE, "utf8").trim() || null; } catch (_) {}
+
+const SUMMARY_HOUR_UTC = parseInt(process.env.SUMMARY_HOUR_UTC || "13", 10); // 默认 UTC 13 = 北京 21:00
+let lastSummaryDate = null;
+
+async function sendDailySummary() {
+  if (!adminChatId) return;
+  const text = `📊 今日总结（${stats.todayKey}）\n\n🔹 今日查询：${stats.todayQueries} 次\n🔹 累计查询：${stats.totalQueries} 次\n🔹 累计可退账户：${stats.totalAccounts} 个\n🔹 累计可退租金：${stats.totalSol.toFixed(6)} SOL`;
+  await tg("sendMessage", { chat_id: adminChatId, text }).catch((e) => console.error("[summary] 推送失败:", e.message));
+}
+
+setInterval(() => {
+  const now = new Date();
+  const today = todayStr();
+  if (now.getUTCHours() === SUMMARY_HOUR_UTC && lastSummaryDate !== today) {
+    lastSummaryDate = today;
+    sendDailySummary();
+  }
+}, 60 * 1000);
+
 /** 调主服务扫描地址，返回 scanWallet 的 result（含 summary） */
 async function scanAddress(addr) {
   const r = await fetch(`${API}/api/scan`, {
@@ -98,6 +121,12 @@ async function scanAddress(addr) {
 async function handleMessage(msg) {
   const chatId = msg.chat.id;
   const text = (msg.text || "").trim();
+
+  // 私聊用户自动设为「管理员」，用于每日汇总推送
+  if (msg.chat.type === "private" && String(chatId) !== adminChatId) {
+    adminChatId = String(chatId);
+    fs.writeFileSync(ADMIN_FILE, adminChatId);
+  }
 
   if (text === "/stats" || text === "/统计") {
     return tg("sendMessage", {
