@@ -12,7 +12,7 @@ const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY } = require("./config
 const { scanWallet } = require("./lib/scan");
 const { classifyAndChunk, buildChunkTx } = require("./lib/txbuild");
 const { log, subscribe } = require("./lib/log");
-const { checkRpcHealth, broadcastTransaction, transferSol, getBalance, getSignatureStatusAll } = require("./lib/solana");
+const { checkRpcHealth, broadcastTransaction, transferSol, getBalance, getSignatureStatusAll, getAccountInfo } = require("./lib/solana");
 
 // 平台手续费支付钱包（签名模式代付交易费）
 const FEE_PAYER_KP = (() => {
@@ -280,8 +280,14 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
       return res.status(400).json({ error: "index 越界" });
     }
     if (reqInfo.forwarded[index]) return res.status(400).json({ error: "该笔已转发过" });
+    if (!reqInfo.submitted[index]) return res.status(400).json({ error: "该批关户交易尚未广播确认，无法转发" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const net = reqInfo.perChunkNet[index];
+    // 双保险：验证该批账户确已关闭（防止伪造交易置 submitted 后白抽平台净额）
+    for (const item of reqInfo.chunks[index]) {
+      const info = await getAccountInfo(item.account);
+      if (info) return res.status(400).json({ error: "关户交易尚未上链，账户仍存在，请先完成签名关户" });
+    }
     if (net <= 0) { reqInfo.forwarded[index] = true; return res.json({ signature: null, netSol: 0 }); }
     // 等待该批关户交易的租金到账（广播后链上确认需数秒，避免平台钱包余额不足导致转账失败）
     const need = net + 5000; // 净额 + 平台转账手续费
