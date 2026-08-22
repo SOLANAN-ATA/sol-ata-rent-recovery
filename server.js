@@ -283,6 +283,7 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     }
     if (reqInfo.forwarded[index]) return res.status(400).json({ error: "该笔已转发过" });
     if (reqInfo.ip && req.ip !== reqInfo.ip) return res.status(403).json({ error: "请求来源不一致，请从同一设备完成操作" });
+    console.error("[forward] req", JSON.stringify({ requestId, index, ip: req.ip, reqIp: reqInfo.ip, chunks: reqInfo.chunks.length, submitted: reqInfo.submitted, forwarded: reqInfo.forwarded }));
     if (!reqInfo.submitted[index]) return res.status(400).json({ error: "该批关户交易尚未广播确认，无法转发" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const net = reqInfo.perChunkNet[index];
