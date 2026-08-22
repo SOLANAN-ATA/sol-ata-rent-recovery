@@ -11,6 +11,10 @@
  * 说明：复用主服务的 /api/scan + /api/progress，只做「查询 + 回链接」，退回仍在网页完成（签名模式）。
  */
 const { PublicKey } = require("@solana/web3.js");
+const fs = require("fs");
+const path = require("path");
+
+const STATS_FILE = path.join(__dirname, "bot-stats.jsonl");
 
 const TOKEN = process.env.TG_BOT_TOKEN;
 const API = process.env.SOLATA_API || "https://solata.top"; // 服务端内部调用主服务（服务器上可设 127.0.0.1:3725）
@@ -39,6 +43,39 @@ function isSolAddress(s) {
   try { new PublicKey(s); return true; } catch { return false; }
 }
 
+// ===== 查询统计（只记地址 + 结果，不记私钥；写 bot-stats.jsonl 持久化）=====
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+let stats = { totalQueries: 0, totalAccounts: 0, totalSol: 0, todayQueries: 0, todayKey: todayStr() };
+
+function loadStats() {
+  try {
+    if (!fs.existsSync(STATS_FILE)) return;
+    for (const l of fs.readFileSync(STATS_FILE, "utf8").split("\n")) {
+      if (!l.trim()) continue;
+      try {
+        const r = JSON.parse(l);
+        stats.totalQueries++;
+        stats.totalAccounts += r.recoverableCount || 0;
+        stats.totalSol += r.recoverableSol || 0;
+        if (r.date === stats.todayKey) stats.todayQueries++;
+      } catch (_) {}
+    }
+  } catch (e) { console.error("[stats] 加载失败:", e.message); }
+}
+
+function logQuery(rec) {
+  const date = todayStr();
+  if (date !== stats.todayKey) { stats.todayKey = date; stats.todayQueries = 0; }
+  stats.totalQueries++;
+  stats.todayQueries++;
+  stats.totalAccounts += rec.recoverableCount || 0;
+  stats.totalSol += rec.recoverableSol || 0;
+  fs.appendFile(STATS_FILE, JSON.stringify({ date, ts: Date.now(), ...rec }) + "\n", () => {});
+}
+
 /** 调主服务扫描地址，返回 scanWallet 的 result（含 summary） */
 async function scanAddress(addr) {
   const r = await fetch(`${API}/api/scan`, {
@@ -62,6 +99,12 @@ async function handleMessage(msg) {
   const chatId = msg.chat.id;
   const text = (msg.text || "").trim();
 
+  if (text === "/stats" || text === "/统计") {
+    return tg("sendMessage", {
+      chat_id: chatId,
+      text: `📊 查询统计\n\n🔹 累计查询：${stats.totalQueries} 次\n🔹 今日查询：${stats.todayQueries} 次\n🔹 累计发现可退账户：${stats.totalAccounts} 个\n🔹 累计可退租金：${stats.totalSol.toFixed(6)} SOL`,
+    });
+  }
   if (text.startsWith("/start") || text.startsWith("/help")) {
     return tg("sendMessage", {
       chat_id: chatId,
@@ -88,6 +131,7 @@ async function handleMessage(msg) {
     }
     const sol = s.recoverableSol.toFixed(6);
     const fee = (s.recoverableCount * FEE_SOL).toFixed(6);
+    logQuery({ chatType: msg.chat.type, address: text, recoverableCount: s.recoverableCount, recoverableSol: s.recoverableSol });
     const net = (s.recoverableSol - s.recoverableCount * FEE_SOL).toFixed(6);
     return tg("sendMessage", {
       chat_id: chatId,
@@ -147,5 +191,6 @@ async function poll() {
   poll();
 }
 
-console.log("🤖 solata TG bot 启动（long polling）… API:", API);
+loadStats();
+console.log("🤖 solata TG bot 启动（long polling）… API:", API, "| 累计查询:", stats.totalQueries);
 poll();
