@@ -13,7 +13,8 @@
 const { PublicKey } = require("@solana/web3.js");
 
 const TOKEN = process.env.TG_BOT_TOKEN;
-const API = process.env.SOLATA_API || "https://solata.top";
+const API = process.env.SOLATA_API || "https://solata.top"; // 服务端内部调用主服务（服务器上可设 127.0.0.1:3725）
+const PUBLIC_URL = process.env.PUBLIC_URL || "https://solata.top"; // 用户跳转链接（必须公网）
 const FEE_SOL = 0.0002; // 每账户手续费（与主服务 FEE_LAMPORTS 一致）
 
 if (!TOKEN) {
@@ -93,7 +94,7 @@ async function handleMessage(msg) {
       text: `💰 这个地址锁了 <b>${sol} SOL</b> 租金！\n\n🔹 可退账户：${s.recoverableCount} 个\n🔹 手续费：${fee} SOL（10%）\n🔹 预计到账：<b>${net} SOL</b>\n\n👉 连接钱包一键退回：`,
       parse_mode: "HTML",
       reply_markup: {
-        inline_keyboard: [[{ text: "🚀 立即退回", url: API }]],
+        inline_keyboard: [[{ text: "🚀 立即退回", url: PUBLIC_URL }]],
       },
     });
   } catch (e) {
