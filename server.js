@@ -286,9 +286,16 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     console.error("[forward] req", JSON.stringify({ requestId, index, ip: req.ip, reqIp: reqInfo.ip, chunks: reqInfo.chunks.length, submitted: reqInfo.submitted, forwarded: reqInfo.forwarded }));
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const net = reqInfo.perChunkNet[index];
-    // 双保险：验证该批账户确已关闭（防止伪造交易置 submitted 后白抽平台净额）
+    // 双保险：验证该批账户确已关闭（防止跳过关户白抽平台净额）
+    // 关户交易刚 confirmed 时，RPC 节点可能尚未同步账户删除，这里等待/重试直到账户从链上消失
     for (const item of reqInfo.chunks[index]) {
-      const info = await getAccountInfo(item.account);
+      let info = await getAccountInfo(item.account);
+      let tries = 0;
+      while (info && tries < 15) {
+        await new Promise((r) => setTimeout(r, 2000));
+        info = await getAccountInfo(item.account);
+        tries++;
+      }
       if (info) return res.status(400).json({ error: "关户交易尚未上链，账户仍存在，请先完成签名关户" });
     }
     if (net <= 0) { reqInfo.forwarded[index] = true; return res.json({ signature: null, netSol: 0 }); }
