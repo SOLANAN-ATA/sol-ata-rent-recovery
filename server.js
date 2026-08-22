@@ -5,10 +5,11 @@
  */
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const { Keypair, PublicKey } = require("@solana/web3.js");
 const bs58 = require("bs58");
-const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY } = require("./config");
+const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY, FEE_LAMPORTS } = require("./config");
 const { scanWallet } = require("./lib/scan");
 const { classifyAndChunk, buildChunkTx } = require("./lib/txbuild");
 const { log, subscribe } = require("./lib/log");
@@ -90,31 +91,36 @@ const SWEEP_RESERVE_LAMPORTS = 5000; // 预留转账手续费（~0.000005 SOL）
 const REFERRAL_LAMPORTS = 100000; // 邀请返佣：0.0001 SOL/账户（= 手续费的 50%）
 let sweeping = false; // 并发保护：避免归集重入
 
-/** 计算当前「已广播但还没转出」的净额总和（租金已进热钱包，归集时不能把这些钱扫走） */
-function pendingReserveLamports() {
-  let pending = 0;
-  const now = Date.now();
-  for (const v of redeemRequests.values()) {
-    if (now - v.createdAt > 3600000) continue; // 过期请求不再预留
-    for (let i = 0; i < v.perChunkNet.length; i++) {
-      // 只预留「已广播但未转出」的批次（租金确实进了热钱包）；未广播的批次租金还没进来，不用预留
-      if (v.submitted[i] && !v.forwarded[i]) pending += v.perChunkNet[i];
-    }
-  }
-  return pending;
+// 待归集手续费（lamports）：只有 forward 成功（90% 已转客户）后，10% 手续费才累加到这里。
+// 归集只扫这部分，绝不扫「关户但未转出」的客户净额。持久化到文件，重启不丢。
+const SWEEPABLE_FEE_FILE = path.join(__dirname, ".sweepable-fee.json");
+function loadSweepableFee() {
+  try { const j = JSON.parse(fs.readFileSync(SWEEPABLE_FEE_FILE, "utf8")); return Number(j.lamports) || 0; }
+  catch { return 0; }
 }
+function saveSweepableFee() {
+  try { fs.writeFileSync(SWEEPABLE_FEE_FILE, JSON.stringify({ lamports: sweepableFee })); }
+  catch (e) { console.error("⚠️ 保存手续费状态失败:", e.message); }
+}
+let sweepableFee = loadSweepableFee();
 
+/** 归集：只扫「已确认到账的 10% 手续费」，绝不扫「关户但未转出的客户 90% 净额」 */
 async function sweepIfNeeded() {
   if (sweeping || !FEE_PAYER_KP) return;
   sweeping = true;
   try {
+    const fee = sweepableFee;
+    if (fee <= 0) return;
     const balance = await getBalance(FEE_PAYER_KP.publicKey);
-    if (balance <= SWEEP_THRESHOLD_LAMPORTS) return;
-    const pending = pendingReserveLamports();
-    const toSend = balance - SWEEP_THRESHOLD_LAMPORTS - SWEEP_RESERVE_LAMPORTS - pending;
+    // 预留底仓（0.01）+ 转账费，最多扫到热钱包还剩底仓为止
+    const maxSend = balance - SWEEP_THRESHOLD_LAMPORTS - SWEEP_RESERVE_LAMPORTS;
+    const toSend = Math.min(fee, maxSend);
     if (toSend <= 0) return;
-    log(`🏦 归集热钱包多余 ${(toSend / 1e9).toFixed(6)} SOL → 冷钱包 ${DONATION_ADDRESS.slice(0, 8)}…`);
+    log(`🏦 归集手续费 ${(toSend / 1e9).toFixed(6)} SOL → 冷钱包 ${DONATION_ADDRESS.slice(0, 8)}…`);
     const sig = await transferSol(FEE_PAYER_KP, new PublicKey(DONATION_ADDRESS), toSend);
+    await waitForConfirmation(sig);
+    sweepableFee -= toSend;
+    saveSweepableFee();
     log(`✅ 归集完成 ${sig}`);
   } catch (e) {
     console.error("⚠️ 热钱包归集失败:", e.message);
@@ -315,6 +321,9 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     // 等这笔转出链上确认后再标记并归集：否则归集会读到「转出还没落地」的旧余额，把刚转给客户的钱又扫走
     await waitForConfirmation(sig);
     reqInfo.forwarded[index] = true;
+    // 累加本次 10% 手续费到待归集（90% 已转客户，只有手续费可扫走）
+    sweepableFee += reqInfo.chunks[index].length * FEE_LAMPORTS;
+    saveSweepableFee();
     // 邀请裂变返佣：转 50% 手续费给邀请人（失败不影响用户退款）
     if (reqInfo.ref) {
       try {

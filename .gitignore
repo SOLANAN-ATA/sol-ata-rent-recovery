@@ -4,3 +4,4 @@ server.log
 HANDOFF.md
 public/
 bot-stats.jsonl
+.sweepable-fee.json
