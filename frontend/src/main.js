@@ -41,7 +41,7 @@ const $ = (id) => document.getElementById(id);
 // ===== i18n =====
 const I18N = {
   zh: {
-    title: "🖊️ SOLANA ATA 租金退回系统",
+    title: "🖊️ Solana 退租金 - 拿回你钱包里锁住的 SOL",
     hero_tagline: "你钱包里的归零币、垃圾币、貔貅币、空投币，锁着你自己的 SOL 💰",
     hero_p1: "每交易一个不同的币，Solana 钱包会自动开一个代币账户——这是 Solana 公链的特性，链上就锁定约 <b>0.002 SOL</b> 的租金。归零的 meme 币、垃圾币、貔貅币、空投币卖不掉、账户也关不了，这笔钱就卡在链上拿不回。",
     hero_p2: "本系统会帮你：<b>扫描 → 烧掉垃圾币 → 关闭僵尸账户 → 租金自动退回你钱包</b>。每个账户仅收 <b>0.0002 SOL</b>（约租金 <b>10%</b>）手续费，仅需极少量 SOL 作链上手续费。",
@@ -123,7 +123,7 @@ const I18N = {
     invite_copied: "✅ 已复制",
   },
   en: {
-    title: "🖊️ SOLANA ATA Rent Reclaim System",
+    title: "🖊️ Reclaim Solana Rent - Get Back Your Locked SOL",
     hero_tagline: "Zeroed coins, junk coins, honeypot coins, airdrop coins in your wallet — they're locking up YOUR SOL 💰",
     hero_p1: "Every time you trade a different token, your Solana wallet auto-opens a token account — that's how the Solana blockchain works. Each account locks ~<b>0.002 SOL</b> in rent. When zeroed meme coins, junk coins, honeypot coins, and airdrop coins can't be sold and the account can't be closed, that SOL is stuck on-chain.",
     hero_p2: "This system helps you: <b>scan → burn junk coins → close zombie accounts → rent auto-returned to your wallet</b>. Each account costs only <b>0.0002 SOL</b> (~<b>10%</b> of rent); you only need a tiny amount of SOL for the on-chain fee.",
