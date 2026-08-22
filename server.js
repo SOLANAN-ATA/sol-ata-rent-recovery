@@ -168,7 +168,6 @@ async function retryPendingForwards() {
         // 10% 手续费同样入待归集（补发也是「退成功才收费」）
         sweepableFee += p.accounts.length * FEE_LAMPORTS;
         saveSweepableFee();
-        sweepIfNeeded().catch(() => {});
       } catch (e) {
         console.error("⚠️ 补发孤儿失败:", e.message);
       }
@@ -439,8 +438,8 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     });
 
     if (result.status) return res.status(result.status).json({ error: result.error });
-    // 转发确认后立即触发归集，把累积的 10% 手续费及时扫到冷钱包（锁外调用，避免持锁归集）
-    sweepIfNeeded().catch(() => {});
+    // 归集交给 60 秒定时任务（不立即归集）：否则 forward 后 getBalance 可能读到过期余额，
+    // 把「余额-阈值」算成整笔手续费扫过头，导致热钱包水位被打到阈值以下。
     res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });
