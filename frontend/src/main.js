@@ -55,10 +55,9 @@ const I18N = {
     connected_prefix: "已连接：",
     not_connected: "未连接",
     redeem_btn: "扫描并一键退回",
-    force_burn_label: "同时烧掉有价值的币（确定不值钱再勾选）",
     force_burn_hint: "🛡️ 受保护代币永不销毁：SOL / USDT / USDC / PYUSD / USDS / EURC",
     multi_sign_hint: "⚠️ 共 {total} 个账户，将分成 {tx} 笔交易，请在钱包中连续确认 {tx} 次签名。",
-    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。⚠️ 若钱包里有比较值钱的币，请先自行卖掉再来赎回——系统只处理归零币，值钱的币会跳过，避免烧掉可惜。⚠️ 账户较多时会分成多笔交易，需在钱包多次确认签名（每笔约 20 个账户）。",
+    wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。⚠️ 赎回前请先把钱包里有价值的币转走或卖掉——系统会销毁所有有余额的代币账户（受保护代币 SOL/USDT/USDC/PYUSD/USDS/EURC 除外），避免误烧。⚠️ 账户较多时会分成多笔交易，需在钱包多次确认签名（每笔约 20 个账户）。",
     wallet_verify_tx: "🔍 请在钱包弹窗里核对每笔交易：是「关闭代币账户 / 退回租金」，不是转出你的 SOL / USDT 等资产。",
     scan_label: "钱包地址（公钥）",
     scan_placeholder: "输入任意 Solana 地址，查询可赎回押金的归零币",
@@ -137,10 +136,9 @@ const I18N = {
     connected_prefix: "Connected: ",
     not_connected: "Not connected",
     redeem_btn: "Scan & Reclaim",
-    force_burn_label: "Also burn valuable tokens (tick only if you're sure they're worthless)",
     force_burn_hint: "🛡️ Protected tokens are never burned: SOL / USDT / USDC / PYUSD / USDS / EURC",
     multi_sign_hint: "⚠️ {total} accounts will be split into {tx} transactions — please approve {tx} signatures in your wallet.",
-    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee. ⚠️ If you hold any valuable tokens, sell them manually first — this tool only processes zeroed tokens and will skip valuable ones to avoid burning them. ⚠️ With many accounts, the reclaim is split into multiple transactions and needs multiple wallet signatures (~20 accounts per tx).",
+    wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee. ⚠️ Before reclaiming, transfer out or sell any valuable tokens first — the system burns every token account that has a balance (except protected tokens SOL/USDT/USDC/PYUSD/USDS/EURC). ⚠️ With many accounts, the reclaim is split into multiple transactions and needs multiple wallet signatures (~20 accounts per tx).",
     wallet_verify_tx: "🔍 Please verify each transaction in your wallet: it should be 'closing token accounts / reclaiming rent', NOT sending out your SOL / USDT assets.",
     scan_label: "Wallet Address (Public Key)",
     scan_placeholder: "Enter any Solana address to find reclaimable rent from zeroed coins",
@@ -210,7 +208,7 @@ let LANG = localStorage.getItem("lang") || "zh";
 const t = (key) => (I18N[LANG] && I18N[LANG][key]) || key;
 
 function catLabel(cat) {
-  const map = { empty: "cat_empty", burnable: "cat_burnable", protected: "cat_protected", valuable: "cat_valuable", "non-redeemable": "cat_nonredeemable" };
+  const map = { empty: "cat_empty", burnable: "cat_burnable", protected: "cat_protected", "non-redeemable": "cat_nonredeemable" };
   return map[cat] ? t(map[cat]) : cat;
 }
 
@@ -232,7 +230,6 @@ function renderSummary(s) {
     <div class="stat"><b style="color:var(--green)">${s.empty}</b><span>${t("stat_empty")}</span></div>
     <div class="stat"><b style="color:var(--amber)">${s.burnable}</b><span>${t("stat_burnable")}</span></div>
     <div class="stat"><b style="color:var(--blue)">${s.protected}</b><span>${t("stat_protected")}</span></div>
-    <div class="stat"><b style="color:var(--blue)">${s.valuable}</b><span>${t("stat_valuable")}</span></div>
     <div class="stat"><b style="color:var(--red)">${s.nonRedeemable}</b><span>${t("stat_nonredeemable")}</span></div>
     <div class="stat"><b>${s.recoverableCount}</b><span>${t("stat_recoverable")}</span></div>
     <div class="stat"><b style="color:var(--green)">${s.recoverableSol.toFixed(6)}</b><span>${t("stat_recoverable_sol")}</span></div>
@@ -521,7 +518,7 @@ $("redeemWalletBtn").onclick = async () => {
   try {
     const build = await fetch("/api/build-redeem-tx", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: currentWallet, forceBurnValuable: $("forceBurnValuable").checked, ref: localStorage.getItem("solata_ref") || "" }),
+      body: JSON.stringify({ address: currentWallet, ref: localStorage.getItem("solata_ref") || "" }),
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
     if (!build.targetCount) {

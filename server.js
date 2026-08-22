@@ -31,10 +31,10 @@ app.use(express.json({ limit: "1mb" }));
 // 信任 Nginx 反代，识别真实客户端 IP（限流按真实 IP 计）
 app.set("trust proxy", 1);
 
-// 全局限流：每 IP 每分钟 120 次
+// 全局限流：每 IP 每分钟 300 次（放宽，防误伤大户批量退租）
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 120,
+  limit: 300,
   standardHeaders: true,
   headers: false,
   message: { error: "请求过于频繁，请稍后再试" },
@@ -53,7 +53,7 @@ const scanLimiter = rateLimit({
 // 逐笔构造交易（每笔仅取 blockhash + 序列化，轻量；一次多账户赎回会连发多笔）
 const buildTxLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 30,
+  limit: 120,
   standardHeaders: true,
   headers: false,
   message: { error: "操作过于频繁，请稍后再试" },
@@ -62,7 +62,7 @@ const buildTxLimiter = rateLimit({
 // 逐笔转发净额（敏感，动平台钱包资金；一次赎回多笔账户会连发多笔）
 const forwardLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 30,
+  limit: 120,
   standardHeaders: true,
   headers: false,
   message: { error: "操作过于频繁，请稍后再试" },
@@ -95,10 +95,10 @@ function savePendingForwards() {
 }
 let pendingForwards = loadPendingForwards();
 
-function addPendingForward({ address, accounts, net, ref }) {
+function addPendingForward({ address, accounts, net, ref, requestId, index }) {
   const key = address + "|" + accounts.join(",");
   if (pendingForwards.some(p => (p.address + "|" + p.accounts.join(",")) === key)) return; // 幂等
-  pendingForwards.push({ address, accounts, net, ref: ref || null, createdAt: Date.now() });
+  pendingForwards.push({ address, accounts, net, ref: ref || null, requestId, index, createdAt: Date.now() });
   savePendingForwards();
 }
 
@@ -109,41 +109,71 @@ function markForwarded(address, accounts) {
   if (pendingForwards.length !== before) savePendingForwards();
 }
 
+// ===== 转账互斥锁 =====
+// forward 与 retryPendingForwards 都动平台热钱包（转 90% 净额），用互斥锁串行化，
+// 防止两者并发对同一批账户重复转账（重复支付 90% = 平台损失）。
+let transferLock = Promise.resolve();
+async function withTransferLock(fn) {
+  let release;
+  const prev = transferLock;
+  transferLock = new Promise((r) => { release = r; });
+  await prev; // 等上一个持锁者释放
+  try {
+    return await fn();
+  } finally {
+    release();
+  }
+}
+
 /** 定时补发：把「关户成功但 forward 未转出」的 90% 净额自动转回客户，不让客户损失也不让平台重复转 */
 async function retryPendingForwards() {
   if (!FEE_PAYER_KP || pendingForwards.length === 0) return;
-  const remain = [];
-  for (const p of pendingForwards) {
-    try {
-      // 验证该批账户确已关闭（未关户则跳过，等关户完成 + RPC 同步）
-      let allClosed = true;
-      for (const a of p.accounts) {
-        const info = await getAccountInfo(new PublicKey(a));
-        if (info) { allClosed = false; break; }
+  for (const p of [...pendingForwards]) {
+    const key = p.address + "|" + p.accounts.join(",");
+    await withTransferLock(async () => {
+      try {
+        // 重入锁后重新确认该笔仍在待补发（可能已被并发 forward 处理掉）
+        if (!pendingForwards.some(e => (e.address + "|" + e.accounts.join(",")) === key)) return;
+        // 验证该批账户确已关闭（未关户则跳过，等关户完成 + RPC 同步）
+        let allClosed = true;
+        for (const a of p.accounts) {
+          const info = await getAccountInfo(new PublicKey(a));
+          if (info) { allClosed = false; break; }
+        }
+        if (!allClosed) return;
+        // 余额足够才转（租金已进热钱包）
+        const need = p.net + 5000;
+        const balance = await getBalance(FEE_PAYER_KP.publicKey);
+        if (balance < need) return;
+        const sig = await transferSol(FEE_PAYER_KP, new PublicKey(p.address), p.net);
+        await waitForConfirmation(sig);
+        // 邀请返佣（失败不影响补发）
+        if (p.ref) {
+          try {
+            const refSig = await transferSol(FEE_PAYER_KP, new PublicKey(p.ref), REFERRAL_LAMPORTS * p.accounts.length);
+            await waitForConfirmation(refSig);
+          } catch (e2) { console.error("⚠️ 补发返佣失败:", e2.message); }
+        }
+        // 标记 forward 的 forwarded[index]，防止 forward 端点再转一次（双转）
+        if (p.requestId) {
+          const ri = redeemRequests.get(p.requestId);
+          if (ri && Number.isInteger(p.index) && p.index >= 0 && p.index < ri.forwarded.length) {
+            ri.forwarded[p.index] = true;
+          }
+        }
+        log(`🔁 补发孤儿净额 ${(p.net / 1e9).toFixed(6)} SOL → ${p.address.slice(0, 8)}…`);
+        // 移除该笔
+        pendingForwards = pendingForwards.filter(e => (e.address + "|" + e.accounts.join(",")) !== key);
+        savePendingForwards();
+        // 10% 手续费同样入待归集（补发也是「退成功才收费」）
+        sweepableFee += p.accounts.length * FEE_LAMPORTS;
+        saveSweepableFee();
+        sweepIfNeeded().catch(() => {});
+      } catch (e) {
+        console.error("⚠️ 补发孤儿失败:", e.message);
       }
-      if (!allClosed) { remain.push(p); continue; }
-      // 余额足够才转（租金已进热钱包）
-      const need = p.net + 5000;
-      const balance = await getBalance(FEE_PAYER_KP.publicKey);
-      if (balance < need) { remain.push(p); continue; }
-      const sig = await transferSol(FEE_PAYER_KP, new PublicKey(p.address), p.net);
-      await waitForConfirmation(sig);
-      // 邀请返佣（失败不影响补发）
-      if (p.ref) {
-        try {
-          const refSig = await transferSol(FEE_PAYER_KP, new PublicKey(p.ref), REFERRAL_LAMPORTS * p.accounts.length);
-          await waitForConfirmation(refSig);
-        } catch (e2) { console.error("⚠️ 补发返佣失败:", e2.message); }
-      }
-      log(`🔁 补发孤儿净额 ${(p.net / 1e9).toFixed(6)} SOL → ${p.address.slice(0, 8)}…`);
-      // 成功，不加入 remain（移除）
-    } catch (e) {
-      console.error("⚠️ 补发孤儿失败:", e.message);
-      remain.push(p);
-    }
+    });
   }
-  pendingForwards = remain;
-  savePendingForwards();
 }
 
 // ===== 热钱包归集：余额 > 0.01 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
@@ -172,19 +202,21 @@ async function sweepIfNeeded() {
   if (sweeping || !FEE_PAYER_KP) return;
   sweeping = true;
   try {
-    const fee = sweepableFee;
-    if (fee <= 0) return;
-    const balance = await getBalance(FEE_PAYER_KP.publicKey);
-    // 预留底仓（0.01）+ 转账费，最多扫到热钱包还剩底仓为止
-    const maxSend = balance - SWEEP_THRESHOLD_LAMPORTS - SWEEP_RESERVE_LAMPORTS;
-    const toSend = Math.min(fee, maxSend);
-    if (toSend <= 0) return;
-    log(`🏦 归集手续费 ${(toSend / 1e9).toFixed(6)} SOL → 冷钱包 ${DONATION_ADDRESS.slice(0, 8)}…`);
-    const sig = await transferSol(FEE_PAYER_KP, new PublicKey(DONATION_ADDRESS), toSend);
-    await waitForConfirmation(sig);
-    sweepableFee -= toSend;
-    saveSweepableFee();
-    log(`✅ 归集完成 ${sig}`);
+    await withTransferLock(async () => {
+      const fee = sweepableFee;
+      if (fee <= 0) return;
+      const balance = await getBalance(FEE_PAYER_KP.publicKey);
+      // 预留底仓 + 转账费，最多扫到热钱包还剩底仓为止
+      const maxSend = balance - SWEEP_THRESHOLD_LAMPORTS - SWEEP_RESERVE_LAMPORTS;
+      const toSend = Math.min(fee, maxSend);
+      if (toSend <= 0) return;
+      log(`🏦 归集手续费 ${(toSend / 1e9).toFixed(6)} SOL → 冷钱包 ${DONATION_ADDRESS.slice(0, 8)}…`);
+      const sig = await transferSol(FEE_PAYER_KP, new PublicKey(DONATION_ADDRESS), toSend);
+      await waitForConfirmation(sig);
+      sweepableFee -= toSend;
+      saveSweepableFee();
+      log(`✅ 归集完成 ${sig}`);
+    });
   } catch (e) {
     console.error("⚠️ 热钱包归集失败:", e.message);
   } finally {
@@ -352,59 +384,67 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     }
     if (reqInfo.forwarded[index]) return res.status(400).json({ error: "该笔已转发过" });
     if (reqInfo.ip && req.ip !== reqInfo.ip) return res.status(403).json({ error: "请求来源不一致，请从同一设备完成操作" });
-    console.error("[forward] req", JSON.stringify({ requestId, index, ip: req.ip, reqIp: reqInfo.ip, chunks: reqInfo.chunks.length, submitted: reqInfo.submitted, forwarded: reqInfo.forwarded }));
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const net = reqInfo.perChunkNet[index];
-    // 双保险：验证该批账户确已关闭（防止跳过关户白抽平台净额）
-    // 关户交易刚 confirmed 时，RPC 节点可能尚未同步账户删除，这里等待/重试直到账户从链上消失
-    for (const item of reqInfo.chunks[index]) {
-      let info = await getAccountInfo(item.account);
-      let tries = 0;
-      while (info && tries < 15) {
-        await new Promise((r) => setTimeout(r, 2000));
-        info = await getAccountInfo(item.account);
-        tries++;
-      }
-      if (info) return res.status(400).json({ error: "关户交易尚未上链，账户仍存在，请先完成签名关户" });
-    }
-    if (net <= 0) { reqInfo.forwarded[index] = true; return res.json({ signature: null, netSol: 0 }); }
-    // 等待该批关户交易的租金到账（广播后链上确认需数秒，避免平台钱包余额不足导致转账失败）
-    const need = net + 5000; // 净额 + 平台转账手续费
-    let balance = await getBalance(FEE_PAYER_KP.publicKey);
-    const deadline = Date.now() + 30000; // 最多等 30 秒
-    while (balance < need && Date.now() < deadline) {
-      await new Promise((r) => setTimeout(r, 2000));
-      balance = await getBalance(FEE_PAYER_KP.publicKey);
-    }
-    if (balance < need) {
-      return res.status(500).json({ error: "平台钱包余额不足，关户租金尚未到账，请稍后重试" });
-    }
-    log(`💸 方案A 转发净额 ${(net / 1e9).toFixed(6)} SOL → ${reqInfo.address.slice(0, 8)}…`);
-    const sig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.address), net);
-    // 等这笔转出链上确认后再标记并归集：否则归集会读到「转出还没落地」的旧余额，把刚转给客户的钱又扫走
-    await waitForConfirmation(sig);
-    reqInfo.forwarded[index] = true;
-    // 转出成功：从待补发中移除（避免定时任务重复转）
-    markForwarded(reqInfo.address, reqInfo.chunks[index].map(item => item.account.toBase58()));
-    // 累加本次 10% 手续费到待归集（90% 已转客户，只有手续费可扫走）
-    sweepableFee += reqInfo.chunks[index].length * FEE_LAMPORTS;
-    saveSweepableFee();
-    // 邀请裂变返佣：转 50% 手续费给邀请人（失败不影响用户退款）
-    if (reqInfo.ref) {
-      try {
-        const refAmount = REFERRAL_LAMPORTS * reqInfo.chunks[index].length;
-        if (refAmount > 0) {
-          const refSig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.ref), refAmount);
-          await waitForConfirmation(refSig);
-          log(`🎁 邀请返佣 ${(refAmount / 1e9).toFixed(6)} SOL → ${reqInfo.ref.slice(0, 8)}…`);
+    const accounts = reqInfo.chunks[index].map(item => item.account.toBase58());
+
+    // 转账全程持锁，防止与定时补发并发对同一批账户重复转账
+    const result = await withTransferLock(async () => {
+      // 重入锁后重新校验（可能已被定时补发抢先处理）
+      if (reqInfo.forwarded[index]) return { status: 400, error: "该笔已转发过" };
+      // 双保险：验证该批账户确已关闭（防止跳过关户白抽平台净额）
+      for (const item of reqInfo.chunks[index]) {
+        let info = await getAccountInfo(item.account);
+        let tries = 0;
+        while (info && tries < 15) {
+          await new Promise((r) => setTimeout(r, 2000));
+          info = await getAccountInfo(item.account);
+          tries++;
         }
-      } catch (e2) {
-        console.error("⚠️ 邀请返佣失败:", e2.message);
+        if (info) return { status: 400, error: "关户交易尚未上链，账户仍存在，请先完成签名关户" };
       }
-    }
-    // 转发确认后立即触发归集，把累积的 10% 手续费及时扫到冷钱包（不用等 10 分钟定时）
+      if (net <= 0) { reqInfo.forwarded[index] = true; markForwarded(reqInfo.address, accounts); return { signature: null, netSol: 0 }; }
+      // 等待该批关户交易的租金到账（广播后链上确认需数秒，避免平台钱包余额不足导致转账失败）
+      const need = net + 5000; // 净额 + 平台转账手续费
+      let balance = await getBalance(FEE_PAYER_KP.publicKey);
+      const deadline = Date.now() + 30000; // 最多等 30 秒
+      while (balance < need && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 2000));
+        balance = await getBalance(FEE_PAYER_KP.publicKey);
+      }
+      if (balance < need) {
+        return { status: 500, error: "平台钱包余额不足，关户租金尚未到账，请稍后重试" };
+      }
+      log(`💸 方案A 转发净额 ${(net / 1e9).toFixed(6)} SOL → ${reqInfo.address.slice(0, 8)}…`);
+      const sig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.address), net);
+      // 等这笔转出链上确认后再标记并归集：否则归集会读到「转出还没落地」的旧余额，把刚转给客户的钱又扫走
+      await waitForConfirmation(sig);
+      reqInfo.forwarded[index] = true;
+      // 转出成功：从待补发中移除（避免定时任务重复转）
+      markForwarded(reqInfo.address, accounts);
+      // 累加本次 10% 手续费到待归集（90% 已转客户，只有手续费可扫走）
+      sweepableFee += reqInfo.chunks[index].length * FEE_LAMPORTS;
+      saveSweepableFee();
+      // 邀请裂变返佣：转 50% 手续费给邀请人（失败不影响用户退款）
+      if (reqInfo.ref) {
+        try {
+          const refAmount = REFERRAL_LAMPORTS * reqInfo.chunks[index].length;
+          if (refAmount > 0) {
+            const refSig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.ref), refAmount);
+            await waitForConfirmation(refSig);
+            log(`🎁 邀请返佣 ${(refAmount / 1e9).toFixed(6)} SOL → ${reqInfo.ref.slice(0, 8)}…`);
+          }
+        } catch (e2) {
+          console.error("⚠️ 邀请返佣失败:", e2.message);
+        }
+      }
+      return { signature: sig, netSol: net / 1e9 };
+    });
+
+    if (result.status) return res.status(result.status).json({ error: result.error });
+    // 转发确认后立即触发归集，把累积的 10% 手续费及时扫到冷钱包（锁外调用，避免持锁归集）
     sweepIfNeeded().catch(() => {});
-    res.json({ signature: sig, netSol: net / 1e9 });
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -437,6 +477,8 @@ app.post("/api/submit-tx", async (req, res) => {
               accounts: reqInfo.chunks[index].map(item => item.account.toBase58()),
               net: reqInfo.perChunkNet[index],
               ref: reqInfo.ref || null,
+              requestId,
+              index,
             });
           }
           return res.json({ signature: sig });
