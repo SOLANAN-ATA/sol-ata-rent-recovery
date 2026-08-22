@@ -43,7 +43,7 @@ app.use(globalLimiter);
 // 扫描/构造交易（耗 RPC）更严格限流
 const scanLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 20,
+  limit: 10,
   standardHeaders: true,
   headers: false,
   message: { error: "扫描过于频繁，请稍后再试" },
@@ -52,7 +52,7 @@ const scanLimiter = rateLimit({
 // 逐笔构造交易（每笔仅取 blockhash + 序列化，轻量；一次多账户赎回会连发多笔）
 const buildTxLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 60,
+  limit: 30,
   standardHeaders: true,
   headers: false,
   message: { error: "操作过于频繁，请稍后再试" },
@@ -61,7 +61,7 @@ const buildTxLimiter = rateLimit({
 // 逐笔转发净额（敏感，动平台钱包资金；一次赎回多笔账户会连发多笔）
 const forwardLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 60,
+  limit: 30,
   standardHeaders: true,
   headers: false,
   message: { error: "操作过于频繁，请稍后再试" },
@@ -228,6 +228,7 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
       submitted: result.chunks.map(() => false),
       forwarded: result.chunks.map(() => false),
       ref: refAddress,
+      ip: req.ip,
       createdAt: Date.now(),
     });
     // 清理过期请求（>1 小时）
@@ -281,6 +282,7 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
       return res.status(400).json({ error: "index 越界" });
     }
     if (reqInfo.forwarded[index]) return res.status(400).json({ error: "该笔已转发过" });
+    if (reqInfo.ip && req.ip !== reqInfo.ip) return res.status(403).json({ error: "请求来源不一致，请从同一设备完成操作" });
     if (!reqInfo.submitted[index]) return res.status(400).json({ error: "该批关户交易尚未广播确认，无法转发" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const net = reqInfo.perChunkNet[index];
