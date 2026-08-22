@@ -380,8 +380,8 @@ app.listen(PORT, HOST, () => {
   console.log(`  归集冷钱包地址: ${DONATION_ADDRESS}`);
   console.log("==============================================");
 
-  // 热钱包归集定时任务：每 10 分钟检查一次，余额 > 0.1 SOL 自动扫到冷钱包
-  const SWEEP_INTERVAL_MS = 10 * 60 * 1000;
+  // 热钱包归集定时任务：每 1 分钟检查一次，余额 > 0.01 SOL 自动扫到冷钱包（及时降敞口）
+  const SWEEP_INTERVAL_MS = 60 * 1000;
   setInterval(() => {
     sweepIfNeeded().catch((e) => console.error("⚠️ 归集定时任务异常:", e.message));
   }, SWEEP_INTERVAL_MS);
