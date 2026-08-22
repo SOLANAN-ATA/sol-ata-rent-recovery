@@ -315,11 +315,9 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
         if (rp.toBase58() !== userPk.toBase58()) refAddress = rp.toBase58();
       } catch (_) {}
     }
-    const result = await classifyAndChunk(userPk, FEE_PAYER_KP.publicKey, {
-      forceBurnValuable: !!(req.body && req.body.forceBurnValuable),
-    });
+    const result = await classifyAndChunk(userPk, FEE_PAYER_KP.publicKey);
     if (!result.targetCount) {
-      return res.json({ targetCount: 0, chunkCount: 0, skippedValuable: result.skippedValuable });
+      return res.json({ targetCount: 0, chunkCount: 0 });
     }
     const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     redeemRequests.set(requestId, {
@@ -346,7 +344,6 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
       rentSol: result.totalRent / 1e9,
       feeSol: result.totalFee / 1e9,
       netSol: result.totalNet / 1e9,
-      skippedValuable: result.skippedValuable,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });

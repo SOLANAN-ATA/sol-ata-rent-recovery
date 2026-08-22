@@ -55,7 +55,7 @@ const I18N = {
     connected_prefix: "已连接：",
     not_connected: "未连接",
     redeem_btn: "扫描并一键退回",
-    force_burn_hint: "🛡️ 受保护代币永不销毁：SOL / USDT / USDC / PYUSD / USDS / EURC",
+    protected_hint: "🛡️ 受保护代币永不销毁：SOL / USDT / USDC / PYUSD / USDS / EURC",
     multi_sign_hint: "⚠️ 共 {total} 个账户，将分成 {tx} 笔交易，请在钱包中连续确认 {tx} 次签名。",
     wallet_warn: "🔐 私钥永不离开你的钱包。每个账户收 0.0002 SOL（约租金 10%），钱包里面仅需预留极少量 SOL（留 0.001 SOL 左右）作链上手续费。⚠️ 赎回前请先把钱包里有价值的币转走或卖掉——系统会销毁所有有余额的代币账户（受保护代币 SOL/USDT/USDC/PYUSD/USDS/EURC 除外），避免误烧。⚠️ 账户较多时会分成多笔交易，需在钱包多次确认签名（每笔约 20 个账户）。",
     wallet_verify_tx: "🔍 请在钱包弹窗里核对每笔交易：是「关闭代币账户 / 退回租金」，不是转出你的 SOL / USDT 等资产。",
@@ -71,14 +71,12 @@ const I18N = {
     stat_empty: "可直接关",
     stat_burnable: "系统会自动销毁再退回",
     stat_protected: "受保护",
-    stat_valuable: "有价值(跳过)",
     stat_nonredeemable: "不可赎回",
     stat_recoverable: "可回收账户",
     stat_recoverable_sol: "可回收 SOL",
     cat_empty: "可直接关",
     cat_burnable: "系统会自动销毁代币再执行租金赎回操作",
     cat_protected: "受保护",
-    cat_valuable: "有价值",
     cat_nonredeemable: "不可赎回",
     th_mint: "代币 Mint",
     th_program: "程序",
@@ -93,7 +91,6 @@ const I18N = {
     wr_net: "净额转回 SOL",
     wr_forward: "✅ 平台已把净额转回你的钱包",
     wr_view_tx: "查看转账交易",
-    skipped_valuable_hint: "⚠️ 检测到 {n} 个有价值的币已跳过（未烧）。建议先手动卖掉这些币，再来赎回，避免烧掉可惜。",
     no_accounts: "未发现代币账户",
     no_reclaimable: "没有可退回租金的账户（0 个可关账户）",
     wallet_balance: "钱包 SOL 余额",
@@ -136,7 +133,7 @@ const I18N = {
     connected_prefix: "Connected: ",
     not_connected: "Not connected",
     redeem_btn: "Scan & Reclaim",
-    force_burn_hint: "🛡️ Protected tokens are never burned: SOL / USDT / USDC / PYUSD / USDS / EURC",
+    protected_hint: "🛡️ Protected tokens are never burned: SOL / USDT / USDC / PYUSD / USDS / EURC",
     multi_sign_hint: "⚠️ {total} accounts will be split into {tx} transactions — please approve {tx} signatures in your wallet.",
     wallet_warn: "🔐 Your private key never leaves your wallet. Each account costs 0.0002 SOL (~10% of rent). Just keep a tiny reserve of SOL (~0.001 SOL) for the on-chain fee. ⚠️ Before reclaiming, transfer out or sell any valuable tokens first — the system burns every token account that has a balance (except protected tokens SOL/USDT/USDC/PYUSD/USDS/EURC). ⚠️ With many accounts, the reclaim is split into multiple transactions and needs multiple wallet signatures (~20 accounts per tx).",
     wallet_verify_tx: "🔍 Please verify each transaction in your wallet: it should be 'closing token accounts / reclaiming rent', NOT sending out your SOL / USDT assets.",
@@ -152,14 +149,12 @@ const I18N = {
     stat_empty: "Can Close Directly",
     stat_burnable: "Auto-burn & Reclaim",
     stat_protected: "Protected",
-    stat_valuable: "Valuable (Skip)",
     stat_nonredeemable: "Non-redeemable",
     stat_recoverable: "Reclaimable Accounts",
     stat_recoverable_sol: "Reclaimable SOL",
     cat_empty: "Can close directly",
     cat_burnable: "System will auto-burn tokens then reclaim rent",
     cat_protected: "Protected",
-    cat_valuable: "Valuable",
     cat_nonredeemable: "Non-redeemable",
     th_mint: "Token Mint",
     th_program: "Program",
@@ -174,7 +169,6 @@ const I18N = {
     wr_net: "Net Returned (SOL)",
     wr_forward: "✅ Net amount returned to your wallet",
     wr_view_tx: "View transfer tx",
-    skipped_valuable_hint: "⚠️ Detected {n} valuable token(s) skipped (not burned). Consider selling them manually first, then come back to reclaim — so they aren't wasted.",
     no_accounts: "No token accounts found",
     no_reclaimable: "No reclaimable accounts (0 closable accounts)",
     wallet_balance: "Wallet SOL Balance",
@@ -267,9 +261,6 @@ function renderScanResult(data) {
 function renderWalletResult(build) {
   lastWalletBuild = build;
   lastShareText = buildShareText(build);
-  const skippedHint = build.skippedValuable > 0
-    ? `<div class="warn" style="margin-top:10px">${t("skipped_valuable_hint").replace("{n}", build.skippedValuable)}</div>`
-    : "";
   $("walletResult").innerHTML = `<div class="card">
     <div class="summary">
       <div class="stat"><b>${build.targetCount}</b><span>${t("wr_accounts")}</span></div>
@@ -278,7 +269,6 @@ function renderWalletResult(build) {
       <div class="stat"><b style="color:var(--green)">${build.netSol.toFixed(6)}</b><span>${t("wr_net")}</span></div>
     </div>
     <div class="muted">${t("wr_forward")}${build.forwardSig ? ` · <a href="https://solscan.io/tx/${build.forwardSig}" target="_blank" rel="noopener" style="color:var(--blue)">${t("wr_view_tx")}</a>` : ""}</div>
-    ${skippedHint}
     <div class="share-box" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
       <div style="font-size:13px;color:var(--dim);margin-bottom:8px">${t("share_title")}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -522,10 +512,7 @@ $("redeemWalletBtn").onclick = async () => {
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
     if (!build.targetCount) {
-      const hint = build.skippedValuable > 0
-        ? `<div class="warn" style="margin-top:10px">${t("skipped_valuable_hint").replace("{n}", build.skippedValuable)}</div>`
-        : "";
-      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>${hint}`;
+      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>`;
       return;
     }
     if (build.chunkCount > 1) {
