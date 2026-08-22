@@ -84,9 +84,9 @@ const jobs = new Map(); // jobId -> { status, logs, result, error }
 const redeemRequests = new Map();
 
 // ===== 热钱包归集：余额 > 0.01 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
-// 设计：91nSV…（FEE_PAYER，私钥在 .env）只留极少量运转资金，超过阈值扫到冷钱包少放钱
-// 2026-08-22 下调 0.1 → 0.01：降低被攻击时的损失敞口（攻击事件后）
-const SWEEP_THRESHOLD_LAMPORTS = 10000000; // 0.01 SOL
+// 设计：91nSV…（FEE_PAYER，私钥在 .env）只留极少量运转资金（够 GAS 即可，中转账户非储值账户）
+// 2026-08-22 下调 0.1 → 0.001：热钱包只需够付转账 GAS，手续费及时扫冷钱包
+const SWEEP_THRESHOLD_LAMPORTS = 1000000; // 0.001 SOL（约 200 次 GAS，足够运转）
 const SWEEP_RESERVE_LAMPORTS = 5000; // 预留转账手续费（~0.000005 SOL）
 const REFERRAL_LAMPORTS = 100000; // 邀请返佣：0.0001 SOL/账户（= 手续费的 50%）
 let sweeping = false; // 并发保护：避免归集重入
