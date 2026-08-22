@@ -117,6 +117,10 @@ const I18N = {
     share_copy: "📋 复制文案",
     share_tg: "💬 分享到 TG",
     share_x: "𝕏 分享到 X",
+    invite_title: "🎁 邀请好友，一起拿回租金",
+    invite_desc: "好友通过你的链接退租，你每账户得 0.0001 SOL 返佣",
+    invite_copy: "📋 复制邀请链接",
+    invite_copied: "✅ 已复制",
   },
   en: {
     title: "🖊️ SOLANA ATA Rent Reclaim System",
@@ -195,6 +199,10 @@ const I18N = {
     share_copy: "📋 Copy text",
     share_tg: "💬 Share to TG",
     share_x: "𝕏 Share to X",
+    invite_title: "🎁 Invite friends, reclaim rent together",
+    invite_desc: "You earn 0.0001 SOL for every account your friend reclaims via your link",
+    invite_copy: "📋 Copy invite link",
+    invite_copied: "✅ Copied",
   },
 };
 
@@ -210,6 +218,12 @@ let currentWallet = null;
 let lastScanData = null;
 let lastWalletBuild = null;
 let lastShareText = "";
+
+// 邀请裂变：进入时读 URL ref 参数，存 localStorage
+(function initReferrer() {
+  const ref = new URLSearchParams(window.location.search).get("ref");
+  if (ref) localStorage.setItem("solata_ref", ref);
+})();
 
 // ===== 渲染函数 =====
 function renderSummary(s) {
@@ -390,10 +404,17 @@ function updateWalletUI(connected) {
     renderAddr();
     $("connectBtn").disabled = true;
     $("connectBtn").textContent = t("connected");
+    const inviteBox = $("inviteBox");
+    if (inviteBox) {
+      inviteBox.style.display = "block";
+      $("inviteLink").value = `${window.location.origin}/?ref=${currentWallet}`;
+    }
   } else {
     renderAddr();
     $("connectBtn").disabled = false;
     $("connectBtn").textContent = t("connect_btn");
+    const inviteBox = $("inviteBox");
+    if (inviteBox) inviteBox.style.display = "none";
   }
 }
 
@@ -445,6 +466,34 @@ $("copyAddrBtn").onclick = async () => {
   }
 };
 
+$("copyInviteBtn").onclick = async () => {
+  if (!currentWallet) return;
+  const btn = $("copyInviteBtn");
+  const link = `${window.location.origin}/?ref=${currentWallet}`;
+  const done = () => {
+    btn.textContent = t("invite_copied");
+    setTimeout(() => { btn.textContent = t("invite_copy"); }, 1500);
+  };
+  try {
+    await navigator.clipboard.writeText(link);
+    done();
+  } catch (e) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = link;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      done();
+    } catch (e2) {
+      console.error("[invite] 复制失败:", e2);
+    }
+  }
+};
+
 $("disconnectBtn").onclick = () => {
   // 先本地立即断开（UI + 本地状态，不依赖网络/VPN）
   currentWallet = null;
@@ -472,7 +521,7 @@ $("redeemWalletBtn").onclick = async () => {
   try {
     const build = await fetch("/api/build-redeem-tx", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: currentWallet, forceBurnValuable: $("forceBurnValuable").checked }),
+      body: JSON.stringify({ address: currentWallet, forceBurnValuable: $("forceBurnValuable").checked, ref: localStorage.getItem("solata_ref") || "" }),
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
     if (!build.targetCount) {

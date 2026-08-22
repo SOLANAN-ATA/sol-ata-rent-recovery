@@ -86,6 +86,7 @@ const redeemRequests = new Map();
 // 设计：91nSV…（FEE_PAYER，私钥在 .env）只留少量运转资金，超过阈值扫到冷钱包少放钱
 const SWEEP_THRESHOLD_LAMPORTS = 100000000; // 0.1 SOL
 const SWEEP_RESERVE_LAMPORTS = 5000; // 预留转账手续费（~0.000005 SOL）
+const REFERRAL_LAMPORTS = 100000; // 邀请返佣：0.0001 SOL/账户（= 手续费的 50%）
 let sweeping = false; // 并发保护：避免归集重入
 
 /** 计算当前「已广播但还没转出」的净额总和（租金已进热钱包，归集时不能把这些钱扫走） */
@@ -203,6 +204,15 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
     if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
     if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const userPk = new PublicKey(addr);
+    // 邀请裂变：解析 ref（邀请人地址），校验有效且 ≠ 用户自己（防自刷）
+    let refAddress = null;
+    const refRaw = (req.body && req.body.ref || "").trim();
+    if (refRaw) {
+      try {
+        const rp = new PublicKey(refRaw);
+        if (rp.toBase58() !== userPk.toBase58()) refAddress = rp.toBase58();
+      } catch (_) {}
+    }
     const result = await classifyAndChunk(userPk, FEE_PAYER_KP.publicKey, {
       forceBurnValuable: !!(req.body && req.body.forceBurnValuable),
     });
@@ -216,6 +226,7 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
       perChunkNet: result.perChunkNet,
       submitted: result.chunks.map(() => false),
       forwarded: result.chunks.map(() => false),
+      ref: refAddress,
       createdAt: Date.now(),
     });
     // 清理过期请求（>1 小时）
@@ -288,6 +299,19 @@ app.post("/api/forward", forwardLimiter, async (req, res) => {
     // 等这笔转出链上确认后再标记并归集：否则归集会读到「转出还没落地」的旧余额，把刚转给客户的钱又扫走
     await waitForConfirmation(sig);
     reqInfo.forwarded[index] = true;
+    // 邀请裂变返佣：转 50% 手续费给邀请人（失败不影响用户退款）
+    if (reqInfo.ref) {
+      try {
+        const refAmount = REFERRAL_LAMPORTS * reqInfo.chunks[index].length;
+        if (refAmount > 0) {
+          const refSig = await transferSol(FEE_PAYER_KP, new PublicKey(reqInfo.ref), refAmount);
+          await waitForConfirmation(refSig);
+          log(`🎁 邀请返佣 ${(refAmount / 1e9).toFixed(6)} SOL → ${reqInfo.ref.slice(0, 8)}…`);
+        }
+      } catch (e2) {
+        console.error("⚠️ 邀请返佣失败:", e2.message);
+      }
+    }
     // 转发确认后立即触发归集，把累积的 10% 手续费及时扫到冷钱包（不用等 10 分钟定时）
     sweepIfNeeded().catch(() => {});
     res.json({ signature: sig, netSol: net / 1e9 });

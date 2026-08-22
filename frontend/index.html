@@ -93,6 +93,14 @@
         <b id="walletAddr" style="color:var(--green); word-break:break-all" data-i18n="not_connected">未连接</b>
         <button id="copyAddrBtn" type="button" data-i18n="copy" style="display:none; margin-left:8px; padding:2px 10px; font-size:12px; background:var(--blue); color:#fff; border:none; border-radius:6px; cursor:pointer; vertical-align:middle">📋 复制</button>
       </div>
+      <div id="inviteBox" style="display:none; margin-top:12px; padding:10px; border:1px solid var(--border); border-radius:8px; background:#0f1420">
+        <div style="font-size:13px; color:var(--green); margin-bottom:4px" data-i18n="invite_title">🎁 邀请好友，一起拿回租金</div>
+        <div style="font-size:12px; color:var(--dim); margin-bottom:8px" data-i18n="invite_desc">好友通过你的链接退租，你每账户得 0.0001 SOL 返佣</div>
+        <div style="display:flex; gap:8px">
+          <input id="inviteLink" readonly style="flex:1; font-size:12px" value="">
+          <button id="copyInviteBtn" type="button" style="flex:0 0 auto; font-size:12px; padding:9px 14px" data-i18n="invite_copy">📋 复制邀请链接</button>
+        </div>
+      </div>
       <button id="redeemWalletBtn" style="margin-top:14px; width:100%" data-i18n="redeem_btn">扫描并一键退回</button>
       <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; color:var(--dim); cursor:pointer">
         <input type="checkbox" id="forceBurnValuable" style="width:auto; margin:0">
