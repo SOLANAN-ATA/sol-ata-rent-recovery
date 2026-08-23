@@ -46,7 +46,7 @@ SOL / USDT / USDC / PYUSD / USDS / EURC 永不销毁。
 - 🌐 官网：https://solata.top
 - 🤖 TG 机器人：[@solata_rent_bot](https://t.me/solata_rent_bot)
 - 💬 TG 群组：https://t.me/SOLANA_ATA_TEAM
-- 📱 DEBOX 群组：https://m.debox.pro/group?id=ztuvet6y
+- 📱 DEBOX 群组：https://m.debox.pro/group?id=ztuvet6y&code=bemdnbps
 - 𝕏 X：https://x.com/mingzhu038
 
 ## 技术栈
