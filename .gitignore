@@ -2,7 +2,7 @@
 node_modules/
 server.log
 HANDOFF.md
-public/
+/public/
 bot-stats.jsonl
 .sweepable-fee.json
 .pending-forwards.json
