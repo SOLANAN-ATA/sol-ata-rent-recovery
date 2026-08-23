@@ -4,17 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solana 退租金 - 拿回你钱包里锁住的 SOL | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="description" content="Solana 退租金工具：一键扫描并关闭归零币/垃圾币的代币账户，拿回被锁住的 ATA 租金（每账户约 0.002 SOL）。支持 Phantom/Solflare/OKX 等钱包，代码开源，私钥不出钱包。">
 <meta name="keywords" content="solana 退租金, 关闭 token account, 拿回 SOL 租金, ATA 租金, solana 钱包清理, close token account solana">
 <meta property="og:title" content="Solana 退租金 - 拿回你钱包里锁住的 SOL | solata.top">
 <meta property="og:description" content="一键关闭归零币代币账户，退回被锁住的 ATA 租金。每账户约 0.002 SOL，只收 10% 手续费，代码开源。">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://solata.top/og-image.png">
 <style>
   :root { --bg:#0b0e14; --card:#151a24; --border:#232b3b; --txt:#e6e9f0; --dim:#8b94a7; --green:#3ddc84; --amber:#f5b942; --red:#ff5d5d; --blue:#4aa3ff; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--txt); }
   .wrap { max-width:1080px; margin:0 auto; padding:24px 20px 60px; }
-  h1 { font-size:22px; margin:0 0 4px; }
+  h1 { font-size:22px; margin:0 0 4px; display:flex; align-items:center; gap:10px; }
+  .brand-logo { width:30px; height:30px; border-radius:7px; flex:0 0 auto; }
   .sub { color:var(--dim); font-size:13px; margin-bottom:20px; word-break:break-all; }
   .lang-toggle { position:fixed; top:16px; right:16px; z-index:100; display:flex; gap:6px; }
   .lang-btn { padding:6px 12px; border:1px solid var(--border); background:var(--card); color:var(--dim); border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; }
@@ -69,7 +75,7 @@
 </div>
 
 <div class="wrap">
-  <h1 data-i18n="title">🖊️ SOLANA ATA 租金退回系统</h1>
+  <h1><img src="/logo.svg" alt="Solata" class="brand-logo"><span data-i18n="title">SOLANA ATA 租金退回系统</span></h1>
 
   <div class="hero">
     <div class="hero-tagline" data-i18n="hero_tagline">你钱包里的归零币、垃圾币、貔貅币、空投币，锁着你自己的 SOL 💰</div>
