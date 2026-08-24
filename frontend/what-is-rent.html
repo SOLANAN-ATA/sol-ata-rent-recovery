@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>什么是 ATA 租金？为什么你的 SOL 会被锁住 | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/what-is-rent.html">
+<meta name="description" content="什么是 ATA 租金？Solana 上每个代币账户（Associated Token Account）都押约 0.002 SOL 租金。打过的归零币、垃圾币越多，锁住的 SOL 越多，关掉账户就能退回。">
+<meta name="keywords" content="什么是 ATA 租金, solana 租金, associated token account, solana 代币账户, sol 锁住, 退回 sol 租金">
+<meta property="og:title" content="什么是 ATA 租金？为什么你的 SOL 会被锁住 | solata.top">
+<meta property="og:description" content="Solana 每个代币账户都押约 0.002 SOL 租金。打过的归零币越多，锁住的 SOL 越多。搞懂机制，学会拿回来。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://solata.top/what-is-rent.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "什么是 ATA 租金？为什么你的 SOL 会被锁住",
+  "description": "Solana 上每个代币账户（ATA）都押约 0.002 SOL 租金。打过的归零币、垃圾币越多，锁住的 SOL 越多，关掉账户就能退回。",
+  "image": "https://solata.top/og-image.png",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://solata.top/what-is-rent.html",
+  "publisher": { "@type": "Organization", "name": "solata.top" },
+  "datePublished": "2026-08-24",
+  "dateModified": "2026-08-24"
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 首页工具</a>
+      <a href="/guide.html">📖 教程</a>
+      <a href="/faq.html">❓ FAQ</a>
+      <a href="/what-is-rent.html" class="active">💡 什么是租金</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">首页</a><span>/</span>什么是租金</div>
+    <h1>什么是 ATA 租金？为什么你的 SOL 会被锁住</h1>
+    <p class="lead">很多人不知道：你在 Solana 上打币、买 meme，钱包里已经悄悄押进去一堆 SOL 租金，而且这些钱拿不回来——除非你主动去关账户。</p>
+
+    <h2>代币账户（ATA）是什么</h2>
+    <p>在 Solana 上，你的钱包（主账户）不能直接持有代币。每持有一种代币，链上就要创建一个「关联代币账户」（Associated Token Account，简称 <b>ATA</b>），专门存这个币。</p>
+    <p>所以：<b>你每交易一个不同的币 = 自动开一个 ATA</b>。打了 100 个不同的 meme 币，就开了 100 个 ATA。</p>
+
+    <h2>每个账户押了多少租金</h2>
+    <p>链上存数据要花存储成本，Solana 用「租金」机制来防止账户滥用：每个 ATA 创建时要押一笔 SOL 押金，目前大约是 <b>0.00203928 SOL</b>。</p>
+    <blockquote>一句话：开一个代币账户 ≈ 押 0.002 SOL；关掉它 ≈ 退回 0.002 SOL。</blockquote>
+
+    <h2>为什么这笔钱会「卡住」</h2>
+    <p>正常情况下，你卖出代币后账户余额归零，可以主动关掉账户、拿回租金。但问题是：</p>
+    <ul>
+      <li><b>归零币 / 垃圾币</b>：跌到几乎归零，卖不出去，账户里永远有「几千万亿」的垃圾币余额，关不掉。</li>
+      <li><b>貔貅币 / 蜜罐币</b>：只能买不能卖，账户被锁死。</li>
+      <li><b>空投币</b>：项目方随手空投，你根本不知道，账户一直开着。</li>
+    </ul>
+    <p>这些僵尸账户日积月累，每个锁着 0.002 SOL。打狗打得越多，锁得越多。</p>
+
+    <h2>这笔钱能拿回来吗？</h2>
+    <p>能。只要关掉账户，租金就退回你钱包。思路是：<b>先把垃圾币烧掉（或直接关掉空账户）→ 关闭账户 → 租金退回</b>。</p>
+    <p>关键区别在于：<b>0 持币账户</b>直接关掉就能退；而<b>归零币、貔貅币</b>这种有余额但卖不掉的账户，得先把代币<b>烧掉</b>才能关户退租——这一步大多数工具做不到，我们能做。</p>
+    <p>你可以用 <a href="/">solata.top</a> 一键完成：先用「地址查询」看账户明细，再连接钱包、一键关闭僵尸账户、退回租金。每个账户只收 0.0002 SOL（约租金 10%）手续费。</p>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ 一个坑：closeAuthority</div>
+      少数项目方给代币设置了 <code>closeAuthority</code>（关户权限），这种账户链上关不掉，租金只能一直押着。其余没有该权限的账户都能退。
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">你的钱包里锁了多少？查一查 👇</div>
+      <div class="cta-sub">连接钱包，自动扫描所有僵尸账户</div>
+      <a class="btn" href="/">开始扫描退回</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">相关阅读</div>
+      <a href="/guide.html"><span class="rel-title">📖 Solana 退租金完整教程</span><span class="rel-desc">3 步拿回钱包里锁住的 SOL</span></a>
+      <a href="/faq.html"><span class="rel-title">❓ 退租金常见问题 FAQ</span><span class="rel-desc">能退多少？会不会误烧？</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 首页工具</a>
+    <a href="/guide.html">📖 教程</a>
+    <a href="/faq.html">❓ FAQ</a>
+    <a href="/what-is-rent.html">💡 什么是租金</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG 群组</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 只收 10% 手续费 · 代码开源</div>
+</footer>
+
+</body>
+</html>

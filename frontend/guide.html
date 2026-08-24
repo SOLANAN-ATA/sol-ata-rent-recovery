@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana 退租金教程：3 步拿回钱包里锁住的 SOL | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/guide.html">
+<meta name="description" content="Solana 退租金完整教程：先用地址查询看归零币/0持币/貔貅币账户明细，再连接钱包一键关闭僵尸账户、退回 ATA 租金。0持币、归零币、貔貅币账户都能退。">
+<meta name="keywords" content="solana 退租金教程, 关闭 token account, 拿回 SOL 租金, ATA 租金, solana 钱包清理, 归零币退租金, 貔貅币退租金, close token account solana">
+<meta property="og:title" content="Solana 退租金教程：3 步拿回钱包里锁住的 SOL | solata.top">
+<meta property="og:description" content="0持币、归零币、貔貅币账户都能退。先地址查询看明细，再一键关闭僵尸账户、退回租金。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://solata.top/guide.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Solana 退租金教程：3 步拿回钱包里锁住的 SOL",
+  "description": "先用地址查询看归零币/0持币/貔貅币账户明细，再连接钱包一键关闭僵尸账户、退回 ATA 租金。0持币、归零币、貔貅币账户都能退。",
+  "image": "https://solata.top/og-image.png",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://solata.top/guide.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "solata.top",
+    "logo": { "@type": "ImageObject", "url": "https://solata.top/logo.svg" }
+  },
+  "datePublished": "2026-08-24",
+  "dateModified": "2026-08-24"
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 首页工具</a>
+      <a href="/guide.html" class="active">📖 教程</a>
+      <a href="/faq.html">❓ FAQ</a>
+      <a href="/what-is-rent.html">💡 什么是租金</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">首页</a><span>/</span>教程</div>
+    <h1>Solana 退租金教程：3 步拿回钱包里锁住的 SOL</h1>
+    <p class="lead">你在 Solana 上每打一个归零币、垃圾币、貔貅币、空投币，钱包就自动开一个代币账户，锁住约 0.002 SOL 的租金。本教程教你一步步把它们全部拿回来。</p>
+
+    <div class="callout info">
+      <div class="callout-title">💡 一句话原理</div>
+      Solana 公链规定：每个代币账户（ATA）都要押一笔「租金」。账户能关掉，租金就退回；账户关不掉（币卖不掉、账户有余额），这笔 SOL 就卡在链上。我们帮你关掉这些僵尸账户。
+    </div>
+
+    <h2>第一步：地址查询 —— 先看你锁了多少、有哪些账户</h2>
+    <p>不用连钱包，先在首页的 <b>「🔍 地址查询」</b>输入任意钱包地址（自己的、朋友的都行），系统会自动扫描并列出所有代币账户的<b>具体明细</b>：</p>
+    <ul>
+      <li><b>0 持币账户</b>：账户里没有代币，可以直接关闭退回租金</li>
+      <li><b>归零币账户</b>：装着已经归零、卖不掉的垃圾币</li>
+      <li><b>貔貅币账户</b>：只能买不能卖的蜜罐币，账户被锁死</li>
+      <li><b>受保护代币</b>：SOL / USDT / USDC 等（系统不会碰）</li>
+      <li><b>不可赎回</b>：项目方锁了 closeAuthority 的账户（链上关不掉）</li>
+    </ul>
+    <p>每个账户都会标出「可回收 SOL」，你一眼就能看清：锁了多少租金、哪些能退、哪些不能退。也可以用 TG 机器人 <a href="https://t.me/solata_rent_bot" target="_blank" rel="noopener">@solata_rent_bot</a> 秒查。</p>
+
+    <h2>第二步：连接钱包</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-body"><h3>切到「连接钱包退回」</h3>在首页点「🔗 连接钱包退回」标签。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><h3>连接你的钱包</h3>支持 Phantom / Solflare / OKX / TokenPocket / Backpack 等 Solana 钱包。注意：MetaMask 是以太坊钱包，不支持 Solana。</div></div>
+
+    <h2>第三步：扫描并一键退回</h2>
+    <p>点「扫描并一键退回」，系统会按第一步的明细自动处理：<b>0 持币账户直接关闭、归零币和貔貅币先烧掉再关闭</b>，然后在钱包弹窗里逐笔确认签名。每关一个账户，约 0.002 SOL 的租金就退回你钱包，平台只收 0.0002 SOL（约租金 10%）手续费，<b>退成功才收费</b>。</p>
+
+    <h2>我们的优势：三类账户都能退</h2>
+    <p>市面上大多数工具<b>只能关「空账户」（0 持币）</b>——账户里一旦还残留着代币余额，它们就退不了，因为你得先把币卖掉、账户清零。而归零币、貔貅币根本卖不掉，所以普通工具拿它们没办法。</p>
+    <p>我们能<b>全覆盖</b>：</p>
+    <ul>
+      <li>✅ <b>0 持币账户</b> → 直接关闭，租金退回</li>
+      <li>✅ <b>归零币账户</b>（有币但不值钱）→ 先把代币烧掉，再关闭账户，租金退回</li>
+      <li>✅ <b>貔貅币账户</b>（只能买不能卖）→ 先把代币烧掉，再关闭账户，租金退回</li>
+    </ul>
+    <blockquote>一句话：不管账户是空的、装着归零币、还是装着貔貅币，我们都能帮你烧掉、关掉、拿回租金。</blockquote>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ 赎回前必看</div>
+      系统会销毁所有「有余额」的代币账户（受保护代币除外）。赎回前请先自行转走钱包里值钱的币，避免误烧。受保护代币 <b>SOL / USDT / USDC / PYUSD / USDS / EURC</b> 永不销毁。
+    </div>
+
+    <div class="callout good">
+      <div class="callout-title">🔐 安全承诺</div>
+      私钥永不离开你的钱包，全程只做「关闭代币账户 / 退回租金」签名，不会转出你的 SOL、USDT 等资产。代码已在 <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub 开源</a>。
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">先查查你锁了多少 👇</div>
+      <div class="cta-sub">输入钱包地址，看归零币 / 0持币 / 貔貅币账户明细</div>
+      <a class="btn" href="/">开始地址查询</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">相关阅读</div>
+      <a href="/what-is-rent.html"><span class="rel-title">💡 什么是 ATA 租金？为什么 SOL 会被锁住</span><span class="rel-desc">搞懂 Solana 代币账户租金机制，理解你的钱去哪了</span></a>
+      <a href="/faq.html"><span class="rel-title">❓ 退租金常见问题 FAQ</span><span class="rel-desc">能退多少？会不会误烧？没有 SOL 怎么办？</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 首页工具</a>
+    <a href="/guide.html">📖 教程</a>
+    <a href="/faq.html">❓ FAQ</a>
+    <a href="/what-is-rent.html">💡 什么是租金</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG 群组</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 只收 10% 手续费 · 代码开源</div>
+</footer>
+
+</body>
+</html>

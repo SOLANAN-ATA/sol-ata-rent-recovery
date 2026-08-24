@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana 退租金常见问题 FAQ | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/faq.html">
+<meta name="description" content="Solana 退租金常见问题：每个账户能退多少 SOL？会不会误烧值钱的币？没有 SOL 还能退吗？不可赎回是什么意思？收费多少？安全吗？">
+<meta name="keywords" content="solana 退租金 FAQ, close token account, 关闭代币账户, ATA 租金 退回, solana 钱包清理 常见问题">
+<meta property="og:title" content="Solana 退租金常见问题 FAQ | solata.top">
+<meta property="og:description" content="能退多少 SOL？会不会误烧值钱的币？没有 SOL 还能退吗？所有疑问一次解答。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://solata.top/faq.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "每个代币账户能退回多少 SOL？",
+      "acceptedAnswer": { "@type": "Answer", "text": "约 0.00203928 SOL，这是 Solana 链上每个代币账户（ATA）的标准租金。打过的归零币越多，能退回的租金越多。" }
+    },
+    {
+      "@type": "Question",
+      "name": "怎么查我的钱包锁了多少租金？",
+      "acceptedAnswer": { "@type": "Answer", "text": "两种方式：把钱包地址发给 TG 机器人 @solata_rent_bot 秒回结果；或打开 solata.top 连接钱包查看。" }
+    },
+    {
+      "@type": "Question",
+      "name": "会不会误烧掉我值钱的币？",
+      "acceptedAnswer": { "@type": "Answer", "text": "受保护代币 SOL / USDT / USDC / PYUSD / USDS / EURC 永不销毁。其余有余额的代币账户会被销毁并退回租金，所以赎回前请先自行转走有价值的币。" }
+    },
+    {
+      "@type": "Question",
+      "name": "我钱包里没有 SOL 了，还能退吗？",
+      "acceptedAnswer": { "@type": "Answer", "text": "退回需要极少量 SOL 作链上手续费（约 0.000005 SOL/签名）。余额为 0 时先充一点点 SOL 即可。" }
+    },
+    {
+      "@type": "Question",
+      "name": "为什么有些账户显示「不可赎回」？",
+      "acceptedAnswer": { "@type": "Answer", "text": "有些项目方给代币设置了 closeAuthority（关户权限），这种账户链上就关不掉。其余没有 closeAuthority 的账户都能退回租金。" }
+    },
+    {
+      "@type": "Question",
+      "name": "平台收多少手续费？",
+      "acceptedAnswer": { "@type": "Answer", "text": "每个账户收 0.0002 SOL，约租金（0.002 SOL）的 10%。退成功才收费，0 SOL 也能退。" }
+    },
+    {
+      "@type": "Question",
+      "name": "归零币、貔貅币这种有币的账户能退吗？",
+      "acceptedAnswer": { "@type": "Answer", "text": "能。这是我们的核心优势：0 持币账户直接关闭退回；归零币、貔貅币这种有余额但卖不掉的账户，我们会先把代币烧掉，再关闭账户退回租金。市面大多数工具只能退空账户，有币账户退不了。" }
+    },
+    {
+      "@type": "Question",
+      "name": "安全吗？私钥会被拿走吗？",
+      "acceptedAnswer": { "@type": "Answer", "text": "私钥永不离开你的钱包。全程只做「关闭代币账户 / 退回租金」的签名，不会转出你的 SOL、USDT 等资产。代码已在 GitHub 开源，可自行审阅。" }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 首页工具</a>
+      <a href="/guide.html">📖 教程</a>
+      <a href="/faq.html" class="active">❓ FAQ</a>
+      <a href="/what-is-rent.html">💡 什么是租金</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">首页</a><span>/</span>FAQ</div>
+    <h1>Solana 退租金常见问题（FAQ）</h1>
+    <p class="lead">关于退租金、关账户、手续费、安全的所有疑问，一次说清楚。</p>
+
+    <details class="faq" open>
+      <summary>每个代币账户能退回多少 SOL？</summary>
+      <p>约 <b>0.00203928 SOL</b>，这是 Solana 链上每个代币账户（ATA）的标准租金。打过的归零币越多，能退回的租金越多。</p>
+    </details>
+    <details class="faq">
+      <summary>怎么查我的钱包锁了多少租金？</summary>
+      <p>两种方式：① 把钱包地址发给 TG 机器人 <a href="https://t.me/solata_rent_bot" target="_blank" rel="noopener">@solata_rent_bot</a>，秒回你锁了多少 SOL；② 打开 <a href="/">solata.top</a> 连接钱包查看。</p>
+    </details>
+    <details class="faq">
+      <summary>会不会误烧掉我值钱的币？</summary>
+      <p>受保护代币 <b>SOL / USDT / USDC / PYUSD / USDS / EURC</b> 永不销毁。其余有余额的代币账户会被销毁并退回租金，所以<b>赎回前请先自行转走钱包里有价值的币</b>，避免误烧。</p>
+    </details>
+    <details class="faq">
+      <summary>归零币、貔貅币这种有币的账户能退吗？</summary>
+      <p><b>能，这是我们的核心优势。</b>0 持币账户直接关闭退回；归零币、貔貅币这种有余额但卖不掉的账户，我们会先把代币烧掉，再关闭账户退回租金。市面上大多数工具<b>只能退空账户，有币账户退不了</b>——因为归零币、貔貅币卖不掉，账户清不了零。</p>
+    </details>
+    <details class="faq">
+      <summary>我钱包里没有 SOL 了，还能退吗？</summary>
+      <p>退回需要极少量 SOL 作链上手续费（约 0.000005 SOL/签名）。如果余额为 0，先充一点点 SOL 即可。</p>
+    </details>
+    <details class="faq">
+      <summary>为什么有些账户显示「不可赎回」？</summary>
+      <p>有些项目方给代币设置了 <code>closeAuthority</code>（关户权限），这种账户链上就关不掉。其余没有 closeAuthority 的账户都能退回租金。</p>
+    </details>
+    <details class="faq">
+      <summary>平台收多少手续费？</summary>
+      <p>每个账户收 <b>0.0002 SOL</b>，约租金（0.002 SOL）的 <b>10%</b>。退成功才收费，<b>0 SOL 也能退</b>。</p>
+    </details>
+    <details class="faq">
+      <summary>安全吗？私钥会被拿走吗？</summary>
+      <p><b>私钥永不离开你的钱包</b>。全程只做「关闭代币账户 / 退回租金」的签名，不会转出你的 SOL、USDT 等资产。代码已在 <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub 开源</a>，欢迎审阅。</p>
+    </details>
+    <details class="faq">
+      <summary>账户很多会怎么样？</summary>
+      <p>账户较多时会自动分成多笔交易，每笔约 20 个账户，需要在钱包里连续确认几次签名。</p>
+    </details>
+
+    <div class="cta">
+      <div class="cta-title">还有疑问？直接上手试 👇</div>
+      <div class="cta-sub">连接钱包，扫描后结果一目了然</div>
+      <a class="btn" href="/">开始扫描退回</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">相关阅读</div>
+      <a href="/guide.html"><span class="rel-title">📖 Solana 退租金完整教程</span><span class="rel-desc">3 步拿回钱包里锁住的 SOL</span></a>
+      <a href="/what-is-rent.html"><span class="rel-title">💡 什么是 ATA 租金？</span><span class="rel-desc">搞懂 Solana 代币账户租金机制</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 首页工具</a>
+    <a href="/guide.html">📖 教程</a>
+    <a href="/faq.html">❓ FAQ</a>
+    <a href="/what-is-rent.html">💡 什么是租金</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG 群组</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 只收 10% 手续费 · 代码开源</div>
+</footer>
+
+</body>
+</html>
