@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is ATA Rent? Why Your SOL Gets Locked | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/en/what-is-rent.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/what-is-rent.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/what-is-rent.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/what-is-rent.html">
+<meta name="description" content="What is ATA rent? Every token account (Associated Token Account) on Solana deposits ~0.002 SOL in rent. The more dead coins and junk tokens you've traded, the more SOL is locked — close the accounts to get it back.">
+<meta name="keywords" content="what is ATA rent, solana rent, associated token account, solana token account, locked SOL, reclaim sol rent, close token account">
+<meta property="og:title" content="What is ATA Rent? Why Your SOL Gets Locked | solata.top">
+<meta property="og:description" content="Every Solana token account deposits ~0.002 SOL in rent. The more dead coins you've traded, the more SOL is locked. Learn the mechanism and how to get it back.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://solata.top/en/what-is-rent.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "What is ATA Rent? Why Your SOL Gets Locked",
+  "description": "Every token account (ATA) on Solana deposits ~0.002 SOL in rent. The more dead coins and junk tokens you've traded, the more SOL is locked — close the accounts to get it back.",
+  "image": "https://solata.top/og-image.png",
+  "inLanguage": "en",
+  "mainEntityOfPage": "https://solata.top/en/what-is-rent.html",
+  "publisher": { "@type": "Organization", "name": "solata.top" },
+  "datePublished": "2026-08-24",
+  "dateModified": "2026-08-24"
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 Home</a>
+      <a href="/en/guide.html">📖 Guide</a>
+      <a href="/en/faq.html">❓ FAQ</a>
+      <a href="/en/what-is-rent.html" class="active">💡 What is Rent</a>
+      <a href="/what-is-rent.html">中文</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>What is Rent</div>
+    <h1>What is ATA Rent? Why Your SOL Gets Locked</h1>
+    <p class="lead">Most people don't realize it: every time you trade memecoins on Solana, your wallet quietly deposits a pile of SOL as rent — and you can't get it back unless you actively close those accounts.</p>
+
+    <h2>What is a token account (ATA)?</h2>
+    <p>On Solana, your wallet (the main account) can't hold tokens directly. For every token you hold, the chain creates an "Associated Token Account" (ATA) just for that token.</p>
+    <p>So: <b>every different token you trade = one ATA auto-created</b>. Trade 100 different memecoins, and you've opened 100 ATAs.</p>
+
+    <h2>How much rent is locked per account</h2>
+    <p>Storing data on-chain costs something, so Solana uses a "rent" mechanism to prevent account spam: each ATA requires a SOL deposit at creation — currently about <b>0.00203928 SOL</b>.</p>
+    <blockquote>In one line: opening a token account ≈ depositing 0.002 SOL; closing it ≈ getting 0.002 SOL back.</blockquote>
+
+    <h2>Why does this money get "stuck"?</h2>
+    <p>Normally, after you sell a token the balance drops to zero and you can close the account to reclaim rent. But the problem is:</p>
+    <ul>
+      <li><b>Dead / junk coins</b>: dropped to near-zero, unsellable, and the account is forever stuck with "trillions" of worthless tokens — can't be closed.</li>
+      <li><b>Honeypot coins</b>: buy-only, the account is locked.</li>
+      <li><b>Airdrop coins</b>: projects airdrop them without you noticing, and the account stays open forever.</li>
+    </ul>
+    <p>These zombie accounts pile up over time, each locking 0.002 SOL. The more you trade, the more you've locked.</p>
+
+    <h2>Can this money be recovered?</h2>
+    <p>Yes. Close the account, and the rent returns to your wallet. The idea is: <b>burn the junk tokens (or close empty accounts directly) → close the account → rent returned</b>.</p>
+    <p>The key difference: <b>zero-balance accounts</b> can be closed directly, while <b>dead coins and honeypots</b> (with unsellable balances) must be <b>burned</b> first before the account can be closed — a step most tools can't do. We can.</p>
+    <p>You can do it all with <a href="/">solata.top</a>: use "Address Lookup" to see your account details first, then connect your wallet and close zombie accounts in one click. Only 0.0002 SOL (~10% of rent) per account.</p>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ One catch: closeAuthority</div>
+      A few projects set a <code>closeAuthority</code> (close permission) on their token, making that account impossible to close on-chain — the rent stays locked forever. All other accounts without that permission can be reclaimed.
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">How much is locked in your wallet? Check 👇</div>
+      <div class="cta-sub">Connect your wallet and auto-scan all zombie accounts</div>
+      <a class="btn" href="/">Start Scan &amp; Reclaim</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">Related reading</div>
+      <a href="/en/guide.html"><span class="rel-title">📖 Complete Solana rent reclaim guide</span><span class="rel-desc">3 steps to get back your locked SOL</span></a>
+      <a href="/en/faq.html"><span class="rel-title">❓ Rent reclaim FAQ</span><span class="rel-desc">How much? Will it burn my coins?</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 Home</a>
+    <a href="/en/guide.html">📖 Guide</a>
+    <a href="/en/faq.html">❓ FAQ</a>
+    <a href="/en/what-is-rent.html">💡 What is Rent</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG Group</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+    <a href="/what-is-rent.html">中文</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 10% fee only · open source</div>
+</footer>
+
+</body>
+</html>

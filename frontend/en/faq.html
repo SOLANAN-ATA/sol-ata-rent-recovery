@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Rent Reclaim FAQ | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/en/faq.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/faq.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/faq.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/faq.html">
+<meta name="description" content="Solana rent reclaim FAQ: How much SOL per account? Will it burn my valuable tokens? What if I have no SOL? What does non-redeemable mean? Fees? Is it safe?">
+<meta name="keywords" content="solana rent reclaim FAQ, close token account, close token account solana, ATA rent recovery, solana wallet cleanup FAQ, reclaim dead coin rent, honeypot rent">
+<meta property="og:title" content="Solana Rent Reclaim FAQ | solata.top">
+<meta property="og:description" content="How much can I reclaim? Will it burn my valuable tokens? What if I have no SOL? All your questions answered.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://solata.top/en/faq.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much SOL can I reclaim per token account?",
+      "acceptedAnswer": { "@type": "Answer", "text": "About 0.00203928 SOL — the standard rent for each token account (ATA) on Solana. The more dead coins you've traded, the more rent you can reclaim." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I check how much rent my wallet has locked?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Two ways: send your wallet address to the TG bot @solata_rent_bot for an instant result, or open solata.top and connect your wallet." }
+    },
+    {
+      "@type": "Question",
+      "name": "Will it accidentally burn my valuable tokens?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Protected tokens SOL / USDT / USDC / PYUSD / USDS / EURC are never burned. Other token accounts with a balance will be burned and the rent reclaimed, so transfer out any valuable tokens first." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can dead-coin or honeypot accounts (with tokens) be reclaimed?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — that's our core advantage. Zero-balance accounts are closed directly; dead-coin and honeypot accounts (with unsellable tokens) are burned first, then closed to reclaim rent. Most tools can only reclaim empty accounts." }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my wallet has no SOL left?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Reclaiming needs a tiny amount of SOL for the on-chain fee (~0.000005 SOL per signature). Top up a little SOL first if your balance is zero." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do some accounts show 'non-redeemable'?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Some projects set a closeAuthority (close permission) on their token, which makes the account impossible to close on-chain. All other accounts without a closeAuthority can be reclaimed." }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does the platform charge?",
+      "acceptedAnswer": { "@type": "Answer", "text": "0.0002 SOL per account — about 10% of the 0.002 SOL rent. You only pay when the reclaim succeeds; even 0 SOL accounts can be reclaimed." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it safe? Will my private key be taken?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Your private key never leaves your wallet. Every signature only 'closes token accounts / reclaims rent' — it never sends out your SOL, USDT or other assets. The code is open sourced on GitHub." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 Home</a>
+      <a href="/en/guide.html">📖 Guide</a>
+      <a href="/en/faq.html" class="active">❓ FAQ</a>
+      <a href="/en/what-is-rent.html">💡 What is Rent</a>
+      <a href="/faq.html">中文</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>FAQ</div>
+    <h1>Solana Rent Reclaim FAQ</h1>
+    <p class="lead">Everything about reclaiming rent, closing accounts, fees, and safety — answered in one place.</p>
+
+    <details class="faq" open>
+      <summary>How much SOL can I reclaim per token account?</summary>
+      <p>About <b>0.00203928 SOL</b> — the standard rent for each token account (ATA) on Solana. The more dead coins you've traded, the more rent you can reclaim.</p>
+    </details>
+    <details class="faq">
+      <summary>How do I check how much rent my wallet has locked?</summary>
+      <p>Two ways: ① send your wallet address to the TG bot <a href="https://t.me/solata_rent_bot" target="_blank" rel="noopener">@solata_rent_bot</a> for an instant result; ② open <a href="/">solata.top</a> and connect your wallet.</p>
+    </details>
+    <details class="faq">
+      <summary>Will it accidentally burn my valuable tokens?</summary>
+      <p>Protected tokens <b>SOL / USDT / USDC / PYUSD / USDS / EURC</b> are never burned. Other token accounts with a balance will be burned and the rent reclaimed, so <b>transfer out any valuable tokens first</b>.</p>
+    </details>
+    <details class="faq">
+      <summary>Can dead-coin or honeypot accounts (with tokens) be reclaimed?</summary>
+      <p><b>Yes — that's our core advantage.</b> Zero-balance accounts are closed directly; dead-coin and honeypot accounts (with unsellable tokens) are burned first, then closed to reclaim rent. Most tools on the market <b>can only reclaim empty accounts</b> — because dead coins and honeypots can't be sold, so those accounts can never be zeroed out.</p>
+    </details>
+    <details class="faq">
+      <summary>What if my wallet has no SOL left?</summary>
+      <p>Reclaiming needs a tiny amount of SOL for the on-chain fee (~0.000005 SOL per signature). Top up a little SOL first if your balance is zero.</p>
+    </details>
+    <details class="faq">
+      <summary>Why do some accounts show "non-redeemable"?</summary>
+      <p>Some projects set a <code>closeAuthority</code> (close permission) on their token, which makes the account impossible to close on-chain. All other accounts without a closeAuthority can be reclaimed.</p>
+    </details>
+    <details class="faq">
+      <summary>How much does the platform charge?</summary>
+      <p><b>0.0002 SOL</b> per account — about <b>10%</b> of the 0.002 SOL rent. You only pay when the reclaim succeeds; even <b>0 SOL accounts</b> can be reclaimed.</p>
+    </details>
+    <details class="faq">
+      <summary>Is it safe? Will my private key be taken?</summary>
+      <p><b>Your private key never leaves your wallet.</b> Every signature only "closes token accounts / reclaims rent" — it never sends out your SOL, USDT or other assets. The code is <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">open sourced on GitHub</a>.</p>
+    </details>
+    <details class="faq">
+      <summary>What if I have many accounts?</summary>
+      <p>Many accounts are automatically split into multiple transactions (~20 accounts each) and you'll confirm a few signatures in your wallet.</p>
+    </details>
+
+    <div class="cta">
+      <div class="cta-title">Still have questions? Just try it 👇</div>
+      <div class="cta-sub">Connect your wallet and see the results at a glance</div>
+      <a class="btn" href="/">Start Scan &amp; Reclaim</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">Related reading</div>
+      <a href="/en/guide.html"><span class="rel-title">📖 Complete Solana rent reclaim guide</span><span class="rel-desc">3 steps to get back your locked SOL</span></a>
+      <a href="/en/what-is-rent.html"><span class="rel-title">💡 What is ATA rent?</span><span class="rel-desc">Understand Solana token-account rent</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 Home</a>
+    <a href="/en/guide.html">📖 Guide</a>
+    <a href="/en/faq.html">❓ FAQ</a>
+    <a href="/en/what-is-rent.html">💡 What is Rent</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG Group</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+    <a href="/faq.html">中文</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 10% fee only · open source</div>
+</footer>
+
+</body>
+</html>
