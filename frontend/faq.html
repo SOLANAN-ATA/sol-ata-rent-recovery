@@ -12,8 +12,8 @@
 <link rel="alternate" hreflang="zh-CN" href="https://solata.top/faq.html">
 <link rel="alternate" hreflang="en" href="https://solata.top/en/faq.html">
 <link rel="alternate" hreflang="x-default" href="https://solata.top/faq.html">
-<meta name="description" content="Solana 退租金常见问题：每个账户能退多少 SOL？会不会误烧值钱的币？没有 SOL 还能退吗？不可赎回是什么意思？收费多少？安全吗？">
-<meta name="keywords" content="solana 退租金 FAQ, close token account, 关闭代币账户, ATA 租金 退回, solana 钱包清理 常见问题">
+<meta name="description" content="Solana 退租金常见问题：每个账户能退多少 SOL？会不会误烧值钱的币？没有 SOL 还能退吗？不可赎回是什么意思？Pump.fun 交易量押金是什么？收费多少？安全吗？">
+<meta name="keywords" content="solana 退租金 FAQ, close token account, 关闭代币账户, ATA 租金 退回, solana 钱包清理 常见问题, pump.fun 交易量押金, 累加器押金">
 <meta property="og:title" content="Solana 退租金常见问题 FAQ | solata.top">
 <meta property="og:description" content="能退多少 SOL？会不会误烧值钱的币？没有 SOL 还能退吗？所有疑问一次解答。">
 <meta property="og:type" content="website">
@@ -64,6 +64,11 @@
       "@type": "Question",
       "name": "安全吗？私钥会被拿走吗？",
       "acceptedAnswer": { "@type": "Answer", "text": "私钥永不离开你的钱包。全程只做「关闭代币账户 / 退回租金」的签名，不会转出你的 SOL、USDT 等资产。代码已在 GitHub 开源，可自行审阅。" }
+    },
+    {
+      "@type": "Question",
+      "name": "什么是 Pump.fun 交易量押金（累加器）？",
+      "acceptedAnswer": { "@type": "Answer", "text": "在 pump.fun 上打狗（交易 meme 币）时，pump.fun 会自动创建「交易量累加器」账户并锁定约 0.0018 SOL 押金，有的账户里还累积了返现。它挂在 pump.fun 程序名下、不是普通代币账户，所以大多数工具扫不到。solata.top 能扫出来并全额退回（押金+返现，免手续费）。" }
     }
   ]
 }
@@ -125,6 +130,14 @@
     <details class="faq">
       <summary>账户很多会怎么样？</summary>
       <p>账户较多时会自动分成多笔交易，每笔约 20 个账户，需要在钱包里连续确认几次签名。</p>
+    </details>
+    <details class="faq">
+      <summary>什么是 Pump.fun 交易量押金（累加器）？</summary>
+      <p>在 <b>pump.fun</b> 上打狗（交易 meme 币）时，pump.fun 会自动给你的钱包创建「<b>交易量累加器</b>」账户，锁定约 <b>0.0018 SOL</b> 押金，有的账户里还累积了返现（多的能有好几个 SOL）。它挂在 pump.fun 程序名下、<b>不是普通代币账户</b>，所以大多数工具扫不到。solata.top 能扫出来并<b>全额退回</b>（押金 + 返现，<b>免手续费</b>）。</p>
+    </details>
+    <details class="faq">
+      <summary>为什么别的工具扫不到这笔押金？</summary>
+      <p>因为绝大多数工具<b>只扫 Token / Token-2022 两个程序的代币账户</b>，而 Pump.fun 累加器挂在 pump.fun 自己的程序名下，属于第二类隐形资产。这是我们的技术护城河——专门逆向并支持了它。</p>
     </details>
 
     <div class="cta">

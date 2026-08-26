@@ -12,8 +12,8 @@
 <link rel="alternate" hreflang="en" href="https://solata.top/en/guide.html">
 <link rel="alternate" hreflang="zh-CN" href="https://solata.top/guide.html">
 <link rel="alternate" hreflang="x-default" href="https://solata.top/guide.html">
-<meta name="description" content="Complete Solana rent reclaim guide: first use address lookup to see your dead-coin / zero-balance / honeypot token accounts, then connect your wallet and close zombie accounts to reclaim ATA rent. Works for empty, dead-coin and honeypot accounts.">
-<meta name="keywords" content="solana rent reclaim guide, close token account, get back SOL rent, ATA rent, solana wallet cleanup, reclaim dead coin rent, reclaim honeypot rent, close token account solana">
+<meta name="description" content="Complete Solana rent reclaim guide: first use address lookup to see your dead-coin / zero-balance / honeypot token accounts, then connect your wallet and close zombie accounts to reclaim ATA rent. Also reclaims Pump.fun volume deposits (accumulators). Works for empty, dead-coin and honeypot accounts.">
+<meta name="keywords" content="solana rent reclaim guide, close token account, get back SOL rent, ATA rent, solana wallet cleanup, reclaim dead coin rent, reclaim honeypot rent, pump.fun volume deposit, accumulator deposit, close token account solana">
 <meta property="og:title" content="Solana Rent Reclaim Guide: 3 Steps to Get Back Your Locked SOL | solata.top">
 <meta property="og:description" content="Works for empty, dead-coin and honeypot accounts. Check your account details first, then close zombie accounts and reclaim rent.">
 <meta property="og:type" content="article">
@@ -92,6 +92,16 @@
       <li>✅ <b>Honeypot accounts</b> (buy-only) → burn the tokens, close the account, rent returned</li>
     </ul>
     <blockquote>In one line: whether the account is empty, full of dead coins, or full of honeypot tokens — we can burn it, close it, and get your rent back.</blockquote>
+
+    <h2>Bonus: Pump.fun volume deposits (accumulators)</h2>
+    <p>If you've traded meme coins on <b>pump.fun</b>, pump.fun automatically created a <b>"volume accumulator"</b> account for your wallet, locking up ~<b>0.0018 SOL</b> in deposit. Some of these accounts even hold accumulated cashback — sometimes several SOL.</p>
+    <p>These accounts live under the pump.fun program, <b>not as regular token accounts</b>, so most tools on the market (which only scan Token / Token-2022) never see them — your deposit just sits there on-chain. We reverse-engineered and support them:</p>
+    <ul>
+      <li>✅ <b>Shown automatically on scan</b>: after connecting, accumulator deposits are listed alongside your token accounts</li>
+      <li>✅ <b>One-click reclaim</b>: close the accumulator and get the deposit + accumulated cashback back <b>in full</b></li>
+      <li>✅ <b>Free</b>: we charge <b>no fee</b> on this deposit — you get 100% back</li>
+    </ul>
+    <blockquote>Almost everyone who trades pump.fun has this hidden deposit — others can't see it, we reclaim it for you.</blockquote>
 
     <div class="callout warn">
       <div class="callout-title">⚠️ Read before reclaiming</div>

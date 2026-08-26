@@ -12,8 +12,8 @@
 <link rel="alternate" hreflang="zh-CN" href="https://solata.top/what-is-rent.html">
 <link rel="alternate" hreflang="en" href="https://solata.top/en/what-is-rent.html">
 <link rel="alternate" hreflang="x-default" href="https://solata.top/what-is-rent.html">
-<meta name="description" content="什么是 ATA 租金？Solana 上每个代币账户（Associated Token Account）都押约 0.002 SOL 租金。打过的归零币、垃圾币越多，锁住的 SOL 越多，关掉账户就能退回。">
-<meta name="keywords" content="什么是 ATA 租金, solana 租金, associated token account, solana 代币账户, sol 锁住, 退回 sol 租金">
+<meta name="description" content="什么是 ATA 租金？Solana 上每个代币账户（ATA）都押约 0.002 SOL 租金。还有 Pump.fun 交易量累加器押金（约 0.0018 SOL）——打狗人才有的第二类隐形押金。关掉账户就能退回。">
+<meta name="keywords" content="什么是 ATA 租金, solana 租金, associated token account, solana 代币账户, sol 锁住, 退回 sol 租金, pump.fun 交易量押金, 累加器押金">
 <meta property="og:title" content="什么是 ATA 租金？为什么你的 SOL 会被锁住 | solata.top">
 <meta property="og:description" content="Solana 每个代币账户都押约 0.002 SOL 租金。打过的归零币越多，锁住的 SOL 越多。搞懂机制，学会拿回来。">
 <meta property="og:type" content="article">
@@ -77,6 +77,11 @@
     <p>能。只要关掉账户，租金就退回你钱包。思路是：<b>先把垃圾币烧掉（或直接关掉空账户）→ 关闭账户 → 租金退回</b>。</p>
     <p>关键区别在于：<b>0 持币账户</b>直接关掉就能退；而<b>归零币、貔貅币</b>这种有余额但卖不掉的账户，得先把代币<b>烧掉</b>才能关户退租——这一步大多数工具做不到，我们能做。</p>
     <p>你可以用 <a href="/">solata.top</a> 一键完成：先用「地址查询」看账户明细，再连接钱包、一键关闭僵尸账户、退回租金。每个账户只收 0.0002 SOL（约租金 10%）手续费。</p>
+
+    <h2>还有第二类隐形押金：Pump.fun 交易量累加器</h2>
+    <p>除了代币账户的租金，打狗的人还有一笔大多数人不知道的押金：在 <b>pump.fun</b> 上交易 meme 币时，pump.fun 会自动创建一个「<b>交易量累加器</b>」账户，同样锁定约 <b>0.0018 SOL</b> 押金，有的账户里还累积了返现（多的能有好几个 SOL）。</p>
+    <p>这笔押金的特殊之处：它挂在 pump.fun 程序名下、<b>不是代币账户</b>，所以只扫 Token/Token-2022 的工具<b>永远看不见</b>。solata.top 专门支持了它——扫描时一起显示，一键关闭、押金 + 返现全额退回，<b>免手续费</b>。</p>
+    <blockquote>一句话：你的钱包里可能锁着两笔钱——代币账户租金 + Pump.fun 累加器押金，solata 都能帮你退。</blockquote>
 
     <div class="callout warn">
       <div class="callout-title">⚠️ 一个坑：closeAuthority</div>

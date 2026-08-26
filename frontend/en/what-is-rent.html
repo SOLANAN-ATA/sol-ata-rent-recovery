@@ -12,8 +12,8 @@
 <link rel="alternate" hreflang="en" href="https://solata.top/en/what-is-rent.html">
 <link rel="alternate" hreflang="zh-CN" href="https://solata.top/what-is-rent.html">
 <link rel="alternate" hreflang="x-default" href="https://solata.top/what-is-rent.html">
-<meta name="description" content="What is ATA rent? Every token account (Associated Token Account) on Solana deposits ~0.002 SOL in rent. The more dead coins and junk tokens you've traded, the more SOL is locked — close the accounts to get it back.">
-<meta name="keywords" content="what is ATA rent, solana rent, associated token account, solana token account, locked SOL, reclaim sol rent, close token account">
+<meta name="description" content="What is ATA rent? Every token account (ATA) on Solana deposits ~0.002 SOL in rent. Plus a second hidden deposit: Pump.fun volume accumulators (~0.0018 SOL). Close the accounts to get it all back.">
+<meta name="keywords" content="what is ATA rent, solana rent, associated token account, solana token account, locked SOL, reclaim sol rent, close token account, pump.fun volume deposit, accumulator deposit">
 <meta property="og:title" content="What is ATA Rent? Why Your SOL Gets Locked | solata.top">
 <meta property="og:description" content="Every Solana token account deposits ~0.002 SOL in rent. The more dead coins you've traded, the more SOL is locked. Learn the mechanism and how to get it back.">
 <meta property="og:type" content="article">
@@ -77,6 +77,11 @@
     <p>Yes. Close the account, and the rent returns to your wallet. The idea is: <b>burn the junk tokens (or close empty accounts directly) → close the account → rent returned</b>.</p>
     <p>The key difference: <b>zero-balance accounts</b> can be closed directly, while <b>dead coins and honeypots</b> (with unsellable balances) must be <b>burned</b> first before the account can be closed — a step most tools can't do. We can.</p>
     <p>You can do it all with <a href="/">solata.top</a>: use "Address Lookup" to see your account details first, then connect your wallet and close zombie accounts in one click. Only 0.0002 SOL (~10% of rent) per account.</p>
+
+    <h2>A second hidden deposit: Pump.fun volume accumulators</h2>
+    <p>Besides token-account rent, pump.fun traders have another deposit most people don't know about: when you trade meme coins on <b>pump.fun</b>, it automatically creates a <b>"volume accumulator"</b> account, locking ~<b>0.0018 SOL</b>, and some accounts hold accumulated cashback (sometimes several SOL).</p>
+    <p>What makes it special: it lives under the pump.fun program — <b>not a token account</b> — so tools that only scan Token/Token-2022 will <b>never see it</b>. solata.top supports it: shown on scan, closed in one click, deposit + cashback returned <b>in full, no fee</b>.</p>
+    <blockquote>In one line: your wallet may hold two kinds of locked money — token-account rent + Pump.fun accumulator deposits — solata reclaims both.</blockquote>
 
     <div class="callout warn">
       <div class="callout-title">⚠️ One catch: closeAuthority</div>

@@ -12,8 +12,8 @@
 <link rel="alternate" hreflang="en" href="https://solata.top/en/faq.html">
 <link rel="alternate" hreflang="zh-CN" href="https://solata.top/faq.html">
 <link rel="alternate" hreflang="x-default" href="https://solata.top/faq.html">
-<meta name="description" content="Solana rent reclaim FAQ: How much SOL per account? Will it burn my valuable tokens? What if I have no SOL? What does non-redeemable mean? Fees? Is it safe?">
-<meta name="keywords" content="solana rent reclaim FAQ, close token account, close token account solana, ATA rent recovery, solana wallet cleanup FAQ, reclaim dead coin rent, honeypot rent">
+<meta name="description" content="Solana rent reclaim FAQ: How much SOL per account? Will it burn my valuable tokens? What if I have no SOL? What is a Pump.fun volume deposit? Fees? Is it safe?">
+<meta name="keywords" content="solana rent reclaim FAQ, close token account, close token account solana, ATA rent recovery, solana wallet cleanup FAQ, reclaim dead coin rent, honeypot rent, pump.fun volume deposit, accumulator deposit">
 <meta property="og:title" content="Solana Rent Reclaim FAQ | solata.top">
 <meta property="og:description" content="How much can I reclaim? Will it burn my valuable tokens? What if I have no SOL? All your questions answered.">
 <meta property="og:type" content="website">
@@ -64,6 +64,11 @@
       "@type": "Question",
       "name": "Is it safe? Will my private key be taken?",
       "acceptedAnswer": { "@type": "Answer", "text": "Your private key never leaves your wallet. Every signature only 'closes token accounts / reclaims rent' — it never sends out your SOL, USDT or other assets. The code is open sourced on GitHub." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a Pump.fun volume deposit (accumulator)?",
+      "acceptedAnswer": { "@type": "Answer", "text": "When you trade meme coins on pump.fun, pump.fun automatically creates a 'volume accumulator' account and locks ~0.0018 SOL, and some accounts hold accumulated cashback. It lives under the pump.fun program — not a regular token account — so most tools can't see it. solata.top scans and reclaims it in full (deposit + cashback, no fee)." }
     }
   ]
 }
@@ -125,6 +130,14 @@
     <details class="faq">
       <summary>What if I have many accounts?</summary>
       <p>Many accounts are automatically split into multiple transactions (~20 accounts each) and you'll confirm a few signatures in your wallet.</p>
+    </details>
+    <details class="faq">
+      <summary>What is a Pump.fun volume deposit (accumulator)?</summary>
+      <p>When you trade meme coins on <b>pump.fun</b>, pump.fun automatically creates a <b>"volume accumulator"</b> account for your wallet, locking ~<b>0.0018 SOL</b>, and some accounts hold accumulated cashback (sometimes several SOL). It lives under the pump.fun program — <b>not a regular token account</b> — so most tools can't see it. solata.top scans and reclaims it <b>in full</b> (deposit + cashback, <b>no fee</b>).</p>
+    </details>
+    <details class="faq">
+      <summary>Why can't other tools see this deposit?</summary>
+      <p>Because most tools <b>only scan token accounts under the Token / Token-2022 programs</b>, while the Pump.fun accumulator lives under pump.fun's own program — a second class of hidden assets. This is our technical moat: we reverse-engineered and support it.</p>
     </details>
 
     <div class="cta">
