@@ -75,6 +75,7 @@ const I18N = {
     stat_nonredeemable: "不可赎回",
     stat_recoverable: "可回收账户",
     stat_recoverable_sol: "可回收 SOL",
+    stat_volume: "Pump.fun 押金+返现",
     cat_empty: "可直接关",
     cat_burnable: "系统会自动销毁代币再执行租金赎回操作",
     cat_protected: "受保护",
@@ -178,6 +179,7 @@ const I18N = {
     stat_nonredeemable: "Non-redeemable",
     stat_recoverable: "Reclaimable Accounts",
     stat_recoverable_sol: "Reclaimable SOL",
+    stat_volume: "Pump.fun Deposit",
     cat_empty: "Can close directly",
     cat_burnable: "System will auto-burn tokens then reclaim rent",
     cat_protected: "Protected",
@@ -268,7 +270,8 @@ let lastShareText = "";
 })();
 
 // ===== 渲染函数 =====
-function renderSummary(s) {
+function renderSummary(s, volumeSol) {
+  const totalSol = s.recoverableSol + (volumeSol || 0);
   return `<div class="summary">
     <div class="stat"><b>${s.total}</b><span>${t("stat_total")}</span></div>
     <div class="stat"><b style="color:var(--green)">${s.empty}</b><span>${t("stat_empty")}</span></div>
@@ -276,7 +279,8 @@ function renderSummary(s) {
     <div class="stat"><b style="color:var(--blue)">${s.protected}</b><span>${t("stat_protected")}</span></div>
     <div class="stat"><b style="color:var(--red)">${s.nonRedeemable}</b><span>${t("stat_nonredeemable")}</span></div>
     <div class="stat"><b>${s.recoverableCount}</b><span>${t("stat_recoverable")}</span></div>
-    <div class="stat"><b style="color:var(--green)">${s.recoverableSol.toFixed(6)}</b><span>${t("stat_recoverable_sol")}</span></div>
+    ${volumeSol ? `<div class="stat"><b style="color:var(--green)">${volumeSol.toFixed(6)}</b><span>${t("stat_volume")}</span></div>` : ""}
+    <div class="stat"><b style="color:var(--green)">${totalSol.toFixed(6)}</b><span>${t("stat_recoverable_sol")}</span></div>
   </div>`;
 }
 
@@ -316,11 +320,12 @@ function renderVolume(volume) {
 
 function renderScanResult(data) {
   lastScanData = data;
+  const volumeSol = (data.volume || []).reduce((s, v) => s + (v.sol || 0), 0);
   const balCard = `<div class="card">
     <div style="font-size:13px;color:var(--dim);margin-bottom:8px">${t("wallet_balance")}</div>
     <div style="font-size:28px;color:var(--blue);font-weight:700">${data.balanceSol.toFixed(6)} SOL</div>
   </div>`;
-  $("scanResult").innerHTML = balCard + renderSummary(data.summary) + renderTable(data.items) + renderVolume(data.volume);
+  $("scanResult").innerHTML = balCard + renderSummary(data.summary, volumeSol) + renderTable(data.items) + renderVolume(data.volume);
 }
 
 function renderWalletResult(build) {
