@@ -133,6 +133,12 @@ const I18N = {
     guide_faq_a5: "受保护代币 SOL / USDT / USDC / PYUSD / USDS / EURC 永不销毁。其余有余额的代币账户会被销毁并退回租金，所以<b>赎回前请先自行转走钱包里有价值的币</b>，避免误烧。",
     guide_link_full: "📖 完整教程",
     guide_link_faq: "❓ 更多 FAQ",
+    volume_title: "🪙 Pump.fun 交易量押金",
+    volume_account: "累加器账户",
+    volume_sol: "可退回 SOL",
+    volume_redeem: "退回交易量押金",
+    volume_none: "无累加器押金",
+    volume_step: "✅ 已退回交易量押金 {sol} SOL",
     guide_link_rent: "💡 什么是租金",
   },
   en: {
@@ -228,6 +234,12 @@ const I18N = {
     guide_faq_a5: "Protected tokens SOL / USDT / USDC / PYUSD / USDS / EURC are never burned. Other token accounts with a balance will be burned and the rent reclaimed, so <b>transfer out any valuable tokens first</b> to avoid accidental burns.",
     guide_link_full: "📖 Full Tutorial",
     guide_link_faq: "❓ More FAQ",
+    volume_title: "🪙 Pump.fun Volume Deposit",
+    volume_account: "Accumulator Account",
+    volume_sol: "Reclaimable SOL",
+    volume_redeem: "Reclaim Volume Deposit",
+    volume_none: "No volume deposit",
+    volume_step: "✅ Reclaimed volume deposit {sol} SOL",
     guide_link_rent: "💡 What is Rent",
   },
 };
@@ -283,13 +295,28 @@ function renderTable(items) {
     <tbody>${rows}</tbody></table></div>`;
 }
 
+function renderVolume(volume) {
+  if (!volume || !volume.length) return "";
+  const rows = volume
+    .map((v) => `<tr>
+      <td>${v.label}</td>
+      <td>${v.account.slice(0, 8)}…${v.account.slice(-6)}</td>
+      <td style="color:var(--green)">${v.sol.toFixed(6)}</td>
+    </tr>`)
+    .join("");
+  return `<div class="card">
+    <div style="font-size:14px;font-weight:600;margin-bottom:10px">${t("volume_title")}</div>
+    <table><thead><tr><th>${t("th_program")}</th><th>${t("volume_account")}</th><th>${t("volume_sol")}</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
 function renderScanResult(data) {
   lastScanData = data;
   const balCard = `<div class="card">
     <div style="font-size:13px;color:var(--dim);margin-bottom:8px">${t("wallet_balance")}</div>
     <div style="font-size:28px;color:var(--blue);font-weight:700">${data.balanceSol.toFixed(6)} SOL</div>
   </div>`;
-  $("scanResult").innerHTML = balCard + renderSummary(data.summary) + renderTable(data.items);
+  $("scanResult").innerHTML = balCard + renderSummary(data.summary) + renderTable(data.items) + renderVolume(data.volume);
 }
 
 function renderWalletResult(build) {
@@ -545,41 +572,79 @@ $("redeemWalletBtn").onclick = async () => {
       body: JSON.stringify({ address: currentWallet, ref: localStorage.getItem("solata_ref") || "" }),
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
-    if (!build.targetCount) {
-      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>`;
-      return;
-    }
-    if (build.chunkCount > 1) {
-      $("walletResult").innerHTML = `<div class="card" style="border-color:var(--amber)"><div class="warn" style="margin:0; font-size:14px">${t("multi_sign_hint").replace("{total}", build.targetCount).replace("{tx}", build.chunkCount)}</div></div>`;
-    }
+
     const sigs = [];
     let forwardSig = null;
-    // 逐笔：构造（fresh blockhash）→ 签名 → 广播 → 转净额（赎回一笔转走一笔）
-    for (let i = 0; i < build.chunkCount; i++) {
-      const btx = await fetch("/api/build-next-tx", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId: build.requestId, index: i }),
-      }).then((r) => r.json());
-      if (btx.error) throw new Error(btx.error);
-      const txObj = Transaction.from(b64ToBytes(btx.serialized));
+
+    // 1) 代币账户：押金进平台 → 平台逐笔转净额
+    if (build.targetCount) {
+      if (build.chunkCount > 1) {
+        $("walletResult").innerHTML = `<div class="card" style="border-color:var(--amber)"><div class="warn" style="margin:0; font-size:14px">${t("multi_sign_hint").replace("{total}", build.targetCount).replace("{tx}", build.chunkCount)}</div></div>`;
+      }
+      // 逐笔：构造（fresh blockhash）→ 签名 → 广播 → 转净额（赎回一笔转走一笔）
+      for (let i = 0; i < build.chunkCount; i++) {
+        const btx = await fetch("/api/build-next-tx", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestId: build.requestId, index: i }),
+        }).then((r) => r.json());
+        if (btx.error) throw new Error(btx.error);
+        const txObj = Transaction.from(b64ToBytes(btx.serialized));
+        const signed = await provider.signTransaction(txObj);
+        const b64 = signed.serialize().toString("base64");
+        const sub = await fetch("/api/submit-tx", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tx: b64, requestId: build.requestId, index: i }),
+        }).then((r) => r.json());
+        if (sub.error) throw new Error(t("err_broadcast_fail") + sub.error);
+        sigs.push(sub.signature);
+        // 方案A：广播后逐笔请求平台转净额
+        const fw = await fetch("/api/forward", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestId: build.requestId, index: i }),
+        }).then((r) => r.json());
+        if (fw.error) throw new Error(fw.error);
+        if (fw.signature) forwardSig = fw.signature;
+        appendLog(logbox, [t("progress_step").replace("{i}", i + 1).replace("{n}", build.chunkCount).replace("{c}", btx.accountCount).replace("{net}", btx.netSol.toFixed(6))]);
+      }
+    }
+
+    // 2) Pump.fun 累加器：押金直接释放给用户，无需平台中转/forward
+    const volBuild = await fetch("/api/build-volume-tx", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address: currentWallet }),
+    }).then((r) => r.json());
+    if (volBuild.error) throw new Error(volBuild.error);
+    if (volBuild.targetCount) {
+      const txObj = Transaction.from(b64ToBytes(volBuild.serialized));
       const signed = await provider.signTransaction(txObj);
       const b64 = signed.serialize().toString("base64");
       const sub = await fetch("/api/submit-tx", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tx: b64, requestId: build.requestId, index: i }),
+        body: JSON.stringify({ tx: b64 }),
       }).then((r) => r.json());
       if (sub.error) throw new Error(t("err_broadcast_fail") + sub.error);
       sigs.push(sub.signature);
-      // 方案A：广播后逐笔请求平台转净额
-      const fw = await fetch("/api/forward", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId: build.requestId, index: i }),
-      }).then((r) => r.json());
-      if (fw.error) throw new Error(fw.error);
-      if (fw.signature) forwardSig = fw.signature;
-      appendLog(logbox, [t("progress_step").replace("{i}", i + 1).replace("{n}", build.chunkCount).replace("{c}", btx.accountCount).replace("{net}", btx.netSol.toFixed(6))]);
+      appendLog(logbox, [t("volume_step").replace("{sol}", volBuild.totalSol.toFixed(6))]);
     }
-    renderWalletResult({ ...build, sigs, forwardSig });
+
+    // 3) 都无可退
+    if (!build.targetCount && !volBuild.targetCount) {
+      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>`;
+      return;
+    }
+
+    if (build.targetCount) {
+      renderWalletResult({ ...build, sigs, forwardSig });
+    } else {
+      // 只有累加器押金
+      $("walletResult").innerHTML = `<div class="card">
+        <div class="summary">
+          <div class="stat"><b>${volBuild.targetCount}</b><span>${t("volume_account")}</span></div>
+          <div class="stat"><b style="color:var(--green)">${volBuild.totalSol.toFixed(6)}</b><span>${t("volume_sol")}</span></div>
+        </div>
+        <div class="muted">${t("volume_step").replace("{sol}", volBuild.totalSol.toFixed(6))}</div>
+      </div>`;
+    }
   } catch (e) {
     $("walletErr").textContent = e.message || t("err_reclaim_fail");
   } finally {

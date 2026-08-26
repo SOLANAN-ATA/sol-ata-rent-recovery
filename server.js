@@ -11,7 +11,8 @@ const { Keypair, PublicKey } = require("@solana/web3.js");
 const bs58 = require("bs58");
 const { DONATION_ADDRESS, PORT, RPCS, FEE_PAYER_SECRET_KEY, FEE_LAMPORTS } = require("./config");
 const { scanWallet } = require("./lib/scan");
-const { classifyAndChunk, buildChunkTx } = require("./lib/txbuild");
+const { classifyAndChunk, buildChunkTx, buildVolumeTx } = require("./lib/txbuild");
+const { scanVolumeAccumulators } = require("./lib/pumpVolume");
 const { log, subscribe } = require("./lib/log");
 const { checkRpcHealth, broadcastTransaction, transferSol, getBalance, getSignatureStatusAll, getAccountInfo } = require("./lib/solana");
 
@@ -343,6 +344,29 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
       rentSol: result.totalRent / 1e9,
       feeSol: result.totalFee / 1e9,
       netSol: result.totalNet / 1e9,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Pump.fun 累加器关户：构造交易（押金直接释放给用户，无需平台中转，广播复用 /api/submit-tx）
+app.post("/api/build-volume-tx", buildTxLimiter, async (req, res) => {
+  try {
+    const addr = (req.body && req.body.address || "").trim();
+    if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
+    const userPk = new PublicKey(addr);
+    const volume = await scanVolumeAccumulators(userPk);
+    if (!volume.length) {
+      return res.json({ targetCount: 0, accountCount: 0, totalLamports: 0, totalSol: 0 });
+    }
+    const tx = await buildVolumeTx(volume, userPk);
+    res.json({
+      targetCount: volume.length,
+      accountCount: tx.accountCount,
+      totalLamports: tx.totalLamports,
+      totalSol: tx.totalSol,
+      serialized: tx.serialized,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });

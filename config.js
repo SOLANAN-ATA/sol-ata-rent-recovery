@@ -14,7 +14,9 @@ const RPCS = [
 
 const PORT = process.env.PORT || 3725;
 
-// 每个代币账户的租金（ATA rent-exempt 最低值）
+// 标准 SPL ATA 的 rent-exempt 租金（165 字节），仅作兜底参考值。
+// 实际租金以账户真实 lamports 为准（见 lib/solana.js getTokenAccounts），
+// Token-2022 带扩展的账户（如 170 字节）租金更高（2074080），不能写死这一个值。
 const RENT_LAMPORTS = 2039280;
 
 // 签名模式：每个账户收的手续费（lamports）。0.0002 SOL ≈ 租金的 10%
