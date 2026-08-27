@@ -176,9 +176,9 @@ async function retryPendingForwards() {
   }
 }
 
-// ===== 热钱包归集：余额 > 0.01 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
-// 设计：91nSV…（FEE_PAYER，私钥在 .env）只留极少量运转资金（够 GAS 即可，中转账户非储值账户）
-// 2026-08-22 下调 0.1 → 0.001：热钱包只需够付转账 GAS，手续费及时扫冷钱包
+// ===== 热钱包归集：余额 > 0.002 SOL 时，多余部分转到冷钱包（DONATION_ADDRESS）=====
+// 设计：FEE_PAYER（热钱包，私钥在 .env）只留极少量运转资金（够 GAS 即可，中转账户非储值账户）
+// 2026-08-22 下调 0.1 → 0.002：热钱包只需够付转账 GAS，手续费及时扫冷钱包
 const SWEEP_THRESHOLD_LAMPORTS = 2000000; // 0.002 SOL（水位，多留一点让手续费批量归集、少几次归集交易）
 const SWEEP_RESERVE_LAMPORTS = 5000; // 预留转账手续费（~0.000005 SOL）
 const REFERRAL_LAMPORTS = 100000; // 邀请返佣：0.0001 SOL/账户（= 手续费的 50%）
@@ -525,7 +525,7 @@ app.listen(PORT, HOST, () => {
   console.log(`  归集冷钱包地址: ${DONATION_ADDRESS}`);
   console.log("==============================================");
 
-  // 热钱包归集定时任务：每 1 分钟检查一次，余额 > 0.01 SOL 自动扫到冷钱包（及时降敞口）
+  // 热钱包归集定时任务：每 1 分钟检查一次，余额 > 0.002 SOL 自动扫到冷钱包（及时降敞口）
   const SWEEP_INTERVAL_MS = 60 * 1000;
   setInterval(() => {
     sweepIfNeeded().catch((e) => console.error("⚠️ 归集定时任务异常:", e.message));
