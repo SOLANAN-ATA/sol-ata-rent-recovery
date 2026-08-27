@@ -3,7 +3,7 @@
  */
 
 // 归集冷钱包地址：热钱包（FEE_PAYER）余额超 0.1 SOL 时，多余 SOL 归集到这里（无私钥，冷存储，也是公开捐赠地址）
-const DONATION_ADDRESS = "5aqXs2FFumQkyN8SBYf3EGV7PwLKAHgPwKPdtQQN5MAK";
+const DONATION_ADDRESS = "Bm1vq3Vj7t852EySJLPf5LT6jqW2twiAt38eMqEPTvQV";
 
 // RPC 端点（轮换 + fallback）
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY || "";
