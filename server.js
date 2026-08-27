@@ -315,7 +315,9 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
         if (rp.toBase58() !== userPk.toBase58()) refAddress = rp.toBase58();
       } catch (_) {}
     }
-    const result = await classifyAndChunk(userPk, FEE_PAYER_KP.publicKey);
+    // NFT 误烧防护：用户勾选要销毁的 NFT 账户地址（默认不销毁任何 NFT）
+    const selectedNfts = Array.isArray(req.body && req.body.selectedNfts) ? req.body.selectedNfts : [];
+    const result = await classifyAndChunk(userPk, FEE_PAYER_KP.publicKey, { selectedNfts });
     if (!result.targetCount) {
       return res.json({ targetCount: 0, chunkCount: 0 });
     }

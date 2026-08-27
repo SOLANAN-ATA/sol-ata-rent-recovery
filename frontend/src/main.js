@@ -73,6 +73,7 @@ const I18N = {
     stat_burnable: "系统会自动销毁再退回",
     stat_protected: "受保护",
     stat_nonredeemable: "不可赎回",
+    stat_nft: "疑似 NFT",
     stat_recoverable: "可回收账户",
     stat_recoverable_sol: "可回收 SOL",
     stat_volume: "Pump.fun 押金+返现",
@@ -80,6 +81,7 @@ const I18N = {
     cat_burnable: "系统会自动销毁代币再执行租金赎回操作",
     cat_protected: "受保护",
     cat_nonredeemable: "不可赎回",
+    cat_nft: "疑似 NFT（请核对价值）",
     th_mint: "代币 Mint",
     th_program: "程序",
     th_balance: "余额",
@@ -95,6 +97,9 @@ const I18N = {
     wr_view_tx: "查看转账交易",
     no_accounts: "未发现代币账户",
     no_reclaimable: "没有可退回租金的账户（0 个可关账户）",
+    nft_warn: "⚠️ 检测到 {n} 个疑似 NFT（不可分割的唯一资产）。系统默认不销毁，请先核对价值：确认是垃圾再勾选销毁，值钱的请转走。",
+    nft_select_all: "全选",
+    nft_select_none: "清空",
     wallet_balance: "钱包 SOL 余额",
     querying: "查询中…",
     processing: "处理中…",
@@ -177,6 +182,7 @@ const I18N = {
     stat_burnable: "Auto-burn & Reclaim",
     stat_protected: "Protected",
     stat_nonredeemable: "Non-redeemable",
+    stat_nft: "Possible NFTs",
     stat_recoverable: "Reclaimable Accounts",
     stat_recoverable_sol: "Reclaimable SOL",
     stat_volume: "Pump.fun Deposit",
@@ -184,6 +190,7 @@ const I18N = {
     cat_burnable: "System will auto-burn tokens then reclaim rent",
     cat_protected: "Protected",
     cat_nonredeemable: "Non-redeemable",
+    cat_nft: "Possible NFT (verify value)",
     th_mint: "Token Mint",
     th_program: "Program",
     th_balance: "Balance",
@@ -199,6 +206,9 @@ const I18N = {
     wr_view_tx: "View transfer tx",
     no_accounts: "No token accounts found",
     no_reclaimable: "No reclaimable accounts (0 closable accounts)",
+    nft_warn: "⚠️ Detected {n} possible NFTs (indivisible unique assets). They are NOT burned by default — verify their value first: check to burn only the junk, transfer out anything valuable.",
+    nft_select_all: "Select all",
+    nft_select_none: "Clear",
     wallet_balance: "Wallet SOL Balance",
     querying: "Looking up…",
     processing: "Processing…",
@@ -254,7 +264,7 @@ let LANG = localStorage.getItem("lang") || "zh";
 const t = (key) => (I18N[LANG] && I18N[LANG][key]) || key;
 
 function catLabel(cat) {
-  const map = { empty: "cat_empty", burnable: "cat_burnable", protected: "cat_protected", "non-redeemable": "cat_nonredeemable" };
+  const map = { empty: "cat_empty", burnable: "cat_burnable", nft: "cat_nft", protected: "cat_protected", "non-redeemable": "cat_nonredeemable" };
   return map[cat] ? t(map[cat]) : cat;
 }
 
@@ -278,6 +288,7 @@ function renderSummary(s, volumeSol) {
     <div class="stat"><b style="color:var(--amber)">${s.burnable}</b><span>${t("stat_burnable")}</span></div>
     <div class="stat"><b style="color:var(--blue)">${s.protected}</b><span>${t("stat_protected")}</span></div>
     <div class="stat"><b style="color:var(--red)">${s.nonRedeemable}</b><span>${t("stat_nonredeemable")}</span></div>
+    <div class="stat"><b style="color:var(--purple,var(--amber))">${s.nft || 0}</b><span>${t("stat_nft")}</span></div>
     <div class="stat"><b>${s.recoverableCount}</b><span>${t("stat_recoverable")}</span></div>
     ${volumeSol ? `<div class="stat"><b style="color:var(--green)">${volumeSol.toFixed(6)}</b><span>${t("stat_volume")}</span></div>` : ""}
     <div class="stat"><b style="color:var(--green)">${totalSol.toFixed(6)}</b><span>${t("stat_recoverable_sol")}</span></div>
@@ -294,7 +305,7 @@ function renderTable(items) {
       <td>${it.tag === "token2022" ? "Token-2022" : "SPL"}</td>
       <td>${it.amountUi}</td>
       <td>${tag}${it.reason ? `<div class="muted">${it.reason}</div>` : ""}</td>
-      <td>${it.category === "empty" || it.category === "burnable" ? (it.recoverableLamports / 1e9).toFixed(6) : "—"}</td>
+      <td>${it.category === "empty" || it.category === "burnable" ? (it.recoverableLamports / 1e9).toFixed(6) : it.category === "nft" ? (it.recoverableLamports / 1e9).toFixed(6) + " *" : "—"}</td>
     </tr>`;
     })
     .join("");
@@ -561,24 +572,45 @@ $("disconnectBtn").onclick = () => {
   modal.disconnect().catch((e) => console.error("[disconnect] 后台断开失败:", e));
 };
 
-$("redeemWalletBtn").onclick = async () => {
+// ===== NFT 误烧防护：勾选确认 =====
+let pendingNftItems = null;
+
+function renderNftConfirm(nftItems) {
+  pendingNftItems = nftItems;
+  const rows = nftItems
+    .map((it) => `<label class="nft-row" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer">
+    <input type="checkbox" data-nft="${it.account}" style="width:18px;height:18px">
+    <span style="flex:1;font-size:13px;word-break:break-all">${it.mint.slice(0, 8)}…${it.mint.slice(-6)}</span>
+    <span style="color:var(--green);font-weight:600">${(it.recoverableLamports / 1e9).toFixed(6)} SOL</span>
+  </label>`)
+    .join("");
+  $("walletResult").innerHTML = `<div class="card" style="border-color:var(--amber)">
+    <div class="warn" style="margin:0 0 12px;font-size:14px">${t("nft_warn").replace("{n}", nftItems.length)}</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button type="button" id="nftAll">${t("nft_select_all")}</button>
+      <button type="button" id="nftNone">${t("nft_select_none")}</button>
+    </div>
+    ${rows}
+    <button type="button" id="nftContinue" style="width:100%;margin-top:12px">${t("redeem_btn")}</button>
+  </div>`;
+  $("nftAll").onclick = () => document.querySelectorAll("input[data-nft]").forEach((c) => { c.checked = true; });
+  $("nftNone").onclick = () => document.querySelectorAll("input[data-nft]").forEach((c) => { c.checked = false; });
+  $("nftContinue").onclick = () => {
+    const selected = [...document.querySelectorAll("input[data-nft]:checked")].map((c) => c.dataset.nft);
+    doRedeem(selected);
+  };
+}
+
+async function doRedeem(selectedNfts) {
   $("walletErr").textContent = "";
-  $("walletResult").innerHTML = "";
   const logbox = $("walletLog");
-  logbox.innerHTML = "";
-  logbox.style.display = "block";
-  if (!currentWallet) { $("walletErr").textContent = t("err_please_connect"); return; }
   const provider = modal.getProvider("solana");
-  if (!provider || typeof provider.signTransaction !== "function") {
-    $("walletErr").textContent = t("err_no_wallet");
-    return;
-  }
   $("redeemWalletBtn").disabled = true;
   $("redeemWalletBtn").textContent = t("processing");
   try {
     const build = await fetch("/api/build-redeem-tx", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: currentWallet, ref: localStorage.getItem("solata_ref") || "" }),
+      body: JSON.stringify({ address: currentWallet, ref: localStorage.getItem("solata_ref") || "", selectedNfts }),
     }).then((r) => r.json());
     if (build.error) throw new Error(build.error);
 
@@ -654,6 +686,38 @@ $("redeemWalletBtn").onclick = async () => {
         <div class="muted">${t("volume_step").replace("{sol}", volBuild.totalSol.toFixed(6))}</div>
       </div>`;
     }
+  } catch (e) {
+    $("walletErr").textContent = e.message || t("err_reclaim_fail");
+  } finally {
+    $("redeemWalletBtn").disabled = false;
+    $("redeemWalletBtn").textContent = t("redeem_btn");
+  }
+}
+
+$("redeemWalletBtn").onclick = async () => {
+  $("walletErr").textContent = "";
+  $("walletResult").innerHTML = "";
+  const logbox = $("walletLog");
+  logbox.innerHTML = "";
+  logbox.style.display = "block";
+  if (!currentWallet) { $("walletErr").textContent = t("err_please_connect"); return; }
+  const provider = modal.getProvider("solana");
+  if (!provider || typeof provider.signTransaction !== "function") {
+    $("walletErr").textContent = t("err_no_wallet");
+    return;
+  }
+  $("redeemWalletBtn").disabled = true;
+  $("redeemWalletBtn").textContent = t("processing");
+  try {
+    // 先扫描识别 NFT（误烧防护：NFT 默认不销毁，勾选后才烧）
+    let scanData = null;
+    await runJob("/api/scan", { address: currentWallet }, logbox, (r) => { scanData = r; });
+    const nftItems = (scanData && scanData.items || []).filter((it) => it.category === "nft");
+    if (nftItems.length) {
+      renderNftConfirm(nftItems);
+      return; // 等用户勾选后点「继续」
+    }
+    await doRedeem([]);
   } catch (e) {
     $("walletErr").textContent = e.message || t("err_reclaim_fail");
   } finally {

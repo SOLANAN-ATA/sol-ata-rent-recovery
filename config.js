@@ -8,8 +8,11 @@ const DONATION_ADDRESS = "5aqXs2FFumQkyN8SBYf3EGV7PwLKAHgPwKPdtQQN5MAK";
 // RPC 端点（轮换 + fallback）
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY || "";
 const RPCS = [
-  "https://solana-rpc.publicnode.com",
+  // Helius 优先（有 API key，最稳）；publicnode / 官方 / Ankr 作兜底（公开节点对 getTokenAccountsByOwner 限流较严，仅兜底）
   HELIUS_API_KEY ? `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}` : "",
+  "https://solana-rpc.publicnode.com",
+  "https://api.mainnet-beta.solana.com",
+  "https://rpc.ankr.com/solana",
 ].filter(Boolean);
 
 const PORT = process.env.PORT || 3725;
