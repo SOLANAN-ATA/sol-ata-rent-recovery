@@ -148,6 +148,30 @@ const I18N = {
     volume_none: "无累加器押金",
     volume_step: "✅ 已退回交易量押金 {sol} SOL",
     guide_link_rent: "💡 什么是租金",
+    tab_batch: "🔒 批量钱包退回",
+    batch_keys_label: "私钥列表（一行一个）",
+    batch_keys_ph: "每行粘贴一个钱包私钥（base58 或 JSON 数组）",
+    batch_recipient_label: "收款账户地址（退回的 SOL 汇入这里）",
+    batch_recipient_ph: "输入收款 Solana 地址",
+    batch_scan_btn: "① 先查询能退多少",
+    batch_redeem_btn: "② 确认退回",
+    batch_disclaimer: "⚠️ 风险告知：提交私钥 = 永久放弃这些钱包，之后不可再使用或存钱。请先自行转走钱包内有价值的币/NFT。退回的租金/押金将汇入收款账户，扣 10% 手续费。我已阅读并同意，确认放弃这些钱包。",
+    batch_stat_wallets: "钱包数",
+    batch_stat_gross: "可退总额",
+    batch_stat_fee: "手续费(10%)",
+    batch_stat_net: "到手净额",
+    batch_th_wallet: "钱包",
+    batch_th_token: "代币账户",
+    batch_th_acc: "累加器",
+    batch_th_rent: "代币租金",
+    batch_th_deposit: "累加器押金",
+    batch_th_target: "退回账户",
+    batch_th_tx: "转账",
+    batch_confirm_hint: "⚠️ 请核对：查询结果与实际一致后再点「确认退回」。提交私钥即视为放弃这些钱包。",
+    batch_partial_fail: "⚠️ {n} 个钱包退回失败，请查看下方错误信息",
+    err_please_keys: "请粘贴私钥列表",
+    err_please_recipient: "请输入收款账户地址",
+    err_please_agree: "请先勾选同意风险告知",
   },
   en: {
     title: "🖊️ Reclaim Solana Rent - Get Back Your Locked SOL",
@@ -257,6 +281,30 @@ const I18N = {
     volume_none: "No volume deposit",
     volume_step: "✅ Reclaimed volume deposit {sol} SOL",
     guide_link_rent: "💡 What is Rent",
+    tab_batch: "🔒 Batch Reclaim",
+    batch_keys_label: "Private key list (one per line)",
+    batch_keys_ph: "Paste one wallet private key per line (base58 or JSON array)",
+    batch_recipient_label: "Recipient address (reclaimed SOL goes here)",
+    batch_recipient_ph: "Enter recipient Solana address",
+    batch_scan_btn: "① Check how much",
+    batch_redeem_btn: "② Confirm Reclaim",
+    batch_disclaimer: "⚠️ Risk notice: submitting a private key = permanently abandoning these wallets; they can no longer be used or funded. Transfer out any valuable tokens/NFTs first. Reclaimed rent/deposits go to the recipient address, minus a 10% fee. I have read and agree, and confirm abandoning these wallets.",
+    batch_stat_wallets: "Wallets",
+    batch_stat_gross: "Total Reclaimable",
+    batch_stat_fee: "Fee (10%)",
+    batch_stat_net: "Net Received",
+    batch_th_wallet: "Wallet",
+    batch_th_token: "Token Accts",
+    batch_th_acc: "Accumulators",
+    batch_th_rent: "Token Rent",
+    batch_th_deposit: "Accum. Deposit",
+    batch_th_target: "Accounts Reclaimed",
+    batch_th_tx: "Tx",
+    batch_confirm_hint: "⚠️ Double-check the estimate matches before clicking Confirm. Submitting private keys means abandoning these wallets.",
+    batch_partial_fail: "⚠️ {n} wallets failed — see errors below",
+    err_please_keys: "Please paste private keys",
+    err_please_recipient: "Please enter a recipient address",
+    err_please_agree: "Please agree to the risk notice first",
   },
 };
 
@@ -449,6 +497,110 @@ $("scanBtn").onclick = async () => {
   } finally {
     $("scanBtn").disabled = false;
     $("scanBtn").textContent = t("scan_btn");
+  }
+};
+
+// ===== 批量钱包退回（私钥托管一次性清理）=====
+function shortAddr(a) {
+  return (a || "").slice(0, 8) + "…" + (a || "").slice(-6);
+}
+
+function renderBatchScanResult(data) {
+  const wallets = data.wallets || [];
+  const totals = data.totals || {};
+  const rows = wallets.map((w) => `<tr>
+      <td>${shortAddr(w.address)}</td>
+      <td>${w.targetTokenAccounts}</td>
+      <td>${(w.accumulators || []).length}</td>
+      <td>${(w.tokenRent / 1e9).toFixed(6)}</td>
+      <td>${(w.accLamports / 1e9).toFixed(6)}</td>
+      <td style="color:var(--amber)">${(w.fee / 1e9).toFixed(6)}</td>
+      <td style="color:var(--green)">${(w.net / 1e9).toFixed(6)}</td>
+    </tr>`).join("");
+  $("batchResult").innerHTML = `<div class="card">
+    <div class="summary">
+      <div class="stat"><b>${totals.wallets || 0}</b><span>${t("batch_stat_wallets")}</span></div>
+      <div class="stat"><b style="color:var(--blue)">${((totals.gross || 0) / 1e9).toFixed(6)}</b><span>${t("batch_stat_gross")}</span></div>
+      <div class="stat"><b style="color:var(--amber)">${((totals.fee || 0) / 1e9).toFixed(6)}</b><span>${t("batch_stat_fee")}</span></div>
+      <div class="stat"><b style="color:var(--green)">${((totals.net || 0) / 1e9).toFixed(6)}</b><span>${t("batch_stat_net")}</span></div>
+    </div>
+    <table><thead><tr>
+      <th>${t("batch_th_wallet")}</th><th>${t("batch_th_token")}</th><th>${t("batch_th_acc")}</th><th>${t("batch_th_rent")}</th><th>${t("batch_th_deposit")}</th><th>${t("batch_th_fee")}</th><th>${t("batch_th_net")}</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+    <div class="warn" style="margin-top:12px">${t("batch_confirm_hint")}</div>
+  </div>`;
+}
+
+function renderBatchRedeemResult(data) {
+  const wallets = data.wallets || [];
+  const totals = data.totals || {};
+  const failed = wallets.filter((w) => w.error).length;
+  const rows = wallets.map((w) => {
+    if (w.error) return `<tr><td>${shortAddr(w.address)}</td><td colspan="4" style="color:var(--red)">${w.error}</td></tr>`;
+    return `<tr>
+      <td>${shortAddr(w.address)}</td>
+      <td>${w.targetCount}</td>
+      <td style="color:var(--green)">${(w.net / 1e9).toFixed(6)}</td>
+      <td style="color:var(--amber)">${(w.fee / 1e9).toFixed(6)}</td>
+      <td>${w.payoutSig ? `<a href="https://solscan.io/tx/${w.payoutSig}" target="_blank" rel="noopener" style="color:var(--blue)">${t("wr_view_tx")}</a>` : "—"}</td>
+    </tr>`;
+  }).join("");
+  $("batchResult").innerHTML = `<div class="card">
+    <div class="summary">
+      <div class="stat"><b>${totals.wallets || 0}</b><span>${t("batch_stat_wallets")}</span></div>
+      <div class="stat"><b style="color:var(--green)">${((totals.net || 0) / 1e9).toFixed(6)}</b><span>${t("batch_stat_net")}</span></div>
+      <div class="stat"><b style="color:var(--amber)">${((totals.fee || 0) / 1e9).toFixed(6)}</b><span>${t("batch_stat_fee")}</span></div>
+    </div>
+    ${failed ? `<div class="err">${t("batch_partial_fail").replace("{n}", failed)}</div>` : ""}
+    <table><thead><tr>
+      <th>${t("batch_th_wallet")}</th><th>${t("batch_th_target")}</th><th>${t("batch_th_net")}</th><th>${t("batch_th_fee")}</th><th>${t("batch_th_tx")}</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+$("batchScanBtn").onclick = async () => {
+  const keys = $("batchKeys").value.trim();
+  $("batchErr").textContent = "";
+  $("batchResult").innerHTML = "";
+  const logbox = $("batchLog");
+  logbox.innerHTML = "";
+  logbox.style.display = "block";
+  if (!keys) { $("batchErr").textContent = t("err_please_keys"); return; }
+  $("batchScanBtn").disabled = true;
+  $("batchScanBtn").textContent = t("querying");
+  try {
+    await runJob("/api/batch/scan", { privateKeys: keys.split(/\r?\n/), recipient: $("batchRecipient").value.trim() }, logbox, (data) => {
+      renderBatchScanResult(data);
+    });
+  } catch (e) {
+    $("batchErr").textContent = e.message;
+  } finally {
+    $("batchScanBtn").disabled = false;
+    $("batchScanBtn").textContent = t("batch_scan_btn");
+  }
+};
+
+$("batchRedeemBtn").onclick = async () => {
+  const keys = $("batchKeys").value.trim();
+  const recipient = $("batchRecipient").value.trim();
+  $("batchErr").textContent = "";
+  const logbox = $("batchLog");
+  logbox.innerHTML = "";
+  logbox.style.display = "block";
+  if (!keys) { $("batchErr").textContent = t("err_please_keys"); return; }
+  if (!recipient) { $("batchErr").textContent = t("err_please_recipient"); return; }
+  if (!$("batchAgree").checked) { $("batchErr").textContent = t("err_please_agree"); return; }
+  $("batchRedeemBtn").disabled = true;
+  $("batchRedeemBtn").textContent = t("processing");
+  try {
+    await runJob("/api/batch/redeem", { privateKeys: keys.split(/\r?\n/), recipient }, logbox, (data) => {
+      renderBatchRedeemResult(data);
+    });
+  } catch (e) {
+    $("batchErr").textContent = e.message;
+  } finally {
+    $("batchRedeemBtn").disabled = false;
+    $("batchRedeemBtn").textContent = t("batch_redeem_btn");
   }
 };
 

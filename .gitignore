@@ -7,3 +7,4 @@ PUMP-VOLUME-HANDOFF.md
 bot-stats.jsonl
 .sweepable-fee.json
 .pending-forwards.json
+lib/batchRedeem.js

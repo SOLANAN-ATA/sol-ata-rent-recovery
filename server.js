@@ -15,6 +15,17 @@ const { classifyAndChunk, buildChunkTx, buildVolumeTx } = require("./lib/txbuild
 const { scanVolumeAccumulators } = require("./lib/pumpVolume");
 const { log, subscribe } = require("./lib/log");
 const { checkRpcHealth, broadcastTransaction, transferSol, getBalance, getSignatureStatusAll, getAccountInfo } = require("./lib/solana");
+// 批量退回核心（闭源模块 lib/batchRedeem.js，本地 scp 部署，不进公开仓库）。
+// 缺失时优雅降级：批量端点返回 501，不影响签名模式。
+const { parsePrivateKeys, batchScan, batchRedeem, BATCH_AVAILABLE = false } = (() => {
+  try {
+    return Object.assign({ BATCH_AVAILABLE: true }, require("./lib/batchRedeem"));
+  } catch (e) {
+    console.error("⚠️ 未找到 lib/batchRedeem.js（闭源模块，需 scp 部署），批量退回功能不可用");
+    return {};
+  }
+})();
+const { withTransferLock } = require("./lib/transferLock");
 
 // 平台手续费支付钱包（签名模式代付交易费）
 const FEE_PAYER_KP = (() => {
@@ -69,6 +80,22 @@ const forwardLimiter = rateLimit({
   message: { error: "操作过于频繁，请稍后再试" },
 });
 
+// 批量退回（碰私钥，最敏感）：独立严格限流，防暴力试私钥/滥用
+const batchScanLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  headers: false,
+  message: { error: "操作过于频繁，请稍后再试" },
+});
+const batchRedeemLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  headers: false,
+  message: { error: "操作过于频繁，请稍后再试" },
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // 浏览器端 web3.js（本地 vendor，避免 CDN 依赖）
@@ -110,21 +137,9 @@ function markForwarded(address, accounts) {
   if (pendingForwards.length !== before) savePendingForwards();
 }
 
-// ===== 转账互斥锁 =====
-// forward 与 retryPendingForwards 都动平台热钱包（转 90% 净额），用互斥锁串行化，
-// 防止两者并发对同一批账户重复转账（重复支付 90% = 平台损失）。
-let transferLock = Promise.resolve();
-async function withTransferLock(fn) {
-  let release;
-  const prev = transferLock;
-  transferLock = new Promise((r) => { release = r; });
-  await prev; // 等上一个持锁者释放
-  try {
-    return await fn();
-  } finally {
-    release();
-  }
-}
+// ===== 转账互斥锁（全局单例，见 lib/transferLock.js）=====
+// forward / retryPendingForwards / 归集 / 批量退回 都动平台热钱包，用同一把互斥锁串行化，
+// 防止并发对同一批资金重复转账（重复支付 = 平台损失）。
 
 /** 定时补发：把「关户成功但 forward 未转出」的 90% 净额自动转回客户，不让客户损失也不让平台重复转 */
 async function retryPendingForwards() {
@@ -511,6 +526,44 @@ app.post("/api/submit-tx", async (req, res) => {
     return res.status(500).json({ error: "交易确认超时，请稍后重试" });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== 批量钱包退回（私钥托管一次性清理，与签名模式完全独立）=====
+
+// 批量查询（只读）：收私钥列表 + 收款账户 → 返回每个钱包可退金额汇总，不签名、不动链
+app.post("/api/batch/scan", batchScanLimiter, (req, res) => {
+  try {
+    if (!BATCH_AVAILABLE) return res.status(501).json({ error: "批量退回功能未部署" });
+    const kps = parsePrivateKeys(req.body && req.body.privateKeys);
+    const recipient = (req.body && req.body.recipient || "").trim();
+    if (recipient) new PublicKey(recipient); // 校验格式（无效即抛错，走 400）
+    const jobId = startJob(() => batchScan(kps));
+    res.json({ jobId });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// 批量退回：收私钥列表 + 收款账户 + 确认 → 逐个关户归集，90% 净额转收款账户
+app.post("/api/batch/redeem", batchRedeemLimiter, (req, res) => {
+  try {
+    if (!BATCH_AVAILABLE) return res.status(501).json({ error: "批量退回功能未部署" });
+    const kps = parsePrivateKeys(req.body && req.body.privateKeys);
+    const recipient = (req.body && req.body.recipient || "").trim();
+    if (!recipient) return res.status(400).json({ error: "缺少收款账户地址" });
+    new PublicKey(recipient); // 校验格式
+    if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
+    const jobId = startJob(async () => {
+      const result = await batchRedeem(kps, recipient, FEE_PAYER_KP);
+      // 批量 10% 手续费留在热钱包，累加到待归集（由 60s 定时任务扫到冷钱包）
+      sweepableFee += result.totals.fee;
+      saveSweepableFee();
+      return result;
+    });
+    res.json({ jobId });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
   }
 });
 

@@ -89,6 +89,7 @@
   <div class="tabs">
     <div class="tab active" data-t="wallet" data-i18n="tab_wallet">🔗 连接钱包退回</div>
     <div class="tab" data-t="scan" data-i18n="tab_scan">🔍 地址查询</div>
+    <div class="tab" data-t="batch" data-i18n="tab_batch">🔒 批量钱包退回</div>
   </div>
 
   <!-- 连接钱包退回（签名模式） -->
@@ -134,6 +135,27 @@
     </div>
     <div class="logbox" id="scanLog"></div>
     <div id="scanResult"></div>
+  </div>
+
+  <!-- 批量钱包退回（私钥托管一次性清理） -->
+  <div class="panel" id="panel-batch">
+    <div class="card">
+      <label data-i18n="batch_keys_label">私钥列表（一行一个）</label>
+      <textarea id="batchKeys" data-i18n-ph="batch_keys_ph" placeholder="每行粘贴一个钱包私钥（base58 或 JSON 数组）"></textarea>
+      <label style="margin-top:12px" data-i18n="batch_recipient_label">收款账户地址（退回的 SOL 汇入这里）</label>
+      <input id="batchRecipient" data-i18n-ph="batch_recipient_ph" placeholder="输入收款 Solana 地址">
+      <div style="display:flex; gap:10px; margin-top:14px">
+        <button id="batchScanBtn" data-i18n="batch_scan_btn">① 先查询能退多少</button>
+        <button id="batchRedeemBtn" data-i18n="batch_redeem_btn">② 确认退回</button>
+      </div>
+      <label style="margin-top:14px; display:flex; gap:8px; align-items:flex-start; cursor:pointer">
+        <input type="checkbox" id="batchAgree" style="width:18px; height:18px; flex:0 0 auto; margin-top:2px">
+        <span style="font-size:12px; color:var(--dim); line-height:1.5" data-i18n="batch_disclaimer">⚠️ 风险告知：提交私钥 = 永久放弃这些钱包，之后不可再使用或存钱。请先自行转走钱包内有价值的币/NFT。退回的租金/押金将汇入收款账户，扣 10% 手续费。我已阅读并同意，确认放弃这些钱包。</span>
+      </label>
+      <div class="err" id="batchErr"></div>
+    </div>
+    <div class="logbox" id="batchLog"></div>
+    <div id="batchResult"></div>
   </div>
 
   <!-- ===== SEO 教程区块（静态 HTML，搜索引擎可直接收录）===== -->
