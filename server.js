@@ -372,17 +372,22 @@ app.post("/api/build-volume-tx", buildTxLimiter, async (req, res) => {
   try {
     const addr = (req.body && req.body.address || "").trim();
     if (!addr) return res.status(400).json({ error: "缺少 address 参数" });
+    if (!FEE_PAYER_KP) return res.status(500).json({ error: "未配置平台钱包（FEE_PAYER_SECRET_KEY）" });
     const userPk = new PublicKey(addr);
     const volume = await scanVolumeAccumulators(userPk);
     if (!volume.length) {
-      return res.json({ targetCount: 0, accountCount: 0, totalLamports: 0, totalSol: 0 });
+      return res.json({ targetCount: 0, accountCount: 0, totalLamports: 0, totalSol: 0, feeLamports: 0, netLamports: 0 });
     }
-    const tx = await buildVolumeTx(volume, userPk);
+    const tx = await buildVolumeTx(volume, userPk, FEE_PAYER_KP.publicKey);
     res.json({
       targetCount: volume.length,
       accountCount: tx.accountCount,
       totalLamports: tx.totalLamports,
       totalSol: tx.totalSol,
+      feeLamports: tx.feeLamports,
+      feeSol: tx.feeSol,
+      netLamports: tx.netLamports,
+      netSol: tx.netSol,
       serialized: tx.serialized,
     });
   } catch (e) {
