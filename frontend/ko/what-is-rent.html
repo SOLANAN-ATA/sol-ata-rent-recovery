@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATA 렌트란? SOL이 잠기는 이유 | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/ko/rent.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/rent.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/rent.html">
+<link rel="alternate" hreflang="tr" href="https://solata.top/tr/rent.html">
+<link rel="alternate" hreflang="ko" href="https://solata.top/ko/rent.html">
+<link rel="alternate" hreflang="ja" href="https://solata.top/ja/rent.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/rent.html">
+<meta name="description" content="ATA 렌트란? Solana에서 각 토큰 계정(ATA)은 약 0.002 SOL의 렌트를 예치합니다. Pump.fun 거래량 누적기 보증금(약 0.0018 SOL)도 있습니다 — 밈 코인 트레이더에게만 있는 제2의 숨은 보증금. 계정을 닫으면 환급됩니다.">
+<meta name="keywords" content="ATA 렌트란, solana 렌트, associated token account, solana 토큰 계정, sol 잠김, sol 렌트 환급, pump.fun 거래량 보증금, 누적기 보증금">
+<meta property="og:title" content="ATA 렌트란? SOL이 잠기는 이유 | solata.top">
+<meta property="og:description" content="Solana에서 각 토큰 계정은 약 0.002 SOL의 렌트를 예치합니다. 제로화 코인을 많이 거래할수록 잠기는 SOL이 늘어납니다. 메커니즘을 이해하고 되찾는 법을 배우세요.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://solata.top/ko/rent.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "ATA 렌트란? SOL이 잠기는 이유",
+  "description": "Solana에서 각 토큰 계정(ATA)은 약 0.002 SOL의 렌트를 예치합니다. 제로화·쓰레기 코인을 많이 거래할수록 잠기는 SOL이 늘어나고, 계정을 닫으면 환급됩니다.",
+  "image": "https://solata.top/og-image.png",
+  "inLanguage": "ko",
+  "mainEntityOfPage": "https://solata.top/ko/rent.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "solata.top",
+    "logo": { "@type": "ImageObject", "url": "https://solata.top/logo.svg" }
+  },
+  "datePublished": "2026-08-24",
+  "dateModified": "2026-09-03"
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 홈 도구</a>
+      <a href="/ko/guide.html">📖 튜토리얼</a>
+      <a href="/ko/faq.html">❓ FAQ</a>
+      <a href="/ko/what-is-rent.html" class="active">💡 렌트란?</a>
+    </nav>
+    <nav class="nav lang">
+      <a href="/rent.html">中文</a>
+<a href="/en/rent.html">EN</a>
+<a href="/tr/rent.html">Türkçe</a>
+<a href="/ko/rent.html" class="active">한국어</a>
+<a href="/ja/rent.html">日本語</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">홈</a><span>/</span>렌트란?</div>
+    <h1>ATA 렌트란? SOL이 잠기는 이유</h1>
+    <p class="lead">많은 분이 모릅니다: Solana에서 코인을 사고 밈을 거래하면, 지갑에 SOL 렌트가 조용히 쌓여 있고, 이 돈은 — 직접 계정을 닫기 전까지 — 되찾을 수 없습니다.</p>
+
+    <h2>토큰 계정(ATA)이란</h2>
+    <p>Solana에서 지갑(메인 계정)은 토큰을 직접 보유할 수 없습니다. 각 토큰 종류마다 체인에 '연관 토큰 계정'(Associated Token Account, 약칭 <b>ATA</b>)을 만들어 그 코인을 보관합니다.</p>
+    <p>즉: <b>서로 다른 코인을 거래할 때마다 = ATA 하나가 자동 개설</b>됩니다. 서로 다른 밈 코인 100개를 거래했다면 ATA 100개가 열린 셈입니다.</p>
+
+    <h2>계정당 얼마의 렌트가 예치되나요</h2>
+    <p>체인에 데이터를 저장하는 데는 저장 비용이 들며, Solana는 계정 남용을 막기 위해 '렌트' 메커니즘을 씁니다: 각 ATA를 만들 때 SOL 보증금을 예치하며, 현재 약 <b>0.00203928 SOL</b>입니다.</p>
+    <blockquote>한 줄 요약: 토큰 계정 개설 ≈ 0.002 SOL 예치; 폐쇄 ≈ 0.002 SOL 환급.</blockquote>
+
+    <h2>이 돈이 '묶이는' 이유</h2>
+    <p>보통은 토큰을 팔면 계정 잔액이 0이 되어 계정을 닫고 렌트를 되찾을 수 있습니다. 문제는:</p>
+    <ul>
+      <li><b>제로화 / 쓰레기 코인</b>: 거의 0까지 떨어져 팔리지 않고, 계정에 '수천조'의 쓰레기 코인 잔액이 영원히 남아 닫히지 않습니다.</li>
+      <li><b>허니팟 / 꿀단지 코인</b>: 사기만 가능하고 팔 수 없어 계정이 잠깁니다.</li>
+      <li><b>에어드랍 코인</b>: 프로젝트 팀이 몰래 에어드랍하면 당신은 모르는 채 계정이 계속 열려 있습니다.</li>
+    </ul>
+    <p>이 좀비 계정이 쌓일수록 각각 0.002 SOL이 잠깁니다. 밈 거래를 많이 할수록 더 많이 잠깁니다.</p>
+
+    <h2>이 돈을 되찾을 수 있나요?</h2>
+    <p>네. 계정을 닫으면 렌트가 지갑으로 돌아옵니다. 원리는: <b>먼저 쓰레기 코인을 소각(또는 빈 계정은 바로 폐쇄) → 계정 폐쇄 → 렌트 환급</b>.</p>
+    <p>핵심 차이: <b>0보유 계정</b>은 바로 닫아 환급할 수 있지만, <b>제로화·허니팟</b>처럼 잔액은 있지만 팔 수 없는 계정은 토큰을 먼저 <b>소각</b>해야 닫고 렌트를 환급받을 수 있습니다 — 이 단계를 대부분 도구는 못 하지만 저희는 할 수 있습니다.</p>
+    <p><a href="/">solata.top</a>으로 원클릭 완료: 먼저 '주소 조회'로 계정 내역 확인, 지갑 연결, 좀비 계정 원클릭 폐쇄, 렌트 환급. 계정당 0.0002 SOL(렌트의 약 10%) 수수료만 받습니다.</p>
+
+    <h2>제2의 숨은 보증금: Pump.fun 거래량 누적기</h2>
+    <p>토큰 계정 렌트 외에도, 밈 코인 트레이더에게는 대부분 모르는 보증금이 하나 더 있습니다: <b>pump.fun</b>에서 밈 코인을 거래하면 pump.fun이 자동으로 '<b>거래량 누적기</b>' 계정을 만들고 역시 약 <b>0.0018 SOL</b> 보증금을 잠급니다. 일부 계정에는 캐시백도 쌓입니다(여러 SOL에 달하기도).</p>
+    <p>이 보증금의 특징: pump.fun 프로그램에 속해 <b>토큰 계정이 아니므로</b>, Token/Token-2022만 스캔하는 도구는 <b>영원히 못 봅니다</b>. solata.top이 특별 지원합니다 — 스캔 시 함께 표시하고, 원클릭으로 닫아 보증금 + 캐시백 순액(10% 수수료 차감)을 환급합니다.</p>
+    <blockquote>한 줄 요약: 지갑에는 두 종류의 돈이 잠길 수 있습니다 — 토큰 계정 렌트 + Pump.fun 누적기 보증금, solata가 둘 다 환급해 드립니다.</blockquote>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ 함정 하나: closeAuthority</div>
+      소수 프로젝트 팀이 토큰에 <code>closeAuthority</code>(폐쇄 권한)를 설정하면 이 계정은 체인상에서 닫을 수 없어 렌트가 계속 묶입니다. 이 권한이 없는 나머지 계정은 환급할 수 있습니다.
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">지갑에 얼마나 잠겨 있나요? 조회 👇</div>
+      <div class="cta-sub">지갑을 연결하면 모든 좀비 계정을 자동 스캔</div>
+      <a class="btn" href="/">스캔 및 환급 시작</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">관련 읽기</div>
+      <a href="/ko/guide.html"><span class="rel-title">📖 Solana 렌트 환급 전체 튜토리얼</span><span class="rel-desc">3단계로 잠긴 SOL 되찾기</span></a>
+      <a href="/ko/faq.html"><span class="rel-title">❓ 렌트 환급 자주 묻는 질문 FAQ</span><span class="rel-desc">얼마나 환급? 실수로 소각?</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 홈 도구</a>
+    <a href="/ko/guide.html">📖 튜토리얼</a>
+    <a href="/ko/faq.html">❓ FAQ</a>
+    <a href="/ko/what-is-rent.html">💡 렌트란?</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 수수료 10%만 · 오픈소스</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana Kira Geri Alma SSS | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/tr/faq.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/faq.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/faq.html">
+<link rel="alternate" hreflang="tr" href="https://solata.top/tr/faq.html">
+<link rel="alternate" hreflang="ko" href="https://solata.top/ko/faq.html">
+<link rel="alternate" hreflang="ja" href="https://solata.top/ja/faq.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/faq.html">
+<meta name="description" content="Solana kira geri alma SSS: Her hesaptan ne kadar SOL geri alınır? Değerli coin yanlışlıkla yakılır mı? SOL yokken geri alınabilir mi? Geri alınamaz ne demek? Pump.fun işlem hacmi depozitosu nedir? Ücret ne kadar? Güvenli mi?">
+<meta name="keywords" content="solana kira geri alma SSS, close token account, token hesabı kapatma, ATA kirası geri alma, solana cüzdan temizliği SSS, pump.fun işlem hacmi depozitosu, akümülatör depozitosu">
+<meta property="og:title" content="Solana Kira Geri Alma SSS | solata.top">
+<meta property="og:description" content="Ne kadar SOL geri alınır? Değerli coin yanlışlıkla yakılır mı? SOL yokken geri alınabilir mi? Tüm sorular tek cevapta.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://solata.top/tr/faq.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Her token hesabından ne kadar SOL geri alınır?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yaklaşık 0.00203928 SOL; bu, Solana zincirindeki her token hesabının (ATA) standart kirasıdır. Ne kadar çok sıfırlanmış coin'e girdiysen, o kadar çok kira geri alabilirsin." }
+    },
+    {
+      "@type": "Question",
+      "name": "Cüzdanımda ne kadar kira kilitli olduğunu nasıl kontrol ederim?",
+      "acceptedAnswer": { "@type": "Answer", "text": "İki yol: cüzdan adresini @solata_rent_bot TG botuna gönder, saniyeler içinde sonucu verir; veya solata.top'u açıp cüzdanını bağla." }
+    },
+    {
+      "@type": "Question",
+      "name": "Değerli coin'lerim yanlışlıkla yakar mı?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Korumalı token'lar SOL / USDT / USDC / PYUSD / USDS / EURC asla yakılmaz. Bakiyesi olan diğer token hesapları yakılıp kira geri alınır; bu yüzden geri almadan önce değerli coin'lerini kendin taşı." }
+    },
+    {
+      "@type": "Question",
+      "name": "Cüzdanımda SOL kalmadı, yine de geri alabilir miyim?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Geri alma, zincir üstü ücret olarak çok az SOL gerektirir (imza başına ~0.000005 SOL). Bakiye 0 ise önce biraz SOL yükle." }
+    },
+    {
+      "@type": "Question",
+      "name": "Neden bazı hesaplar 'Geri Alınamaz' görünüyor?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Bazı proje ekipleri token'a closeAuthority atar; bu hesaplar zincirde kapatılamaz. closeAuthority olmayan diğer hesapların kirası geri alınabilir." }
+    },
+    {
+      "@type": "Question",
+      "name": "Platform ne kadar komisyon alıyor?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Hesap başına 0.0002 SOL, kiranın (0.002 SOL) yaklaşık %10'u. Yalnızca başarılı geri almada ücret alınır; 0 SOL ile de geri alınabilir." }
+    },
+    {
+      "@type": "Question",
+      "name": "Sıfırlanmış ve honeypot gibi bakiyesi olan hesaplar geri alınabilir mi?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Evet. Bu bizim çekirdek avantajımız: 0 bakiyeli hesaplar doğrudan kapatılır; sıfırlanmış ve honeypot gibi bakiyesi olup satılamayan hesaplarda önce token yakılır, sonra hesap kapatılıp kira geri alınır. Piyasadaki çoğu araç yalnızca boş hesapları geri alabilir." }
+    },
+    {
+      "@type": "Question",
+      "name": "Güvenli mi? Özel anahtarım alınır mı?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Özel anahtarın cüzdanından asla çıkmaz. Tüm süreç yalnızca 'token hesabını kapat / kirayı geri al' imzasıdır; SOL, USDT gibi varlıklarını transfer etmez. Kod GitHub'da açık kaynaktır." }
+    },
+    {
+      "@type": "Question",
+      "name": "Pump.fun işlem hacmi depozitosu (akümülatör) nedir?",
+      "acceptedAnswer": { "@type": "Answer", "text": "pump.fun'da meme coin ticareti yaparken pump.fun otomatik olarak 'işlem hacmi akümülatörü' hesabı oluşturur ve ~0.0018 SOL depozito kilitler; bazı hesaplarda cashback de birikir. pump.fun programına bağlıdır, normal token hesabı değildir, bu yüzden çoğu araç göremez. solata.top bulur ve neti (depozito+cashback, %10 komisyon düşülerek) geri verir." }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 Ana Araç</a>
+      <a href="/tr/guide.html">📖 Rehber</a>
+      <a href="/tr/faq.html" class="active">❓ SSS</a>
+      <a href="/tr/what-is-rent.html">💡 Kira nedir</a>
+    </nav>
+    <nav class="nav lang">
+      <a href="/faq.html">中文</a>
+<a href="/en/faq.html">EN</a>
+<a href="/tr/faq.html" class="active">Türkçe</a>
+<a href="/ko/faq.html">한국어</a>
+<a href="/ja/faq.html">日本語</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">Ana Sayfa</a><span>/</span>SSS</div>
+    <h1>Solana Kira Geri Alma SSS</h1>
+    <p class="lead">Kira geri alma, hesap kapatma, ücret ve güvenlik hakkındaki tüm sorular tek yerde.</p>
+
+    <details class="faq" open>
+      <summary>Her token hesabından ne kadar SOL geri alınır?</summary>
+      <p>Yaklaşık <b>0.00203928 SOL</b>; bu, Solana zincirindeki her token hesabının (ATA) standart kirasıdır. Ne kadar çok sıfırlanmış coin'e girdiysen, o kadar çok kira geri alabilirsin.</p>
+    </details>
+    <details class="faq">
+      <summary>Cüzdanımda ne kadar kira kilitli olduğunu nasıl kontrol ederim?</summary>
+      <p>İki yol: ① cüzdan adresini TG botuna <a href="https://t.me/solata_rent_bot" target="_blank" rel="noopener">@solata_rent_bot</a> gönder, saniyeler içinde ne kadar SOL kilitli olduğunu söyler; ② <a href="/">solata.top</a>'u açıp cüzdanını bağla.</p>
+    </details>
+    <details class="faq">
+      <summary>Değerli coin'lerim yanlışlıkla yakar mı?</summary>
+      <p>Korumalı token'lar <b>SOL / USDT / USDC / PYUSD / USDS / EURC</b> asla yakılmaz. Bakiyesi olan diğer token hesapları yakılıp kira geri alınır; bu yüzden <b>geri almadan önce cüzdanındaki değerli coin'leri kendin taşı</b>, yanlışlıkla yakmayı önlemek için.</p>
+    </details>
+    <details class="faq">
+      <summary>Sıfırlanmış ve honeypot gibi bakiyesi olan hesaplar geri alınabilir mi?</summary>
+      <p><b>Evet, bu bizim çekirdek avantajımız.</b> 0 bakiyeli hesaplar doğrudan kapatılır; sıfırlanmış ve honeypot gibi bakiyesi olup satılamayan hesaplarda önce token yakılır, sonra hesap kapatılıp kira geri alınır. Piyasadaki çoğu araç <b>yalnızca boş hesapları geri alabilir, bakiyesi olanı geri alamaz</b> — çünkü sıfırlanmış ve honeypot coin'ler satılamaz, hesap sıfırlanamaz.</p>
+    </details>
+    <details class="faq">
+      <summary>Cüzdanımda SOL kalmadı, yine de geri alabilir miyim?</summary>
+      <p>Geri alma, zincir üstü ücret olarak çok az SOL gerektirir (imza başına ~0.000005 SOL). Bakiye 0 ise önce biraz SOL yükle.</p>
+    </details>
+    <details class="faq">
+      <summary>Neden bazı hesaplar 'Geri Alınamaz' görünüyor?</summary>
+      <p>Bazı proje ekipleri token'a <code>closeAuthority</code> (kapatma yetkisi) atar; bu hesaplar zincirde kapatılamaz. closeAuthority olmayan diğer hesapların kirası geri alınabilir.</p>
+    </details>
+    <details class="faq">
+      <summary>Platform ne kadar komisyon alıyor?</summary>
+      <p>Hesap başına <b>0.0002 SOL</b>, kiranın (0.002 SOL) yaklaşık <b>%10</b>'u. Yalnızca başarılı geri almada ücret alınır, <b>0 SOL ile de geri alınabilir</b>.</p>
+    </details>
+    <details class="faq">
+      <summary>Güvenli mi? Özel anahtarım alınır mı?</summary>
+      <p><b>Özel anahtarın cüzdanından asla çıkmaz</b>. Tüm süreç yalnızca 'token hesabını kapat / kirayı geri al' imzasıdır; SOL, USDT gibi varlıklarını transfer etmez. Kod <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub'da açık kaynak</a>.</p>
+    </details>
+    <details class="faq">
+      <summary>Hesap çok olursa ne olur?</summary>
+      <p>Hesap çoksa otomatik olarak birden fazla işleme bölünür, her işlem yaklaşık 20 hesap içerir ve cüzdanda birkaç kez imza onaylaman gerekir.</p>
+    </details>
+    <details class="faq">
+      <summary>Pump.fun işlem hacmi depozitosu (akümülatör) nedir?</summary>
+      <p><b>pump.fun</b>'da meme coin ticareti yaparken pump.fun cüzdanına otomatik olarak '<b>işlem hacmi akümülatörü</b>' hesabı oluşturur ve yaklaşık <b>0.0018 SOL</b> depozito kilitler; bazı hesaplarda cashback de birikir (birkaç SOL'a kadar). pump.fun programına bağlıdır, <b>normal token hesabı değildir</b>, bu yüzden çoğu araç göremez. solata.top bulur ve <b>neti</b> (depozito + cashback, <b>%10 komisyon düşülerek</b>) geri verir.</p>
+    </details>
+    <details class="faq">
+      <summary>Neden diğer araçlar bu depozitoyu göremiyor?</summary>
+      <p>Çünkü çoğu araç <b>yalnızca Token / Token-2022 programlarının token hesaplarını tarar</b>; Pump.fun akümülatörü ise pump.fun'ın kendi programına bağlıdır, ikinci tür gizli varlıktır. Bu bizim teknik hendeğimiz — özel olarak tersine mühendislik yapıp destekledik.</p>
+    </details>
+
+    <div class="cta">
+      <div class="cta-title">Hâlâ soru var mı? Doğrudan dene 👇</div>
+      <div class="cta-sub">Cüzdanı bağla, tarama sonrası sonuç net</div>
+      <a class="btn" href="/">Taramaya Başla</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">İlgili Okuma</div>
+      <a href="/tr/guide.html"><span class="rel-title">📖 Solana Kira Geri Alma Tam Rehberi</span><span class="rel-desc">3 adımda kilitli SOL'unu geri al</span></a>
+      <a href="/tr/what-is-rent.html"><span class="rel-title">💡 ATA kirası nedir?</span><span class="rel-desc">Solana token hesabı kira mekanizmasını anla</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 Ana Araç</a>
+    <a href="/tr/guide.html">📖 Rehber</a>
+    <a href="/tr/faq.html">❓ SSS</a>
+    <a href="/tr/what-is-rent.html">💡 Kira nedir</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · Sadece %10 komisyon · açık kaynak</div>
+</footer>
+
+</body>
+</html>

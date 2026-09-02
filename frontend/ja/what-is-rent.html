@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATA レントとは? SOL がロックされる理由 | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/ja/rent.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/rent.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/rent.html">
+<link rel="alternate" hreflang="tr" href="https://solata.top/tr/rent.html">
+<link rel="alternate" hreflang="ko" href="https://solata.top/ko/rent.html">
+<link rel="alternate" hreflang="ja" href="https://solata.top/ja/rent.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/rent.html">
+<meta name="description" content="ATA レントとは? Solana では各トークンアカウント(ATA)が約 0.002 SOL のレントを預けます。さらに Pump.fun 取引量アキュムレータのデポジット(約 0.0018 SOL)も — ミームコイン取引者だけにある第 2 の隠れたデポジット。口座を閉じれば返金されます。">
+<meta name="keywords" content="ATA レントとは, solana レント, associated token account, solana トークンアカウント, sol ロック, sol レント回収, pump.fun 取引量デポジット, アキュムレータ デポジット">
+<meta property="og:title" content="ATA レントとは? SOL がロックされる理由 | solata.top">
+<meta property="og:description" content="Solana では各トークンアカウントが約 0.002 SOL のレントを預けます。ゼロ化コインを多く取引するほどロックされる SOL が増えます。仕組みを理解し、取り戻す方法を学びましょう。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://solata.top/ja/rent.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "ATA レントとは? SOL がロックされる理由",
+  "description": "Solana では各トークンアカウント(ATA)が約 0.002 SOL のレントを預けます。ゼロ化・ゴミコインを多く取引するほどロックされる SOL が増え、口座を閉じれば返金されます。",
+  "image": "https://solata.top/og-image.png",
+  "inLanguage": "ja",
+  "mainEntityOfPage": "https://solata.top/ja/rent.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "solata.top",
+    "logo": { "@type": "ImageObject", "url": "https://solata.top/logo.svg" }
+  },
+  "datePublished": "2026-08-24",
+  "dateModified": "2026-09-03"
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 ホームツール</a>
+      <a href="/ja/guide.html">📖 チュートリアル</a>
+      <a href="/ja/faq.html">❓ FAQ</a>
+      <a href="/ja/what-is-rent.html" class="active">💡 レントとは</a>
+    </nav>
+    <nav class="nav lang">
+      <a href="/rent.html">中文</a>
+<a href="/en/rent.html">EN</a>
+<a href="/tr/rent.html">Türkçe</a>
+<a href="/ko/rent.html">한국어</a>
+<a href="/ja/rent.html" class="active">日本語</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">ホーム</a><span>/</span>レントとは</div>
+    <h1>ATA レントとは? SOL がロックされる理由</h1>
+    <p class="lead">多くの人が知りません: Solana でコインを買いミームを取引すると、ウォレットには SOL レントが静かに積み上がり、このお金は — 自分で口座を閉じるまで — 取り戻せません。</p>
+
+    <h2>トークンアカウント(ATA)とは</h2>
+    <p>Solana では、ウォレット(メインアカウント)はトークンを直接保持できません。トークンの種類ごとにチェーン上に「関連トークンアカウント」(Associated Token Account、略称 <b>ATA</b>)が作られ、そのコインがそこに保管されます。</p>
+    <p>つまり: <b>異なるコインを取引するたびに = ATA が 1 つ自動開設</b>されます。異なるミームコインを 100 個取引したなら、ATA が 100 個開いたことになります。</p>
+
+    <h2>各口座にいくらのレントが預けられるか</h2>
+    <p>チェーン上にデータを保存するにはストレージコストがかかり、Solana は口座の乱用を防ぐため「レント」メカニズムを使います: 各 ATA を作成する際に SOL デポジットを預け、現在は約 <b>0.00203928 SOL</b> です。</p>
+    <blockquote>ひとこと: トークンアカウント開設 ≈ 0.002 SOL 預入; 閉鎖 ≈ 0.002 SOL 返金。</blockquote>
+
+    <h2>このお金が「固定される」理由</h2>
+    <p>通常はトークンを売ると口座残高がゼロになり、口座を閉じてレントを取り戻せます。問題は:</p>
+    <ul>
+      <li><b>ゼロ化 / ゴミコイン</b>: ほぼゼロまで下がり売れず、口座には「何千兆」ものゴミコイン残高が永遠に残り、閉じられません。</li>
+      <li><b>ハニーポット / 蜜壺コイン</b>: 買うだけで売れず、口座がロックされます。</li>
+      <li><b>エアドロップコイン</b>: プロジェクトチームが勝手にエアドロップし、あなたは気づかず口座が開いたままになります。</li>
+    </ul>
+    <p>これらのゾンビ口座は積み重なり、それぞれ 0.002 SOL をロックします。ミーム取引が多いほど、より多くロックされます。</p>
+
+    <h2>このお金は取り戻せますか?</h2>
+    <p>はい。口座を閉じればレントがウォレットに戻ります。考え方は: <b>まずゴミコインを焼却(または空の口座は直接閉鎖) → 口座を閉鎖 → レント返金</b>。</p>
+    <p>重要な違い: <b>0保有口座</b>は直接閉じて返金できますが、<b>ゼロ化・ハニーポット</b>のように残高はあるが売れない口座はトークンを先に<b>焼却</b>してから閉じる必要があります — このステップは大半のツールにはできませんが、私たちはできます。</p>
+    <p><a href="/">solata.top</a> でワンクリック完了: まず「アドレス照会」で口座内訳を確認し、ウォレットを接続してゾンビ口座をワンクリック閉鎖、レント返金。各口座は 0.0002 SOL(レントの約 10%)の手数料のみです。</p>
+
+    <h2>第 2 の隠れたデポジット: Pump.fun 取引量アキュムレータ</h2>
+    <p>トークンアカウントのレントに加えて、ミームコイン取引者にはほとんど知られていないデポジットがもう 1 つあります: <b>pump.fun</b> でミームコインを取引すると、pump.fun が自動で「<b>取引量アキュムレータ</b>」口座を作成し、やはり約 <b>0.0018 SOL</b> のデポジットをロックします。一部の口座にはキャッシュバックも溜まります(数 SOL に達することも)。</p>
+    <p>このデポジットの特徴: pump.fun プログラム配下で <b>トークンアカウントではないため</b>、Token/Token-2022 しかスキャンしないツールには <b>永遠に見えません</b>。solata.top が特別対応します — スキャン時に一緒に表示し、ワンクリックで閉じてデポジット + キャッシュバックの純額(10% 手数料差引)を返金します。</p>
+    <blockquote>ひとこと: ウォレットには 2 種類のお金がロックされている可能性があります — トークンアカウントのレント + Pump.fun アキュムレータのデポジット。solata が両方取り戻します。</blockquote>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ 落とし穴: closeAuthority</div>
+      少数のプロジェクトチームがトークンに <code>closeAuthority</code>(閉鎖権限)を設定すると、この口座はチェーン上で閉じられず、レントが預けられたままになります。この権限がない他の口座は返金できます。
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">ウォレットにいくらロックされていますか? 照会 👇</div>
+      <div class="cta-sub">ウォレットを接続すれば全ゾンビ口座を自動スキャン</div>
+      <a class="btn" href="/">スキャンして返金を始める</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">関連記事</div>
+      <a href="/ja/guide.html"><span class="rel-title">📖 Solana レント返金の完全チュートリアル</span><span class="rel-desc">3ステップでロックされた SOL を取り戻す</span></a>
+      <a href="/ja/faq.html"><span class="rel-title">❓ レント返金のよくある質問 FAQ</span><span class="rel-desc">いくら返金? 誤って焼却?</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 ホームツール</a>
+    <a href="/ja/guide.html">📖 チュートリアル</a>
+    <a href="/ja/faq.html">❓ FAQ</a>
+    <a href="/ja/what-is-rent.html">💡 レントとは</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 手数料は 10% のみ · オープンソース</div>
+</footer>
+
+</body>
+</html>

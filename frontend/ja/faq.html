@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana レント返金のよくある質問 FAQ | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/ja/faq.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/faq.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/faq.html">
+<link rel="alternate" hreflang="tr" href="https://solata.top/tr/faq.html">
+<link rel="alternate" hreflang="ko" href="https://solata.top/ko/faq.html">
+<link rel="alternate" hreflang="ja" href="https://solata.top/ja/faq.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/faq.html">
+<meta name="description" content="Solana レント返金 FAQ: 各口座からいくらの SOL を返金できますか? 価値あるコインを誤って焼却しませんか? SOL がなくても返金できますか? 返金不可とは? Pump.fun 取引量デポジットとは? 手数料は? 安全ですか?">
+<meta name="keywords" content="solana レント返金 FAQ, close token account, トークンアカウント閉鎖, ATA レント返金, solana ウォレット整理 FAQ, pump.fun 取引量デポジット, アキュムレータ デポジット">
+<meta property="og:title" content="Solana レント返金のよくある質問 FAQ | solata.top">
+<meta property="og:description" content="いくら返金? 価値あるコインを誤って焼却? SOL なしで返金可能? 疑問をまとめて解決。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://solata.top/ja/faq.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "各トークンアカウントからいくらの SOL を返金できますか?",
+      "acceptedAnswer": { "@type": "Answer", "text": "約 0.00203928 SOL で、これは Solana チェーン上の各トークンアカウント(ATA)の標準レントです。取引したゼロ化コインが多いほど、返金できるレントが増えます。" }
+    },
+    {
+      "@type": "Question",
+      "name": "ウォレットにどれだけレントがロックされているか確認するには?",
+      "acceptedAnswer": { "@type": "Answer", "text": "2 つの方法: ウォレットアドレスを @solata_rent_bot TG ボットに送ると数秒で返答します; または solata.top を開いてウォレットを接続して確認。" }
+    },
+    {
+      "@type": "Question",
+      "name": "価値あるコインを誤って焼却しませんか?",
+      "acceptedAnswer": { "@type": "Answer", "text": "保護トークン SOL / USDT / USDC / PYUSD / USDS / EURC は絶対に焼却されません。残高のある他のトークンアカウントは焼却してレントが返金されるため、返金前に価値あるコインを自分で移動してください。" }
+    },
+    {
+      "@type": "Question",
+      "name": "ウォレットに SOL がない場合でも返金できますか?",
+      "acceptedAnswer": { "@type": "Answer", "text": "返金にはチェーン上の手数料としてごく少量の SOL(署名あたり約 0.000005 SOL)が必要です。残高が 0 なら少しチャージしてください。" }
+    },
+    {
+      "@type": "Question",
+      "name": "一部の口座が「返金不可」と表示されるのはなぜ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "一部のプロジェクトチームがトークンに closeAuthority を設定すると、その口座はチェーン上で閉鎖できません。closeAuthority がない他の口座はレントを返金できます。" }
+    },
+    {
+      "@type": "Question",
+      "name": "プラットフォームの手数料はいくらですか?",
+      "acceptedAnswer": { "@type": "Answer", "text": "口座あたり 0.0002 SOL、レント(0.002 SOL)の約 10% です。返金成功時のみ課金され、0 SOL でも返金できます。" }
+    },
+    {
+      "@type": "Question",
+      "name": "ゼロ化・ハニーポットのように残高のある口座も返金できますか?",
+      "acceptedAnswer": { "@type": "Answer", "text": "はい。これが私たちの強みです: 0保有口座は直接閉鎖、ゼロ化・ハニーポットのように残高はあるが売れない口座はトークンを先に焼却してから閉鎖しレントを返金します。市場の大半のツールは空の口座しか返金できません。" }
+    },
+    {
+      "@type": "Question",
+      "name": "安全ですか? 秘密鍵を取られますか?",
+      "acceptedAnswer": { "@type": "Answer", "text": "秘密鍵はウォレットから一切出ません。全工程は「トークンアカウント閉鎖 / レント返金」の署名のみで、SOL や USDT などの資産を送ることはありません。コードは GitHub でオープンソースです。" }
+    },
+    {
+      "@type": "Question",
+      "name": "Pump.fun 取引量デポジット(アキュムレータ)とは?",
+      "acceptedAnswer": { "@type": "Answer", "text": "pump.fun でミームコインを取引すると、pump.fun が自動で「取引量アキュムレータ」口座を作成し約 0.0018 SOL のデポジットをロックします。一部の口座にはキャッシュバックも溜まります。pump.fun プログラム配下で通常のトークンアカウントではないため、大半のツールには見えません。solata.top が見つけ、純額(デポジット+キャッシュバック、10% 手数料差引)を返金します。" }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 ホームツール</a>
+      <a href="/ja/guide.html">📖 チュートリアル</a>
+      <a href="/ja/faq.html" class="active">❓ FAQ</a>
+      <a href="/ja/what-is-rent.html">💡 レントとは</a>
+    </nav>
+    <nav class="nav lang">
+      <a href="/faq.html">中文</a>
+<a href="/en/faq.html">EN</a>
+<a href="/tr/faq.html">Türkçe</a>
+<a href="/ko/faq.html">한국어</a>
+<a href="/ja/faq.html" class="active">日本語</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">ホーム</a><span>/</span>FAQ</div>
+    <h1>Solana レント返金のよくある質問 (FAQ)</h1>
+    <p class="lead">レント返金・口座閉鎖・手数料・安全についての疑問をまとめて解決します。</p>
+
+    <details class="faq" open>
+      <summary>各トークンアカウントからいくらの SOL を返金できますか?</summary>
+      <p>約 <b>0.00203928 SOL</b> で、これは Solana チェーン上の各トークンアカウント(ATA)の標準レントです。取引したゼロ化コインが多いほど、返金できるレントが増えます。</p>
+    </details>
+    <details class="faq">
+      <summary>ウォレットにどれだけレントがロックされているか確認するには?</summary>
+      <p>2 つの方法: ① ウォレットアドレスを TG ボット <a href="https://t.me/solata_rent_bot" target="_blank" rel="noopener">@solata_rent_bot</a> に送ると、数秒でロックされている SOL を返答します; ② <a href="/">solata.top</a> を開いてウォレットを接続して確認。</p>
+    </details>
+    <details class="faq">
+      <summary>価値あるコインを誤って焼却しませんか?</summary>
+      <p>保護トークン <b>SOL / USDT / USDC / PYUSD / USDS / EURC</b> は絶対に焼却されません。残高のある他のトークンアカウントは焼却してレントが返金されるため、<b>返金前にウォレット内の価値あるコインを自分で移動</b>し、誤焼却を防いでください。</p>
+    </details>
+    <details class="faq">
+      <summary>ゼロ化・ハニーポットのように残高のある口座も返金できますか?</summary>
+      <p><b>はい、これが私たちの強みです。</b>0保有口座は直接閉鎖、ゼロ化・ハニーポットのように残高はあるが売れない口座はトークンを先に焼却してから閉鎖しレントを返金します。市場の大半のツールは <b>空の口座しか返金できず、残高のある口座は返金できません</b> — ゼロ化・ハニーポットコインは売れないため、口座をゼロにできないからです。</p>
+    </details>
+    <details class="faq">
+      <summary>ウォレットに SOL がない場合でも返金できますか?</summary>
+      <p>返金にはチェーン上の手数料としてごく少量の SOL(署名あたり約 0.000005 SOL)が必要です。残高が 0 なら少しチャージすれば OK です。</p>
+    </details>
+    <details class="faq">
+      <summary>一部の口座が「返金不可」と表示されるのはなぜ?</summary>
+      <p>一部のプロジェクトチームがトークンに <code>closeAuthority</code>(閉鎖権限)を設定すると、その口座はチェーン上で閉鎖できません。closeAuthority がない他の口座はレントを返金できます。</p>
+    </details>
+    <details class="faq">
+      <summary>プラットフォームの手数料はいくらですか?</summary>
+      <p>口座あたり <b>0.0002 SOL</b>、レント(0.002 SOL)の約 <b>10%</b> です。返金成功時のみ課金され、<b>0 SOL でも返金できます</b>。</p>
+    </details>
+    <details class="faq">
+      <summary>安全ですか? 秘密鍵を取られますか?</summary>
+      <p><b>秘密鍵はウォレットから一切出ません</b>。全工程は「トークンアカウント閉鎖 / レント返金」の署名のみで、SOL や USDT などの資産を送ることはありません。コードは <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub でオープンソース</a>です。</p>
+    </details>
+    <details class="faq">
+      <summary>口座が多い場合はどうなりますか?</summary>
+      <p>口座が多い場合は自動で複数のトランザクションに分割され、1 件あたり約 20 口座ずつ、ウォレットで複数回署名を確認する必要があります。</p>
+    </details>
+    <details class="faq">
+      <summary>Pump.fun 取引量デポジット(アキュムレータ)とは?</summary>
+      <p><b>pump.fun</b> でミームコインを取引すると、pump.fun がウォレットに自動で「<b>取引量アキュムレータ</b>」口座を作成し、約 <b>0.0018 SOL</b> のデポジットをロックします。一部の口座にはキャッシュバックも溜まります(数 SOL に達することも)。pump.fun プログラム配下で <b>通常のトークンアカウントではないため</b>、大半のツールには見えません。solata.top が見つけ、<b>純額</b>(デポジット + キャッシュバック、<b>10% 手数料差引</b>)を返金します。</p>
+    </details>
+    <details class="faq">
+      <summary>なぜ他のツールはこのデポジットを見つけられないのですか?</summary>
+      <p>大半のツールは <b>Token / Token-2022 の 2 つのプログラムのトークンアカウントしかスキャンしない</b>ためです。Pump.fun アキュムレータは pump.fun 自身のプログラム配下にあり、第 2 の隠れた資産です。これが私たちの技術的な堀です — リバースエンジニアリングで対応しました。</p>
+    </details>
+
+    <div class="cta">
+      <div class="cta-title">まだ疑問が? 直接試してみてください 👇</div>
+      <div class="cta-sub">ウォレットを接続すれば、スキャン後の結果が一目瞭然</div>
+      <a class="btn" href="/">スキャンして返金を始める</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">関連記事</div>
+      <a href="/ja/guide.html"><span class="rel-title">📖 Solana レント返金の完全チュートリアル</span><span class="rel-desc">3ステップでロックされた SOL を取り戻す</span></a>
+      <a href="/ja/what-is-rent.html"><span class="rel-title">💡 ATA レントとは?</span><span class="rel-desc">Solana トークンアカウントのレントの仕組みを理解</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 ホームツール</a>
+    <a href="/ja/guide.html">📖 チュートリアル</a>
+    <a href="/ja/faq.html">❓ FAQ</a>
+    <a href="/ja/what-is-rent.html">💡 レントとは</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 手数料は 10% のみ · オープンソース</div>
+</footer>
+
+</body>
+</html>

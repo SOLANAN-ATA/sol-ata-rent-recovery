@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana 렌트 환급 튜토리얼: 3단계로 지갑에 잠긴 SOL 되찾기 | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/ko/guide.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/guide.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/guide.html">
+<link rel="alternate" hreflang="tr" href="https://solata.top/tr/guide.html">
+<link rel="alternate" hreflang="ko" href="https://solata.top/ko/guide.html">
+<link rel="alternate" hreflang="ja" href="https://solata.top/ja/guide.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/guide.html">
+<meta name="description" content="Solana 렌트 환급 전체 튜토리얼: 먼저 주소 조회로 제로화/0보유/허니팟 계정 내역을 확인하고, 지갑을 연결해 좀비 계정을 원클릭 폐쇄해 ATA 렌트를 환급받으세요. Pump.fun 거래량 보증금(누적기)도 환급. 0보유·제로화·허니팟 계정 모두 환급 가능.">
+<meta name="keywords" content="solana 렌트 환급 튜토리얼, close token account, SOL 렌트 되찾기, ATA 렌트, solana 지갑 정리, 제로화 코인 렌트, 허니팟 렌트, pump.fun 거래량 보증금, 누적기 보증금">
+<meta property="og:title" content="Solana 렌트 환급 튜토리얼: 3단계로 지갑에 잠긴 SOL 되찾기 | solata.top">
+<meta property="og:description" content="0보유·제로화·허니팟 계정 모두 환급 가능. 먼저 주소 조회로 내역 확인 후 원클릭으로 좀비 계정 폐쇄, 렌트 환급.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://solata.top/ko/guide.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Solana 렌트 환급 튜토리얼: 3단계로 지갑에 잠긴 SOL 되찾기",
+  "description": "먼저 주소 조회로 제로화/0보유/허니팟 계정 내역을 확인하고, 지갑을 연결해 좀비 계정을 원클릭 폐쇄해 ATA 렌트를 환급받으세요.",
+  "image": "https://solata.top/og-image.png",
+  "inLanguage": "ko",
+  "mainEntityOfPage": "https://solata.top/ko/guide.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "solata.top",
+    "logo": { "@type": "ImageObject", "url": "https://solata.top/logo.svg" }
+  },
+  "datePublished": "2026-08-24",
+  "dateModified": "2026-09-03"
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 홈 도구</a>
+      <a href="/ko/guide.html" class="active">📖 튜토리얼</a>
+      <a href="/ko/faq.html">❓ FAQ</a>
+      <a href="/ko/what-is-rent.html">💡 렌트란?</a>
+    </nav>
+    <nav class="nav lang">
+      <a href="/guide.html">中文</a>
+<a href="/en/guide.html">EN</a>
+<a href="/tr/guide.html">Türkçe</a>
+<a href="/ko/guide.html" class="active">한국어</a>
+<a href="/ja/guide.html">日本語</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">홈</a><span>/</span>튜토리얼</div>
+    <h1>Solana 렌트 환급 튜토리얼: 3단계로 지갑에 잠긴 SOL 되찾기</h1>
+    <p class="lead">Solana에서 제로화·쓰레기·허니팟·에어드랍 코인을 거래할 때마다 지갑이 자동으로 토큰 계정을 열고 약 0.002 SOL의 렌트를 잠급니다. 이 튜토리얼은 그것들을 단계별로 모두 되찾는 법을 알려드립니다.</p>
+
+    <div class="callout info">
+      <div class="callout-title">💡 한 줄 원리</div>
+      Solana 체인은 각 토큰 계정(ATA)이 '렌트'를 예치하도록 규정합니다. 계정을 닫으면 렌트가 돌아오고, 닫지 못하면(코인이 안 팔리거나 잔액이 있으면) 그 SOL이 체인에 묶입니다. 저희가 이 좀비 계정을 닫아드립니다.
+    </div>
+
+    <h2>1단계: 주소 조회 —— 먼저 얼마나 잠겼는지, 어떤 계정이 있는지 확인</h2>
+    <p>지갑 연결 없이, 먼저 홈의 <b>「🔍 주소 조회」</b>에 임의의 지갑 주소(본인·친구 모두 가능)를 입력하면 시스템이 자동으로 스캔해 모든 토큰 계정의 <b>상세 내역</b>을 나열합니다:</p>
+    <ul>
+      <li><b>0보유 계정</b>: 토큰이 없어 바로 폐쇄하고 렌트 환급 가능</li>
+      <li><b>제로화 코인 계정</b>: 제로가 되어 팔 수 없는 쓰레기 코인 보유</li>
+      <li><b>허니팟 계정</b>: 사기만 가능하고 팔 수 없는 코인, 계정이 잠김</li>
+      <li><b>보호 토큰</b>: SOL / USDT / USDC 등 (시스템이 건드리지 않음)</li>
+      <li><b>환급 불가</b>: 프로젝트 팀이 closeAuthority를 건 계정 (체인상 폐쇄 불가)</li>
+    </ul>
+    <p>각 계정에 '환급 가능 SOL'이 표시되어 렌트가 얼마나 잠겼는지, 무엇이 환급 가능한지 한눈에 보입니다. TG 봇 <a href="https://t.me/solata_rent_bot" target="_blank" rel="noopener">@solata_rent_bot</a>으로도 몇 초 만에 조회할 수 있습니다.</p>
+
+    <h2>2단계: 지갑 연결</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-body"><h3>「연결 및 환급」 탭으로 이동</h3>홈에서 "🔗 연결 및 환급" 탭을 클릭하세요.</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><h3>지갑 연결</h3>Phantom / Solflare / OKX / TokenPocket / Backpack 등 Solana 지갑을 지원합니다. 참고: MetaMask는 이더리움 지갑이라 Solana를 지원하지 않습니다.</div></div>
+
+    <h2>3단계: 스캔 후 원클릭 환급</h2>
+    <p>"스캔 후 원클릭 환급"을 클릭하면 시스템이 1단계 내역에 따라 자동 처리합니다: <b>0보유 계정은 바로 폐쇄, 제로화·허니팟 코인은 먼저 소각 후 폐쇄</b>한 뒤 지갑 팝업에서 거래를 하나씩 서명 확인합니다. 계정을 닫을 때마다 약 0.002 SOL 렌트가 지갑으로 돌아오고, 플랫폼은 0.0002 SOL(렌트의 약 10%)만 받으며 <b>환급 성공 시에만 수수료를 받습니다</b>.</p>
+
+    <h2>우리의 장점: 세 가지 계정 모두 환급 가능</h2>
+    <p>시중 대부분 도구는 <b>'빈 계정'(0보유)만 닫을 수 있습니다</b> — 계정에 토큰 잔액이 남아 있으면 환급하지 못합니다. 코인을 팔아 계정을 0으로 만들어야 하기 때문입니다. 제로화·허니팟 코인은 애초에 팔 수 없으므로 일반 도구로는 어쩔 수 없습니다.</p>
+    <p>저희는 <b>전부 커버</b>합니다:</p>
+    <ul>
+      <li>✅ <b>0보유 계정</b> → 바로 폐쇄, 렌트 환급</li>
+      <li>✅ <b>제로화 코인 계정</b> (코인은 있지만 무가치) → 토큰을 먼저 소각하고 계정 폐쇄, 렌트 환급</li>
+      <li>✅ <b>허니팟 계정</b> (사기만 가능, 팔 수 없음) → 토큰을 먼저 소각하고 계정 폐쇄, 렌트 환급</li>
+    </ul>
+    <blockquote>한 줄 요약: 계정이 비어 있든, 제로화 코인을 담고 있든, 허니팟을 담고 있든 — 모두 소각·폐쇄해서 렌트를 되찾아 드립니다.</blockquote>
+
+    <h2>보너스: Pump.fun 거래량 보증금 (누적기)</h2>
+    <p><b>pump.fun</b>에서 밈 코인을 거래했다면, pump.fun이 지갑에 자동으로 '<b>거래량 누적기</b>' 계정을 만들고 약 <b>0.0018 SOL</b>의 보증금을 잠급니다. 일부 계정에는 캐시백이 쌓여 여러 SOL에 달하기도 합니다.</p>
+    <p>이 계정은 pump.fun 프로그램에 속해 <b>일반 토큰 계정이 아니므로</b>, 시중 대부분 도구(Token / Token-2022만 스캔)는 찾지 못합니다 — 보증금이 체인에 그대로 남습니다. 저희가 이를 역공학으로 지원했습니다:</p>
+    <ul>
+      <li>✅ <b>스캔 시 자동 표시</b>: 지갑 연결 후 누적기 보증금이 토큰 계정과 함께 나열됩니다</li>
+      <li>✅ <b>원클릭 환급</b>: 누적기 계정을 닫아 보증금 + 누적 캐시백을 <b>지갑으로 환급 (10% 수수료 차감)</b></li>
+      <li>✅ <b>10% 수수료</b>: 보증금 + 캐시백 순액(10% 차감), 토큰 계정 렌트와 동일 요율</li>
+    </ul>
+    <blockquote>밈 코인 트레이더라면 거의 모두 이 숨은 보증금이 있습니다 — 남들은 못 찾지만 저희가 환급해 드립니다.</blockquote>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ 환급 전 필독</div>
+      시스템은 잔액이 있는 모든 토큰 계정을 소각합니다(보호 토큰 제외). 환급 전에 지갑의 가치 있는 코인을 직접 옮겨 실수로 소각되는 것을 막으세요. 보호 토큰 <b>SOL / USDT / USDC / PYUSD / USDS / EURC</b>는 절대 소각되지 않습니다.
+    </div>
+
+    <div class="callout good">
+      <div class="callout-title">🔐 보안 약속</div>
+      개인키는 지갑을 절대 떠나지 않습니다. 모든 과정은 '토큰 계정 폐쇄 / 렌트 환급' 서명뿐이며 SOL, USDT 등 자산을 보내지 않습니다. 코드는 <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub에 오픈소스</a>입니다.
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">얼마나 잠겼는지 먼저 조회 👇</div>
+      <div class="cta-sub">지갑 주소를 입력해 제로화 / 0보유 / 허니팟 계정 내역 확인</div>
+      <a class="btn" href="/">주소 조회 시작</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">관련 읽기</div>
+      <a href="/ko/what-is-rent.html"><span class="rel-title">💡 ATA 렌트란? SOL이 잠기는 이유</span><span class="rel-desc">Solana 토큰 계정 렌트 메커니즘을 이해하고 돈이 어디로 갔는지 파악</span></a>
+      <a href="/ko/faq.html"><span class="rel-title">❓ 렌트 환급 자주 묻는 질문 FAQ</span><span class="rel-desc">얼마나 환급? 실수로 소각? SOL이 없으면?</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 홈 도구</a>
+    <a href="/ko/guide.html">📖 튜토리얼</a>
+    <a href="/ko/faq.html">❓ FAQ</a>
+    <a href="/ko/what-is-rent.html">💡 렌트란?</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 수수료 10%만 · 오픈소스</div>
+</footer>
+
+</body>
+</html>

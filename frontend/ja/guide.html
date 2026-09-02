@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solana レント返金チュートリアル: 3ステップでロックされた SOL を取り戻す | solata.top</title>
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://solata.top/ja/guide.html">
+<link rel="alternate" hreflang="zh-CN" href="https://solata.top/guide.html">
+<link rel="alternate" hreflang="en" href="https://solata.top/en/guide.html">
+<link rel="alternate" hreflang="tr" href="https://solata.top/tr/guide.html">
+<link rel="alternate" hreflang="ko" href="https://solata.top/ko/guide.html">
+<link rel="alternate" hreflang="ja" href="https://solata.top/ja/guide.html">
+<link rel="alternate" hreflang="x-default" href="https://solata.top/guide.html">
+<meta name="description" content="Solana レント返金の完全チュートリアル: まずアドレス照会でゼロ化・0保有・ハニーポット口座の内訳を確認し、ウォレットを接続してゾンビ口座をワンクリックで閉鎖して ATA レントを返金。Pump.fun 取引量デポジット(アキュムレータ)も返金。0保有・ゼロ化・ハニーポット口座すべて返金可能。">
+<meta name="keywords" content="solana レント返金チュートリアル, close token account, SOL レント回収, ATA レント, solana ウォレット整理, ゼロ化コイン レント, ハニーポット レント, pump.fun 取引量デポジット, アキュムレータ デポジット">
+<meta property="og:title" content="Solana レント返金チュートリアル: 3ステップでロックされた SOL を取り戻す | solata.top">
+<meta property="og:description" content="0保有・ゼロ化・ハニーポット口座すべて返金可能。まずアドレス照会で内訳を確認し、ワンクリックでゾンビ口座を閉鎖してレントを返金。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://solata.top/ja/guide.html">
+<meta property="og:image" content="https://solata.top/og-image.png">
+<link rel="stylesheet" href="/content.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Solana レント返金チュートリアル: 3ステップでロックされた SOL を取り戻す",
+  "description": "まずアドレス照会でゼロ化・0保有・ハニーポット口座の内訳を確認し、ウォレットを接続してゾンビ口座をワンクリックで閉鎖して ATA レントを返金。",
+  "image": "https://solata.top/og-image.png",
+  "inLanguage": "ja",
+  "mainEntityOfPage": "https://solata.top/ja/guide.html",
+  "publisher": {
+    "@type": "Organization",
+    "name": "solata.top",
+    "logo": { "@type": "ImageObject", "url": "https://solata.top/logo.svg" }
+  },
+  "datePublished": "2026-08-24",
+  "dateModified": "2026-09-03"
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/logo.svg" alt="Solata">solata.top</a>
+    <nav class="nav">
+      <a href="/">🏠 ホームツール</a>
+      <a href="/ja/guide.html" class="active">📖 チュートリアル</a>
+      <a href="/ja/faq.html">❓ FAQ</a>
+      <a href="/ja/what-is-rent.html">💡 レントとは</a>
+    </nav>
+    <nav class="nav lang">
+      <a href="/guide.html">中文</a>
+<a href="/en/guide.html">EN</a>
+<a href="/tr/guide.html">Türkçe</a>
+<a href="/ko/guide.html">한국어</a>
+<a href="/ja/guide.html" class="active">日本語</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <article>
+    <div class="breadcrumb"><a href="/">ホーム</a><span>/</span>チュートリアル</div>
+    <h1>Solana レント返金チュートリアル: 3ステップでロックされた SOL を取り戻す</h1>
+    <p class="lead">Solana でゼロ化・ゴミ・ハニーポット・エアドロップコインを取引するたびに、ウォレットは自動でトークンアカウントを開設し、約 0.002 SOL のレントをロックします。このチュートリアルでは、それらをステップごとにすべて取り戻す方法を解説します。</p>
+
+    <div class="callout info">
+      <div class="callout-title">💡 ひとことで原理</div>
+      Solana チェーンは、各トークンアカウント(ATA)に「レント」を預けるよう定めています。口座を閉じられればレントが戻り、閉じられなければ(コインが売れず残高がある場合)その SOL はチェーンに固定されます。私たちはそのゾンビ口座を閉鎖します。
+    </div>
+
+    <h2>第1ステップ: アドレス照会 —— まずいくらロックされているか、どの口座があるか確認</h2>
+    <p>ウォレットを接続せず、まずホームの <b>「🔍 アドレス照会」</b>に任意のウォレットアドレス(自分・友人のどちらでも)を入力すると、システムが自動スキャンし全トークンアカウントの<b>内訳</b>を一覧表示します:</p>
+    <ul>
+      <li><b>0保有口座</b>: トークンがなく、直接閉鎖してレント返金可能</li>
+      <li><b>ゼロ化コイン口座</b>: ゼロになり売れないゴミコインを保持</li>
+      <li><b>ハニーポット口座</b>: 買うだけで売れないハニーポット、口座がロック</li>
+      <li><b>保護トークン</b>: SOL / USDT / USDC など (システムは触れません)</li>
+      <li><b>返金不可</b>: プロジェクトチームが closeAuthority を設定した口座 (チェーン上で閉鎖不可)</li>
+    </ul>
+    <p>各口座に「返金可能 SOL」が表示され、いくらロックされているか、どれが返金可能かが一目で分かります。TG ボット <a href="https://t.me/solata_rent_bot" target="_blank" rel="noopener">@solata_rent_bot</a> でも数秒で照会できます。</p>
+
+    <h2>第2ステップ: ウォレットを接続</h2>
+    <div class="step"><div class="step-num">1</div><div class="step-body"><h3>「接続して返金」タブへ</h3>ホームで「🔗 接続して返金」タブをクリック。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><h3>ウォレットを接続</h3>Phantom / Solflare / OKX / TokenPocket / Backpack などの Solana ウォレットに対応。注意: MetaMask はイーサリアムウォレットで Solana 非対応です。</div></div>
+
+    <h2>第3ステップ: スキャンしてワンクリック返金</h2>
+    <p>「スキャンしてワンクリック返金」をクリックすると、システムが第1ステップの内訳に沿って自動処理します: <b>0保有口座は直接閉鎖、ゼロ化・ハニーポットコインは先に焼却してから閉鎖</b>し、ウォレットのポップアップでトランザクションを1件ずつ署名確認します。口座を閉じるごとに約 0.002 SOL のレントがウォレットに戻り、プラットフォームは 0.0002 SOL(レントの約 10%)のみを受け取り、<b>返金成功時のみ課金</b>されます。</p>
+
+    <h2>私たちの強み: 3種類の口座すべて返金可能</h2>
+    <p>市場のほとんどのツールは <b>「空の口座」(0保有)しか閉じられません</b> — 口座にトークン残高が残っていると返金できません。コインを売って口座をゼロにする必要があるからです。ゼロ化・ハニーポットコインはそもそも売れないので、普通のツールでは対処できません。</p>
+    <p>私たちは<b>全カバー</b>します:</p>
+    <ul>
+      <li>✅ <b>0保有口座</b> → 直接閉鎖、レント返金</li>
+      <li>✅ <b>ゼロ化コイン口座</b> (コインはあるが無価値) → トークンを先に焼却して口座閉鎖、レント返金</li>
+      <li>✅ <b>ハニーポット口座</b> (買うだけで売れない) → トークンを先に焼却して口座閉鎖、レント返金</li>
+    </ul>
+    <blockquote>ひとこと: 口座が空でも、ゼロ化コインでも、ハニーポットでも — すべて焼却・閉鎖してレントを取り戻せます。</blockquote>
+
+    <h2>ボーナス: Pump.fun 取引量デポジット (アキュムレータ)</h2>
+    <p><b>pump.fun</b> でミームコインを取引した場合、pump.fun がウォレットに自動で「<b>取引量アキュムレータ</b>」口座を作成し、約 <b>0.0018 SOL</b> のデポジットをロックします。口座によってはキャッシュバックが溜まり、数 SOL に達することもあります。</p>
+    <p>この口座は pump.fun プログラム配下で <b>通常のトークンアカウントではないため</b>、市場の大半のツール(Token / Token-2022 のみスキャン)には見えません — デポジットはチェーン上に残ったままです。私たちはこれをリバースエンジニアリングして対応しました:</p>
+    <ul>
+      <li>✅ <b>スキャン時に自動表示</b>: ウォレット接続後、アキュムレータデポジットがトークンアカウントと一緒に一覧表示</li>
+      <li>✅ <b>ワンクリック返金</b>: アキュムレータ口座を閉じ、デポジット + 累積キャッシュバックを <b>ウォレットへ返金 (10% 手数料差引)</b></li>
+      <li>✅ <b>10% 手数料</b>: デポジット + キャッシュバックの純額(10% 差引)、トークンアカウントのレントと同じ料率</li>
+    </ul>
+    <blockquote>ミームコイン取引をした人ならほぼ全員にこの隠れたデポジットがあります — 他には見えませんが、私たちが返金します。</blockquote>
+
+    <div class="callout warn">
+      <div class="callout-title">⚠️ 返金前に必読</div>
+      システムは残高のあるすべてのトークンアカウントを焼却します(保護トークンを除く)。返金前にウォレット内の価値あるコインを自分で移動し、誤焼却を防いでください。保護トークン <b>SOL / USDT / USDC / PYUSD / USDS / EURC</b> は絶対に焼却されません。
+    </div>
+
+    <div class="callout good">
+      <div class="callout-title">🔐 安全の約束</div>
+      秘密鍵はウォレットから一切出ません。全工程は「トークンアカウント閉鎖 / レント返金」の署名のみで、SOL や USDT などの資産を送ることはありません。コードは <a href="https://github.com/SOLANAN-ATA/sol-ata-rent-recovery" target="_blank" rel="noopener">GitHub でオープンソース</a>です。
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">まずいくらロックされているか照会 👇</div>
+      <div class="cta-sub">ウォレットアドレスを入力し、ゼロ化 / 0保有 / ハニーポット口座の内訳を確認</div>
+      <a class="btn" href="/">アドレス照会を始める</a>
+    </div>
+
+    <div class="related">
+      <div class="related-title">関連記事</div>
+      <a href="/ja/what-is-rent.html"><span class="rel-title">💡 ATA レントとは? SOL がロックされる理由</span><span class="rel-desc">Solana トークンアカウントのレントの仕組みを理解し、お金の行方を把握</span></a>
+      <a href="/ja/faq.html"><span class="rel-title">❓ レント返金のよくある質問 FAQ</span><span class="rel-desc">いくら返金? 誤って焼却? SOL がない場合は?</span></a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <div class="links">
+    <a href="/">🏠 ホームツール</a>
+    <a href="/ja/guide.html">📖 チュートリアル</a>
+    <a href="/ja/faq.html">❓ FAQ</a>
+    <a href="/ja/what-is-rent.html">💡 レントとは</a>
+    <a href="https://t.me/SOLANA_ATA_TEAM" target="_blank" rel="noopener">💬 TG</a>
+    <a href="https://x.com/mingzhu038" target="_blank" rel="noopener">𝕏 X.com</a>
+  </div>
+  <div class="copyright">© 2026 solata.top · 手数料は 10% のみ · オープンソース</div>
+</footer>
+
+</body>
+</html>
