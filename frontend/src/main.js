@@ -313,7 +313,30 @@ const I18N = {
 };
 
 let LANG = localStorage.getItem("lang") || "zh";
-const t = (key) => (I18N[LANG] && I18N[LANG][key]) || key;
+const FALLBACK_LANG = "en"; // 当前语言缺词时回退英文
+const t = (key) => (I18N[LANG] && I18N[LANG][key]) || (I18N[FALLBACK_LANG] && I18N[FALLBACK_LANG][key]) || key;
+
+// ===== 支持的语言（加一门 = 在这里加一项 + 在 I18N 加同名词典）=====
+const LANGS = [
+  { id: "zh", label: "中文", htmlLang: "zh-CN" },
+  { id: "en", label: "EN", htmlLang: "en" },
+];
+
+// 语言切换按钮数据驱动渲染（不用再手写 HTML 按钮）
+function renderLangButtons() {
+  const box = document.querySelector(".lang-toggle");
+  if (!box) return;
+  box.innerHTML = "";
+  LANGS.forEach((l) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "lang-btn";
+    b.textContent = l.label;
+    b.dataset.lang = l.id;
+    b.onclick = () => { LANG = l.id; localStorage.setItem("lang", l.id); applyLang(); };
+    box.appendChild(b);
+  });
+}
 
 function catLabel(cat) {
   const map = { empty: "cat_empty", burnable: "cat_burnable", nft: "cat_nft", protected: "cat_protected", "non-redeemable": "cat_nonredeemable" };
@@ -457,19 +480,19 @@ async function runJob(url, body, logbox, onDone) {
 
 // ===== i18n 应用 =====
 function applyLang() {
-  document.documentElement.lang = LANG === "zh" ? "zh-CN" : "en";
+  const cfg = LANGS.find((l) => l.id === LANG) || LANGS[0];
+  document.documentElement.lang = cfg.htmlLang;
   document.title = t("title");
   document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
   document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
-  document.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b.id === (LANG === "zh" ? "langZh" : "langEn")));
+  document.querySelectorAll(".lang-btn").forEach((b) => b.classList.toggle("active", b.dataset.lang === LANG));
   renderAddr();
   if (lastScanData) renderScanResult(lastScanData);
   if (lastWalletBuild) renderWalletResult(lastWalletBuild);
 }
 
-$("langZh").onclick = () => { LANG = "zh"; localStorage.setItem("lang", "zh"); applyLang(); };
-$("langEn").onclick = () => { LANG = "en"; localStorage.setItem("lang", "en"); applyLang(); };
+renderLangButtons();
 
 // tabs
 document.querySelectorAll(".tab").forEach((tab) => {

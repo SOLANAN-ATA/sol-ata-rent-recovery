@@ -13,6 +13,7 @@
 const { PublicKey } = require("@solana/web3.js");
 const fs = require("fs");
 const path = require("path");
+const { t, detectLang } = require("./lib/bot-i18n");
 
 const STATS_FILE = path.join(__dirname, "bot-stats.jsonl");
 
@@ -121,6 +122,7 @@ async function scanAddress(addr) {
 async function handleMessage(msg) {
   const chatId = msg.chat.id;
   const text = (msg.text || "").trim();
+  const lang = detectLang(msg); // 按用户 Telegram 语言自动切中/英（加语言见 lib/bot-i18n.js）
 
   // 私聊用户自动设为「管理员」，用于每日汇总推送
   if (msg.chat.type === "private" && String(chatId) !== adminChatId) {
@@ -131,20 +133,25 @@ async function handleMessage(msg) {
   if (text === "/stats" || text === "/统计") {
     return tg("sendMessage", {
       chat_id: chatId,
-      text: `📊 查询统计\n\n🔹 累计查询：${stats.totalQueries} 次\n🔹 今日查询：${stats.todayQueries} 次\n🔹 累计发现可退账户：${stats.totalAccounts} 个\n🔹 累计可退租金：${stats.totalSol.toFixed(6)} SOL`,
+      text: t(lang, "stats", {
+        total: stats.totalQueries,
+        today: stats.todayQueries,
+        accounts: stats.totalAccounts,
+        sol: stats.totalSol.toFixed(6),
+      }),
     });
   }
   if (text.startsWith("/start") || text.startsWith("/help")) {
     return tg("sendMessage", {
       chat_id: chatId,
-      text: "👋 把任意 Solana 钱包地址发给我，我帮你查有多少死账户租金能退回。\n\n💡 每交易一个不同的币，Solana 会自动开一个代币账户，每个锁约 0.002 SOL 租金。归零币/垃圾币/貔貅币卖不掉、账户也关不了，这笔钱就卡在链上。\n\n💰 退回只需付 10% 手续费（每账户 0.0002 SOL）。\n\n👇 直接粘贴地址（群里 @我 也行）：",
+      text: t(lang, "welcome"),
     });
   }
   if (!text) return null;
   if (!isSolAddress(text)) {
     return tg("sendMessage", {
       chat_id: chatId,
-      text: "⚠️ 这看起来不是有效的 Solana 地址。请粘贴以 1-9 / A-Z 开头的 32~44 位地址。",
+      text: t(lang, "invalid"),
     });
   }
 
@@ -155,7 +162,7 @@ async function handleMessage(msg) {
     if (!s || !s.recoverableCount) {
       return tg("sendMessage", {
         chat_id: chatId,
-        text: `😕 这个地址没有可退回租金的死账户。\n\n代币账户总数：${s ? s.total : 0}，可回收：0。`,
+        text: t(lang, "none", { total: s ? s.total : 0 }),
       });
     }
     const sol = s.recoverableSol.toFixed(6);
@@ -164,16 +171,16 @@ async function handleMessage(msg) {
     const net = (s.recoverableSol - s.recoverableCount * FEE_SOL).toFixed(6);
     return tg("sendMessage", {
       chat_id: chatId,
-      text: `💰 这个地址锁了 <b>${sol} SOL</b> 租金！\n\n🔹 可退账户：${s.recoverableCount} 个\n🔹 手续费：${fee} SOL（10%）\n🔹 预计到账：<b>${net} SOL</b>\n\n👉 连接钱包一键退回：`,
+      text: t(lang, "success", { sol, count: s.recoverableCount, fee, net }),
       parse_mode: "HTML",
       reply_markup: {
-        inline_keyboard: [[{ text: "🚀 立即退回", url: PUBLIC_URL }]],
+        inline_keyboard: [[{ text: t(lang, "reclaim_btn"), url: PUBLIC_URL }]],
       },
     });
   } catch (e) {
     return tg("sendMessage", {
       chat_id: chatId,
-      text: "❌ 查询失败，请稍后重试。\n" + (e.message || ""),
+      text: t(lang, "error", { err: e.message || "" }),
     });
   }
 }
