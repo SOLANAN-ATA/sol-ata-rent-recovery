@@ -82,7 +82,7 @@ const PAGES = {
     <ul>
       <li><b>0 bakiyeli hesap</b>: içinde token yok, doğrudan kapatılıp kira geri alınabilir</li>
       <li><b>Sıfırlanmış coin hesabı</b>: sıfıra düşmüş, satılamayan çöp coin tutar</li>
-      <li><b>Honeypot hesabı</b>: sadece alınıp satılamayan bal küpü coin, hesap kilitli</li>
+      <li><b>Honeypot hesabı</b>: sadece alınıp satılamayan coin, hesap kilitli</li>
       <li><b>Korumalı token</b>: SOL / USDT / USDC vb. (sistem dokunmaz)</li>
       <li><b>Geri alınamaz</b>: proje ekibinin closeAuthority kilitlediği hesap (zincirde kapatılamaz)</li>
     </ul>
@@ -570,7 +570,7 @@ const PAGES = {
     <p>Normalde token'ı sattığında hesap bakiyesi sıfırlanır ve hesabı kapatıp kirayı geri alabilirsin. Ama sorun şu:</p>
     <ul>
       <li><b>Sıfırlanmış / çöp coin</b>: neredeyse sıfıra düşmüş, satılamaz, hesapta sonsuza dek "katrilyonlarca" çöp coin bakiyesi kalır, kapatılamaz.</li>
-      <li><b>Honeypot / bal küpü coin</b>: sadece alınır satılamaz, hesap kilitlidir.</li>
+      <li><b>Honeypot coin</b>: sadece alınır satılamaz, hesap kilitlidir.</li>
       <li><b>Airdrop coin</b>: proje ekibi habersiz airdrop yapar, sen fark etmezsin, hesap hep açık kalır.</li>
     </ul>
     <p>Bu zombi hesaplar zamanla birikir, her biri 0.002 SOL kilitler. Ne kadar çok meme ticareti yaptıysan, o kadar çok kilitlenir.</p>
