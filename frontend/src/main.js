@@ -97,6 +97,7 @@ const I18N = {
     wr_view_tx: "查看转账交易",
     no_accounts: "未发现代币账户",
     no_reclaimable: "没有可退回租金的账户（0 个可关账户）",
+    truncated_hint: "⚠️ 该地址有 {total} 个代币账户（超过 {max} 个上限），仅显示并处理前 {max} 个。超大钱包请分批处理。",
     nft_warn: "⚠️ 检测到 {n} 个疑似 NFT（不可分割的唯一资产）。系统默认不销毁，请先核对价值：确认是垃圾再勾选销毁，值钱的请转走。",
     nft_select_all: "全选",
     nft_select_none: "清空",
@@ -232,6 +233,7 @@ const I18N = {
     wr_view_tx: "View transfer tx",
     no_accounts: "No token accounts found",
     no_reclaimable: "No reclaimable accounts (0 closable accounts)",
+    truncated_hint: "⚠️ This address has {total} token accounts (over the {max} limit). Only the first {max} are shown and processed. Very large wallets should be handled in batches.",
     nft_warn: "⚠️ Detected {n} possible NFTs (indivisible unique assets). They are NOT burned by default — verify their value first: check to burn only the junk, transfer out anything valuable.",
     nft_select_all: "Select all",
     nft_select_none: "Clear",
@@ -367,6 +369,7 @@ const I18N = {
     wr_view_tx: "Transfer işlemini görüntüle",
     no_accounts: "Token hesabı bulunamadı",
     no_reclaimable: "Geri alınabilecek kira hesabı yok (0 kapatılabilir hesap)",
+    truncated_hint: "⚠️ Bu adreste {total} token hesabı var ({max} sınırını aşıyor). Yalnızca ilk {max} gösterilir ve işlenir. Çok büyük cüzdanlar partiler halinde işlenmeli.",
     nft_warn: "⚠️ {n} şüpheli NFT (bölünemez benzersiz varlık) tespit edildi. Sistem varsayılan olarak yakmaz; önce değerini kontrol et: çöp olduğundan eminsen yakmak için işaretle, değerliyse taşı.",
     nft_select_all: "Tümünü Seç",
     nft_select_none: "Temizle",
@@ -502,6 +505,7 @@ const I18N = {
     wr_view_tx: "송금 거래 보기",
     no_accounts: "토큰 계정을 찾지 못했습니다",
     no_reclaimable: "환급 가능한 렌트 계정이 없습니다 (폐쇄 가능 0개)",
+    truncated_hint: "⚠️ 이 주소에는 토큰 계정이 {total}개 있습니다(상한 {max}개 초과). 처음 {max}개만 표시·처리됩니다. 초대형 지갑은 나눠서 처리하세요.",
     nft_warn: "⚠️ 의심 NFT(분할 불가능한 고유 자산) {n}개 감지. 시스템은 기본적으로 소각하지 않습니다. 먼저 가치를 확인하세요: 쓰레기임이 확실하면 소각 체크, 가치가 있으면 옮기세요.",
     nft_select_all: "전체 선택",
     nft_select_none: "해제",
@@ -637,6 +641,7 @@ const I18N = {
     wr_view_tx: "送金トランザクションを見る",
     no_accounts: "トークンアカウントが見つかりません",
     no_reclaimable: "返金可能なレントアカウントがありません (閉鎖可能 0 個)",
+    truncated_hint: "⚠️ このアドレスには {total} 個のトークンアカウントがあります(上限 {max} 個を超過)。最初の {max} 個のみ表示・処理されます。超大型ウォレットは分割して処理してください。",
     nft_warn: "⚠️ NFT 疑い(分割不能な唯一の資産)を {n} 個検出。システムはデフォルトで焼却しません。まず価値を確認してください: ゴミと確信できれば焼却にチェック、価値があれば移動してください。",
     nft_select_all: "全選択",
     nft_select_none: "解除",
@@ -812,6 +817,12 @@ function renderVolume(volume) {
     <tbody>${rows}</tbody></table></div>`;
 }
 
+function truncateNote(d) {
+  return d && d.truncated
+    ? `<div class="card" style="border-color:var(--amber)"><div style="font-size:14px;color:var(--amber)">${t("truncated_hint").replace("{total}", d.totalAccounts).split("{max}").join(d.maxAccounts)}</div></div>`
+    : "";
+}
+
 function renderScanResult(data) {
   lastScanData = data;
   const volumeSol = (data.volume || []).reduce((s, v) => s + (v.sol || 0), 0);
@@ -819,13 +830,13 @@ function renderScanResult(data) {
     <div style="font-size:13px;color:var(--dim);margin-bottom:8px">${t("wallet_balance")}</div>
     <div style="font-size:28px;color:var(--blue);font-weight:700">${data.balanceSol.toFixed(6)} SOL</div>
   </div>`;
-  $("scanResult").innerHTML = balCard + renderSummary(data.summary, volumeSol) + renderTable(data.items) + renderVolume(data.volume);
+  $("scanResult").innerHTML = truncateNote(data) + balCard + renderSummary(data.summary, volumeSol) + renderTable(data.items) + renderVolume(data.volume);
 }
 
 function renderWalletResult(build) {
   lastWalletBuild = build;
   lastShareText = buildShareText(build);
-  $("walletResult").innerHTML = `<div class="card">
+  $("walletResult").innerHTML = truncateNote(build) + `<div class="card">
     <div class="summary">
       <div class="stat"><b>${build.targetCount}</b><span>${t("wr_accounts")}</span></div>
       <div class="stat"><b style="color:var(--blue)">${build.rentSol.toFixed(6)}</b><span>${t("wr_rent")}</span></div>
@@ -1257,7 +1268,7 @@ async function doRedeem(selectedNfts) {
 
     // 3) 都无可退
     if (!build.targetCount && !volBuild.targetCount) {
-      $("walletResult").innerHTML = `<div class="card muted">${t("no_reclaimable")}</div>`;
+      $("walletResult").innerHTML = truncateNote(build) + `<div class="card muted">${t("no_reclaimable")}</div>`;
       return;
     }
 

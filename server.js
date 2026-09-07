@@ -334,7 +334,7 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
     const selectedNfts = Array.isArray(req.body && req.body.selectedNfts) ? req.body.selectedNfts : [];
     const result = await classifyAndChunk(userPk, FEE_PAYER_KP.publicKey, { selectedNfts });
     if (!result.targetCount) {
-      return res.json({ targetCount: 0, chunkCount: 0 });
+      return res.json({ targetCount: 0, chunkCount: 0, truncated: result.truncated, totalAccounts: result.totalAccounts, maxAccounts: result.maxAccounts });
     }
     const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
     redeemRequests.set(requestId, {
@@ -361,6 +361,9 @@ app.post("/api/build-redeem-tx", scanLimiter, async (req, res) => {
       rentSol: result.totalRent / 1e9,
       feeSol: result.totalFee / 1e9,
       netSol: result.totalNet / 1e9,
+      truncated: result.truncated,
+      totalAccounts: result.totalAccounts,
+      maxAccounts: result.maxAccounts,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
